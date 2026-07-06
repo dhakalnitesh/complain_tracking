@@ -2,6 +2,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { route } from '../../ziggy';
 import StatsCard from '../../Components/StatsCard';
 import { StatusBadge, PriorityBadge } from '../../Components/Badge';
+import SearchSelect from '../../Components/SearchSelect';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { useState } from 'react';
 
@@ -117,16 +118,19 @@ export default function AdminDashboard({ stats, issues, category_stats, org_stat
                                 placeholder="Search issues..."
                                 className="flex-1 sm:w-48 rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
                             />
-                            <select
-                                value={filter}
-                                onChange={e => setFilter(e.target.value)}
-                                className="rounded-lg border-gray-300 border px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
-                            >
-                                <option value="all">All Status</option>
-                                <option value="received">Received</option>
-                                <option value="in_progress">In Progress</option>
-                                <option value="resolved">Resolved</option>
-                            </select>
+                            <div className="w-36">
+                                <SearchSelect
+                                    options={[
+                                        { value: 'all', label: 'All Status' },
+                                        { value: 'received', label: 'Received' },
+                                        { value: 'in_progress', label: 'In Progress' },
+                                        { value: 'resolved', label: 'Resolved' },
+                                    ]}
+                                    value={filter}
+                                    onChange={v => setFilter(v)}
+                                    placeholder="Filter"
+                                />
+                            </div>
                         </div>
                     </div>
 

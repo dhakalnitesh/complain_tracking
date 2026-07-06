@@ -65,6 +65,11 @@
 
 ---
 
+### Bonus UX Detail: Searchable Dropdowns
+When the user selects an organization, the location dropdown is **searchable** — type "hostel" and it filters to matching locations. Same for categories. This matters because native mobile `<select>` with 40+ locations is unusable. Our custom `SearchSelect` component handles filtering, keyboard navigation, and grouped options (parent buildings → sub-locations).
+
+---
+
 ## 3. Key Features to Emphasize
 
 During Q&A or if you need to fill time, hit these points:

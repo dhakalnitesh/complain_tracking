@@ -76,6 +76,8 @@ You do NOT need to create an account to submit or track a complaint.
 8. Fill in your **name, phone, or email** (optional). Check **"Submit Anonymously"** to keep your identity private.
 9. Click **"Submit Complaint"**.
 
+**Tip:** The organization, category, and location dropdowns are **searchable**. Start typing (e.g., "Tribhuvan", "toilet", "hostel") and the list filters automatically. Use arrow keys to navigate and Enter to select.
+
 After submission, you will receive a **reference code** like `TU-0001`. Save this code or share it — you'll need it to track your complaint.
 
 ### 3.2 Track a Complaint
