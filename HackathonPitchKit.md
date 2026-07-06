@@ -149,7 +149,17 @@ Push the repo to GitHub, connect to Railway.app or Render.com, set build command
 
 ---
 
-## 7. Print-Ready QR Code
+## 7. Deployment Status
+
+The app is currently live at a temporary URL for demo purposes. For permanent always-on deployment (even after laptop is shut down), see `DEPLOY.md`.
+
+**Current demo URL:** `https://copy-dawn-forests-projects.trycloudflare.com` (temporary — dies on shutdown)
+
+**Permanent deployment options:** Railway (free, always-on) or Render (free, sleeps on inactivity). Both deploy from GitHub in under 3 minutes.
+
+---
+
+## 8. Print-Ready QR Code
 
 File: **`public/qr-print.html`**
 
