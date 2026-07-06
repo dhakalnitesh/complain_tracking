@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: nagarik-sarokar
+    runtime: php
+    repo: https://github.com/dhakalnitesh/complain_tracking
+    plan: free
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        fromService:
+          type: web
+          name: nagarik-sarokar
+          property: url
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        fromDatabase:
+          name: nagarik-sarokar-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: nagarik-sarokar-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: nagarik-sarokar-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: nagarik-sarokar-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: nagarik-sarokar-db
+          property: password
+
+databases:
+  - name: nagarik-sarokar-db
+    plan: free
+    databaseType: mysql
+    ipAllowList: []

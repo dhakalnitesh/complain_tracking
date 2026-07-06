@@ -1,0 +1,18 @@
+[php]
+version = "8.3"
+
+[php.extensions]
+enable = ["pdo", "pdo_mysql", "mbstring", "xml", "curl", "gd", "fileinfo", "bcmath", "json", "openssl", "tokenizer"]
+
+[php.composer]
+install = true
+
+[node]
+version = "20"
+
+[phpa]
+enabled = false
+
+[hooks]
+preBuild = ""
+postBuild = "npm install && npm run build && php artisan storage:link || true"
