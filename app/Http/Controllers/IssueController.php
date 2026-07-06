@@ -8,6 +8,7 @@ use App\Models\Location;
 use App\Models\Organization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class IssueController extends Controller
@@ -19,7 +20,7 @@ class IssueController extends Controller
             $organization = Organization::where('slug', $request->org)->where('is_active', true)->first();
         }
 
-        $locations = Location::orderBy('name')->get();
+        $locations = Location::orderBy('name')->get(['id', 'name', 'parent_id', 'organization_id']);
         $organizations = Organization::where('is_active', true)->orderBy('name')->get();
 
         return Inertia::render('Submit', [
@@ -56,7 +57,12 @@ class IssueController extends Controller
             'organization_id' => 'required|exists:organizations,id',
             'category' => 'required|string',
             'priority' => 'required|in:low,medium,high,critical',
-            'location_id' => 'required|exists:locations,id',
+            'location_id' => [
+                'required',
+                Rule::exists('locations', 'id')->where(function ($q) use ($request) {
+                    $q->where('organization_id', $request->organization_id);
+                }),
+            ],
             'description' => 'required|string|min:10|max:5000',
             'reporter_name' => 'nullable|string|max:255',
             'reporter_phone' => 'nullable|string|max:20',
@@ -108,7 +114,11 @@ class IssueController extends Controller
             ->with(['location', 'organization', 'events' => function ($q) {
                 $q->latest()->limit(10);
             }])
-            ->firstOrFail();
+            ->first();
+
+        if (!$issue) {
+            return redirect()->route('status.check')->with('error', 'No issue found with reference code: ' . $referenceCode);
+        }
 
         return Inertia::render('Reference', [
             'issue' => [
@@ -125,6 +135,7 @@ class IssueController extends Controller
                 'resolved_at' => $issue->resolved_at?->toISOString(),
                 'rating' => $issue->rating,
                 'feedback_comment' => $issue->feedback_comment,
+                'photo_path' => $issue->photo_path ? \Illuminate\Support\Facades\Storage::url($issue->photo_path) : null,
                 'events' => $issue->events->map(fn($e) => [
                     'id' => $e->id,
                     'type' => $e->type,
@@ -137,6 +148,10 @@ class IssueController extends Controller
 
     public function submitFeedback(Request $request, Issue $issue)
     {
+        if ($issue->rating) {
+            return back()->with('error', 'You have already submitted feedback for this issue.');
+        }
+
         $validated = $request->validate([
             'rating' => 'required|integer|min:1|max:5',
             'feedback_comment' => 'nullable|string|max:1000',

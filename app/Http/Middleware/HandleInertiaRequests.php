@@ -28,6 +28,10 @@ class HandleInertiaRequests extends Middleware
                     'organization' => $request->user()->organization?->only(['id', 'name', 'slug']),
                 ] : null,
             ],
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+            ],
         ];
     }
 }

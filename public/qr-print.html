@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+    <meta charset="utf-8">
+    <title>नागरिक सरोकार — QR Code</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f8fafc;
+        }
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 48px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            text-align: center;
+            max-width: 480px;
+        }
+        .logo {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #dc2626, #1e40af);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        h1 {
+            font-size: 24px;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+        .subtitle {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 32px;
+        }
+        .qr-wrapper {
+            background: #f3f4f6;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .qr-wrapper img {
+            width: 280px;
+            height: 280px;
+            image-rendering: pixelated;
+        }
+        .arrow {
+            font-size: 32px;
+            color: #2563eb;
+            margin: 8px 0;
+        }
+        .scan-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+        }
+        .demo-credits {
+            margin-top: 20px;
+            padding: 16px;
+            background: #f0fdf4;
+            border-radius: 12px;
+            border: 1px solid #bbf7d0;
+            font-size: 13px;
+            color: #166534;
+        }
+        .demo-credits strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+        .demo-credits code {
+            background: #dcfce7;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo">नाग</div>
+        <h1>नागरिक सरोकार</h1>
+        <p class="subtitle">Nepal's Citizen Complaint System</p>
+
+        <div class="qr-wrapper">
+            <img src="qr-demo.png" alt="QR Code">
+        </div>
+
+        <div class="arrow">📱📸</div>
+        <p class="scan-text">Scan to submit a complaint</p>
+
+        <div class="demo-credits">
+            <strong>🔑 Demo Credentials</strong>
+            Admin: <code>admin@nagariksarokar.com</code> / <code>admin123</code><br>
+            Org: <code>tu@nagariksarokar.com</code> / <code>password</code>
+        </div>
+    </div>
+</body>
+</html>

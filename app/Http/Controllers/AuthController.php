@@ -34,7 +34,7 @@ class AuthController extends Controller
                 return redirect()->intended(route('admin.dashboard'));
             }
             if ($user->organization_id) {
-                return redirect()->intended(route('org.dashboard'));
+                return redirect()->intended(route('org.dashboard', $user->organization));
             }
             return redirect()->intended(route('dashboard'));
         }

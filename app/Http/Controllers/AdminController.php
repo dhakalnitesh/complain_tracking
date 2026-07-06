@@ -13,16 +13,6 @@ use Inertia\Inertia;
 
 class AdminController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            if (!Auth::check() || !Auth::user()->isSuperAdmin()) {
-                return redirect()->route('admin.login');
-            }
-            return $next($request);
-        })->except(['showLogin', 'login']);
-    }
-
     public function showLogin()
     {
         if (Auth::check() && Auth::user()->isSuperAdmin()) {
@@ -121,6 +111,10 @@ class AdminController extends Controller
             'status' => 'required|in:received,in_progress,resolved',
         ]);
 
+        if ($validated['status'] === $issue->status) {
+            return redirect()->route('admin.dashboard')->with('error', 'Issue is already in this status.');
+        }
+
         $oldStatus = $issue->status;
         $issue->status = $validated['status'];
 
@@ -140,7 +134,7 @@ class AdminController extends Controller
             'metadata' => ['from' => $oldStatus, 'to' => $validated['status']],
         ]);
 
-        return redirect()->route('admin.dashboard');
+        return redirect()->route('admin.dashboard')->with('success', 'Issue status updated successfully.');
     }
 
     public function assignIssue(Request $request, Issue $issue)
@@ -159,6 +153,6 @@ class AdminController extends Controller
             'metadata' => ['assigned_to' => $validated['assigned_to']],
         ]);
 
-        return redirect()->route('admin.dashboard');
+        return redirect()->route('admin.dashboard')->with('success', "Issue assigned to {$validated['assigned_to']}.");
     }
 }

@@ -55,7 +55,8 @@ class Issue extends Model
     public static function generateReferenceCode(int $orgId): string
     {
         $org = Organization::find($orgId);
-        $prefix = $org ? strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $org->name), 0, 3)) : 'GRV';
+        $clean = $org ? preg_replace('/[^A-Za-z0-9]/', '', $org->name) : '';
+        $prefix = strtoupper(substr($clean, 0, 3)) ?: 'GRV';
         $count = static::where('organization_id', $orgId)->count() + 1;
         return $prefix . '-' . str_pad($count, 4, '0', STR_PAD_LEFT);
     }
