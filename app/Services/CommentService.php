@@ -18,6 +18,9 @@ class CommentService
             'is_public' => $isPublic,
         ]);
 
+        $notificationService = app(NotificationService::class);
+        $notificationService->sendCommentAdded($issue, $event);
+
         broadcast(new IssueCommentAdded($event));
 
         return $event;

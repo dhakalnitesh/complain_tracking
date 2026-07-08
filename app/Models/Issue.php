@@ -70,6 +70,11 @@ class Issue extends Model
         return $this->hasMany(IssueEvent::class);
     }
 
+    public function notificationLogs(): HasMany
+    {
+        return $this->hasMany(NotificationLog::class);
+    }
+
     public static function generateReferenceCode(int $orgId): string
     {
         $org = Organization::find($orgId);

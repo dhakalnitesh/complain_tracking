@@ -7,6 +7,7 @@ use App\Models\Issue;
 use App\Models\IssueEvent;
 use App\Models\Organization;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -139,7 +140,7 @@ class AdminController extends Controller
         ]);
     }
 
-    public function updateStatus(Request $request, Issue $issue)
+    public function updateStatus(Request $request, Issue $issue, NotificationService $notificationService)
     {
         $validated = $request->validate([
             'status' => 'required|in:received,in_progress,resolved',
@@ -160,7 +161,7 @@ class AdminController extends Controller
 
         $issue->save();
 
-        IssueEvent::create([
+        $event = IssueEvent::create([
             'issue_id' => $issue->id,
             'user_id' => Auth::id(),
             'type' => 'status_changed',
@@ -168,6 +169,8 @@ class AdminController extends Controller
             'metadata' => ['from' => $oldStatus, 'to' => $validated['status']],
             'is_public' => true,
         ]);
+
+        $notificationService->sendStatusChange($issue, $event);
 
         broadcast(new IssueStatusChanged($issue, $oldStatus));
 

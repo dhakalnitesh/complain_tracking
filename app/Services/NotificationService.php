@@ -2,43 +2,48 @@
 
 namespace App\Services;
 
+use App\Jobs\SendNotificationJob;
 use App\Models\Issue;
 use App\Models\IssueEvent;
-use Illuminate\Support\Facades\Log;
 
 class NotificationService
 {
-    public function notifyStatusChange(Issue $issue, IssueEvent $event): void
+    public function sendStatusChange(Issue $issue, IssueEvent $event): void
     {
-        if (!$issue->sms_opt_in || !$issue->reporter_phone) {
+        if (!$this->shouldNotify($issue)) {
             return;
         }
 
-        $message = $this->buildMessage($issue, $event);
+        $message = $this->buildStatusMessage($issue);
 
-        $this->sendSms($issue->reporter_phone, $message);
-
-        if ($issue->reporter_email) {
-            $this->sendEmail($issue->reporter_email, $message);
-        }
+        SendNotificationJob::dispatch($issue->id, $event->id, $message);
     }
 
-    public function notifyCommentAdded(Issue $issue, IssueEvent $event): void
+    public function sendCommentAdded(Issue $issue, IssueEvent $event): void
     {
         if (!$event->is_public) {
             return;
         }
 
-        if (!$issue->sms_opt_in || !$issue->reporter_phone) {
+        if (!$this->shouldNotify($issue)) {
             return;
         }
 
-        $message = "Update on {$issue->reference_code}: {$event->description}";
+        $message = $this->buildCommentMessage($issue, $event);
 
-        $this->sendSms($issue->reporter_phone, $message);
+        SendNotificationJob::dispatch($issue->id, $event->id, $message);
     }
 
-    private function buildMessage(Issue $issue, IssueEvent $event): string
+    private function shouldNotify(Issue $issue): bool
+    {
+        if (!$issue->sms_opt_in) {
+            return false;
+        }
+
+        return $issue->reporter_phone || $issue->reporter_email;
+    }
+
+    private function buildStatusMessage(Issue $issue): string
     {
         $statusLabels = [
             'received' => 'Received',
@@ -47,17 +52,23 @@ class NotificationService
         ];
 
         $status = $statusLabels[$issue->status] ?? $issue->status;
+        $template = config('notifications.templates.status_change');
 
-        return "Your complaint {$issue->reference_code} status: {$status}. Track at " . route('status.check', ['code' => $issue->reference_code], false);
+        return str_replace(
+            [':reference_code', ':status', ':track_url'],
+            [$issue->reference_code, $status, route('issues.show-reference', $issue->reference_code)],
+            $template,
+        );
     }
 
-    private function sendSms(string $phone, string $message): void
+    private function buildCommentMessage(Issue $issue, IssueEvent $event): string
     {
-        Log::info("SMS to {$phone}: {$message}");
-    }
+        $template = config('notifications.templates.comment_added');
 
-    private function sendEmail(string $email, string $message): void
-    {
-        Log::info("Email to {$email}: {$message}");
+        return str_replace(
+            [':reference_code', ':comment'],
+            [$issue->reference_code, $event->description],
+            $template,
+        );
     }
 }

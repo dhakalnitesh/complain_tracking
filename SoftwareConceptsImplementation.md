@@ -589,6 +589,150 @@ window.Echo = new Echo({
 
 ---
 
+## 12. Notification Engine (Epic 4)
+
+### Architecture
+
+The notification system follows a **pluggable channel** pattern with **queue-based async delivery** and **delivery tracking**:
+
+```
+Controller (HTTP)
+  → NotificationService::sendStatusChange() / sendCommentAdded()
+    → Dispatch SendNotificationJob to queue
+      → Resolve channels (LogChannel, MailChannel)
+        → channel->send(issue, event, message)
+        → Create NotificationLog record (status: sent|failed)
+      → Cache::forget('notifications.stats.*')
+```
+
+### Channel Pattern (Strategy Design Pattern)
+
+Each channel implements `NotificationChannelInterface` with a single `send()` method:
+
+```php
+interface NotificationChannelInterface
+{
+    public function send(Issue $issue, IssueEvent $event, string $message): array;
+}
+```
+
+**LogChannel** — free SMS audit trail:
+- Logs the message to Laravel's log
+- Used as the default channel (zero cost, self-hosted)
+- Can be replaced with real SMS gateway (SPARROW SMS, Ncell) without touching business logic
+
+**MailChannel** — free email via Laravel Mail:
+- Sends via `Mail::raw()` using configured mailer (`log` driver = free)
+- Catches exceptions gracefully, returns success/failure
+
+### Queue-Based Async Delivery
+
+```mermaid
+sequenceDiagram
+    participant C as Controller
+    participant NS as NotificationService
+    participant Q as Queue (database)
+    participant J as SendNotificationJob
+    participant LC as LogChannel
+    participant MC as MailChannel
+    participant DB as Database
+
+    C->>NS: notifyStatusChange(issue, event)
+    NS->>NS: Check sms_opt_in, phone/email
+    NS->>Q: dispatch(SendNotificationJob)
+    Q->>J: process()
+    J->>LC: send(issue, event, message)
+    LC->>DB: Log::info()
+    J->>DB: create NotificationLog(sent)
+    J->>MC: send(issue, event, message)
+    MC->>DB: Mail::raw()
+    J->>DB: create NotificationLog(sent)
+    J->>Cache: forget(notifications.stats.*)
+```
+
+### Delivery Tracking (`notification_logs` table)
+
+| Column | Type | Purpose |
+|--------|------|---------|
+| `id` | PK | Unique delivery attempt ID |
+| `issue_id` | FK → issues | Which issue was notified about |
+| `issue_event_id` | FK → issue_events (nullable) | Which event triggered it |
+| `channel` | string | `log` or `mail` |
+| `recipient` | string | Phone number or email address |
+| `message` | text | The notification body |
+| `status` | enum | `pending`, `sent`, `failed` |
+| `response` | text (nullable) | Gateway response or error |
+| `delivered_at` | timestamp (nullable) | When it was delivered |
+
+### NotificationService
+
+Acts as the dispatcher — checks eligibility and queues jobs:
+
+```php
+class NotificationService
+{
+    public function sendStatusChange(Issue $issue, IssueEvent $event): void
+    {
+        // Checks sms_opt_in && (phone || email)
+        // Builds message from config template
+        // Dispatches SendNotificationJob
+    }
+
+    public function sendCommentAdded(Issue $issue, IssueEvent $event): void
+    {
+        // Skips internal (non-public) comments
+        // Same flow as sendStatusChange
+    }
+}
+```
+
+### Eligibility Rules
+
+| Condition | SMS (LogChannel) | Email (MailChannel) |
+|-----------|-----------------|-------------------|
+| `sms_opt_in = true` + phone exists | ✅ Sent | ✅ Sent |
+| `sms_opt_in = false` + phone exists | ❌ Skipped | ✅ Sent |
+| `sms_opt_in = true` + no phone | ❌ Skipped | ✅ Sent (if email) |
+| No phone, no email | ❌ Skipped | ❌ Skipped |
+| Internal comment (`is_public = false`) | ❌ Skipped | ❌ Skipped |
+
+### Configuration
+
+`config/notifications.php`:
+
+```php
+'channels' => [
+    'log' => [
+        'enabled' => true,
+        'class' => \App\Services\Channels\LogChannel::class,
+        'label' => 'SMS (Log)',
+    ],
+    'mail' => [
+        'enabled' => true,
+        'class' => \App\Services\Channels\MailChannel::class,
+        'label' => 'Email',
+    ],
+],
+'templates' => [
+    'status_change' => 'Your complaint :reference_code status: :status. Track at :track_url',
+    'comment_added' => 'Update on :reference_code: :comment',
+],
+```
+
+Adding a real SMS gateway (e.g., SPARROW SMS) requires:
+1. Create `SparrowSmsChannel.php` implementing `NotificationChannelInterface`
+2. Add it to `config/notifications.php`
+3. No other code changes — high cohesion, low coupling
+
+### Caching
+
+Delivery stats are cached with key `notifications.stats.{date}`:
+- Cache is invalidated after each notification is sent
+- TTL: 5 minutes (configurable via `cache_ttl`)
+- Cache store: `file` driver (dev) or `redis` (production)
+
+---
+
 ## Summary
 
 | Principle | Status | Key Implementation |
@@ -597,9 +741,11 @@ window.Echo = new Echo({
 | ✅ Low Coupling | Controllers → Services → Models, swapable providers |
 | ✅ DRY | Language files, reusable components, model scopes |
 | ✅ Security | Honeypot, rate limiting, CSRF, protected photos, soft deletes |
-| ✅ TDD | 17 tests covering staff, assignment, authentication |
+| ✅ TDD | 55 tests covering staff, assignment, notifications, channels |
 | ⬜ Redis Caching | Dashboard stats, category breakdowns |
-| ⬜ Service Layer | IssueService, StatsService, NotificationService |
-| ⬜ Queue | SMS, Email, notification dispatch |
+| ✅ Service Layer | CommentService, NotificationService, Channel classes |
+| ✅ Queue | Database queue driver + SendNotificationJob for async delivery |
+| ✅ Delivery Tracking | notification_logs table with status, response, delivered_at |
+| ✅ Notification Engine | LogChannel (free SMS audit) + MailChannel (free Email via log) |
 | ⬜ Pagination | Admin issue list |
-| ⬜ Real-time | Reverb + Redis pub/sub |
+| ✅ Real-time | Reverb + Redis pub/sub |
