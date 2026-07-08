@@ -1,26 +1,26 @@
-# नागरिक सरोकार (Nagarik Sarokar) — User Manual
+# 📖 User Manual — नागरिक सरोकार (Nagarik Sarokar)
 
 > **Nepal's Citizen Complaint Management System** — A bilingual (English/Nepali) platform for citizens to submit, track, and share complaints about public services.
 
 ---
 
-## Table of Contents
+## 📑 Table of Contents
 
 1. [What is Nagarik Sarokar?](#1-what-is-nagarik-sarokar)
-2. [Demo Credentials](#2-demo-credentials)
-3. [For Citizens — How to Use the Platform](#3-for-citizens--how-to-use-the-platform)
+2. [🔑 Demo Credentials](#2-demo-credentials)
+3. [👤 For Citizens — How to Use the Platform](#3-for-citizens--how-to-use-the-platform)
    - [3.1 Submit a Complaint](#31-submit-a-complaint)
    - [3.2 Track a Complaint](#32-track-a-complaint)
    - [3.3 Share a Complaint](#33-share-a-complaint)
    - [3.4 Give Feedback / Rate](#34-give-feedback--rate)
    - [3.5 Voice Input (Speech-to-Text)](#35-voice-input-speech-to-text)
    - [3.6 Language Toggle](#36-language-toggle)
-4. [For Admins — How to Manage the Platform](#4-for-admins--how-to-manage-the-platform)
+4. [🛠️ For Admins — How to Manage the Platform](#4-for-admins--how-to-manage-the-platform)
    - [4.1 Admin Dashboard](#41-admin-dashboard)
    - [4.2 Issue Status Management](#42-issue-status-management)
    - [4.3 Assign Issues](#43-assign-issues)
    - [4.4 Organizations Management](#44-organizations-management)
-5. [Pages Overview](#5-pages-overview)
+5. [📄 Pages Overview](#5-pages-overview)
    - [5.1 Home / Dashboard](#51-home--dashboard)
    - [5.2 Submit a Complaint](#52-submit-a-complaint)
    - [5.3 Track Status](#53-track-status)
@@ -29,12 +29,12 @@
    - [5.6 Organization Dashboard](#56-organization-dashboard)
    - [5.7 Admin Dashboard](#57-admin-dashboard)
    - [5.8 Admin Organizations](#58-admin-organizations)
-6. [Troubleshooting](#6-troubleshooting)
-7. [Technical Notes](#7-technical-notes)
+6. [❓ Troubleshooting](#6-troubleshooting)
+7. [📝 Technical Notes](#7-technical-notes)
 
 ---
 
-## 1. What is Nagarik Sarokar?
+## 1. 🏛️ What is Nagarik Sarokar?
 
 **नागरिक सरोकार** (Citizen Concern) is a web-based platform that lets Nepali citizens report issues related to public services and track their resolution in real-time. It acts as a bridge between citizens and the organizations serving them.
 
@@ -51,7 +51,7 @@ Key features:
 
 ---
 
-## 2. Demo Credentials
+## 2. 🔑 Demo Credentials
 
 | Role | Email | Password | Note |
 |------|-------|----------|------|
@@ -60,7 +60,7 @@ Key features:
 
 ---
 
-## 3. For Citizens — How to Use the Platform
+## 3. 👤 For Citizens — How to Use the Platform
 
 You do NOT need to create an account to submit or track a complaint.
 
@@ -116,7 +116,7 @@ Click the **EN/NP** button on the top navigation bar to switch between English a
 
 ---
 
-## 4. For Admins — How to Manage the Platform
+## 4. 🛠️ For Admins — How to Manage the Platform
 
 ### 4.1 Admin Dashboard
 
@@ -151,7 +151,7 @@ Go to **Organizations** from the admin dashboard to:
 
 ---
 
-## 5. Pages Overview
+## 5. 📄 Pages Overview
 
 ### 5.1 Home / Dashboard
 
@@ -227,7 +227,7 @@ CRUD table for managing organizations. Create new organizations with type, addre
 
 ---
 
-## 6. Troubleshooting
+## 6. ❓ Troubleshooting
 
 | Problem | Solution |
 |---------|----------|
@@ -241,7 +241,7 @@ CRUD table for managing organizations. Create new organizations with type, addre
 
 ---
 
-## 7. Technical Notes
+## 7. 📝 Technical Notes
 
 - **Stack:** Laravel 13 (PHP 8.3), React 19, Inertia.js v3, Tailwind CSS v4, MySQL, Recharts
 - **Authentication:** Session-based with admin middleware

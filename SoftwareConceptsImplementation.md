@@ -1,12 +1,10 @@
-# Software Architecture Concepts & Implementation
+# 🏗️ Software Architecture Concepts & Implementation
 
-## Nagarik Sarokar — Nepal's Complaint Management System
-
-This document explains the architectural decisions, design patterns, and software engineering principles applied in this system. Written for a developer who wants to understand WHY things are built the way they are.
+> **Nagarik Sarokar — Nepal's Complaint Management System** — Architectural decisions, design patterns, and software engineering principles explained for developers who want to understand WHY things are built the way they are.
 
 ---
 
-## 1. Caching: Redis
+## 1. ⚡ Caching: Redis
 
 ### What is Redis?
 Redis (Remote Dictionary Server) is an in-memory data store that lives entirely in RAM. Reading from memory is 1000x faster than reading from a database (nanoseconds vs milliseconds). It also supports data structures (strings, hashes, lists, sets) and pub/sub messaging.
@@ -66,7 +64,7 @@ MONITOR
 
 ---
 
-## 2. Scalability
+## 2. 📈 Scalability
 
 ### What is it?
 The system's ability to handle increased load without redesign. A system that works for 100 issues/day should also work for 100,000 with config changes, not code rewrites.
@@ -105,7 +103,7 @@ The system's ability to handle increased load without redesign. A system that wo
 
 ---
 
-## 3. Performance
+## 3. 🚀 Performance
 
 ### What is it?
 Response time for each request. Users expect pages to load in <2 seconds. Every 100ms of latency reduces engagement.
@@ -162,7 +160,7 @@ $count = Issue::count();
 
 ---
 
-## 4. Security
+## 4. 🔒 Security
 
 ### What is it?
 Protecting the system from malicious actors. For a complaint system in Nepal, this means:
@@ -217,7 +215,7 @@ $request->file('photo')->store('issue-photos', 'private');
 
 ---
 
-## 5. High Cohesion, Low Coupling
+## 5. 🧩 High Cohesion, Low Coupling
 
 ### What it means
 
@@ -306,7 +304,7 @@ This makes each piece testable independently:
 
 ---
 
-## 6. DRY Principle (Don't Repeat Yourself)
+## 6. 🔄 DRY Principle (Don't Repeat Yourself)
 
 ### What it means
 Every piece of knowledge must have a single, unambiguous representation. No copy-pasted code.
@@ -337,7 +335,7 @@ Every piece of knowledge must have a single, unambiguous representation. No copy
 
 ---
 
-## 7. Queue System (Async Processing)
+## 7. ⏳ Queue System (Async Processing)
 
 ### What and why
 Some operations are slow (SMS = 200-500ms, Email = 100-1000ms, image processing = 500-5000ms). Running them synchronously means the user waits. Queue moves them to background workers.
@@ -381,7 +379,7 @@ php artisan queue:work --queue=low --tries=3 &
 
 ---
 
-## 8. Service Layer Architecture (Planned)
+## 8. 🏗️ Service Layer Architecture (Planned)
 
 ### Directory structure
 
@@ -412,7 +410,7 @@ app/
 
 ---
 
-## 9. Testing Strategy (TDD)
+## 9. 🧪 Testing Strategy (TDD)
 
 ### What we test
 
@@ -454,7 +452,7 @@ public function test_admin_can_assign_issue_to_staff()
 
 ---
 
-## 10. Production Readiness Checklist
+## 10. ✅ Production Readiness Checklist
 
 | Category | Item | Status |
 |----------|------|--------|
@@ -473,7 +471,7 @@ public function test_admin_can_assign_issue_to_staff()
 
 ---
 
-## 11. Redis Deep Dive (For Beginners)
+## 11. 🗄️ Redis Deep Dive (For Beginners)
 
 ### Installation
 
@@ -589,7 +587,7 @@ window.Echo = new Echo({
 
 ---
 
-## 12. Notification Engine (Epic 4)
+## 12. 🔔 Notification Engine (Epic 4)
 
 ### Architecture
 

@@ -1,4 +1,4 @@
-# React + Laravel + Inertia + Ziggy — Guide for Vue Developers
+# ⚛️ React + Laravel + Inertia + Ziggy — Guide for Vue Developers
 
 > You know Vue with Laravel. This project uses React with Inertia. Here's everything you need to understand, mapped to Vue concepts you already know.
 
