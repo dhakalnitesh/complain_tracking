@@ -5,6 +5,7 @@ import { StatusBadge, PriorityBadge } from '../../Components/Badge';
 import SearchSelect from '../../Components/SearchSelect';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { useState } from 'react';
+import useRealtime from '../../hooks/useRealtime';
 
 const COLORS = ['#2563eb', '#dc2626', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 const statusOptions = ['received', 'in_progress', 'resolved'];
@@ -15,6 +16,7 @@ function getNextStatus(current) {
 }
 
 export default function AdminDashboard({ stats, issues, category_stats, org_stats, issues_over_time, avg_resolution_hours, staff_users = [] }) {
+    useRealtime();
     const [filter, setFilter] = useState('all');
     const [search, setSearch] = useState('');
     const [assigning, setAssigning] = useState(null);

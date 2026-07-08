@@ -4,6 +4,24 @@ import { LanguageProvider } from './Context/LanguageContext';
 import { ToastProvider } from './Components/Toast';
 import Layout from './Components/Layout';
 
+const broadcastEl = document.getElementById('broadcast-data');
+if (broadcastEl) {
+  const config = JSON.parse(broadcastEl.textContent);
+  if (config.enabled) {
+    import('laravel-echo').then(({ default: Echo }) => {
+      window.Echo = new Echo({
+        broadcaster: 'reverb',
+        key: config.key,
+        wsHost: config.host,
+        wsPort: config.port,
+        wssPort: config.port,
+        forceTLS: config.scheme === 'https',
+        enabledTransports: ['ws', 'wss'],
+      });
+    });
+  }
+}
+
 createInertiaApp({
     resolve: name => {
         const pages = import.meta.glob('./Pages/**/*.jsx', { eager: true });

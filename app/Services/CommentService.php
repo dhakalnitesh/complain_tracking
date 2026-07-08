@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\IssueCommentAdded;
 use App\Models\Issue;
 use App\Models\IssueEvent;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,8 @@ class CommentService
             'description' => $comment,
             'is_public' => $isPublic,
         ]);
+
+        broadcast(new IssueCommentAdded($event));
 
         return $event;
     }

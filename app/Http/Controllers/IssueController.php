@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\IssueCreated;
 use App\Models\Category;
 use App\Models\Issue;
 use App\Models\IssueEvent;
@@ -100,6 +101,8 @@ class IssueController extends Controller
             ],
             'is_public' => true,
         ]);
+
+        broadcast(new IssueCreated($issue));
 
         return redirect()->route('issues.show-reference', [
             'reference_code' => $issue->reference_code,

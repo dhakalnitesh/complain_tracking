@@ -10,6 +10,7 @@
     @inertiaHead
 </head>
 <body class="bg-gray-50 antialiased">
+    <script id="broadcast-data" type="application/json">@json(config('broadcasting'))</script>
     @inertia
 </body>
 </html>

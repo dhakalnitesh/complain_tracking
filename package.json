@@ -17,6 +17,8 @@
     "dependencies": {
         "@inertiajs/react": "^3.6.0",
         "@vitejs/plugin-react": "^6.0.3",
+        "laravel-echo": "^2.3.7",
+        "pusher-js": "^8.5.0",
         "react": "^19.2.7",
         "react-dom": "^19.2.7",
         "recharts": "^3.9.2",

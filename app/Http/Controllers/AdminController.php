@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\IssueStatusChanged;
 use App\Models\Issue;
 use App\Models\IssueEvent;
 use App\Models\Organization;
@@ -147,6 +148,8 @@ class AdminController extends Controller
             'metadata' => ['from' => $oldStatus, 'to' => $validated['status']],
             'is_public' => true,
         ]);
+
+        broadcast(new IssueStatusChanged($issue, $oldStatus));
 
         return redirect()->route('admin.dashboard')->with('success', 'Issue status updated successfully.');
     }
