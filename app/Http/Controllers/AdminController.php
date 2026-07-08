@@ -43,7 +43,7 @@ class AdminController extends Controller
         return back()->withErrors(['email' => 'Invalid credentials.']);
     }
 
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $stats = [
             'total_issues' => Issue::count(),
@@ -55,10 +55,29 @@ class AdminController extends Controller
             'total_users' => User::count(),
         ];
 
-        $issues = Issue::with(['location', 'organization', 'assignedUser'])
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(fn($issue) => [
+        $query = Issue::with(['location', 'organization', 'assignedUser']);
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('priority')) {
+            $query->where('priority', $request->priority);
+        }
+        if ($request->filled('organization_id')) {
+            $query->where('organization_id', $request->organization_id);
+        }
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(function ($q) use ($s) {
+                $q->where('reference_code', 'like', "%{$s}%")
+                  ->orWhere('description', 'like', "%{$s}%");
+            });
+        }
+
+        $perPage = min((int) $request->get('per_page', 50), 100);
+        $issues = $query->orderBy('created_at', 'desc')
+            ->paginate($perPage)
+            ->through(fn($issue) => [
                 'id' => $issue->id,
                 'reference_code' => $issue->reference_code,
                 'category' => $issue->category,
@@ -116,6 +135,7 @@ class AdminController extends Controller
             'issues_over_time' => $issuesOverTime,
             'avg_resolution_hours' => $avgResolution ? round($avgResolution, 1) : null,
             'staff_users' => $staffUsers,
+            'filters' => $request->only(['status', 'priority', 'organization_id', 'search', 'per_page']),
         ]);
     }
 
@@ -274,5 +294,46 @@ class AdminController extends Controller
         ]);
 
         return redirect()->route('admin.dashboard')->with('success', "Issue assigned to {$validated['assigned_to']}.");
+    }
+
+    public function showIssue(Issue $issue)
+    {
+        $issue->load(['location', 'organization', 'category', 'assignedUser', 'events' => function ($q) {
+            $q->latest()->limit(50);
+        }]);
+
+        return Inertia::render('Admin/IssueDetail', [
+            'issue' => [
+                'id' => $issue->id,
+                'reference_code' => $issue->reference_code,
+                'category' => $issue->category,
+                'priority' => $issue->priority,
+                'location' => $issue->location?->name,
+                'organization' => $issue->organization?->name,
+                'description' => $issue->description,
+                'status' => $issue->status,
+                'assigned_to' => $issue->assigned_to,
+                'assigned_user_name' => $issue->assignedUser?->name,
+                'reporter_name' => $issue->is_anonymous ? 'Anonymous' : $issue->reporter_name,
+                'reporter_phone' => $issue->is_anonymous ? null : $issue->reporter_phone,
+                'reporter_email' => $issue->is_anonymous ? null : $issue->reporter_email,
+                'is_anonymous' => $issue->is_anonymous,
+                'sms_opt_in' => $issue->sms_opt_in,
+                'is_escalated' => $issue->isEscalated(),
+                'is_sla_breached' => $issue->isSlaBreached(),
+                'created_at' => $issue->created_at->toISOString(),
+                'resolved_at' => $issue->resolved_at?->toISOString(),
+                'rating' => $issue->rating,
+                'feedback_comment' => $issue->feedback_comment,
+                'photo_path' => $issue->photo_path ? route('issues.photo', $issue->reference_code) : null,
+                'events' => $issue->events->map(fn($e) => [
+                    'id' => $e->id,
+                    'type' => $e->type,
+                    'description' => $e->description,
+                    'is_public' => $e->is_public,
+                    'created_at' => $e->created_at->toISOString(),
+                ]),
+            ],
+        ]);
     }
 }

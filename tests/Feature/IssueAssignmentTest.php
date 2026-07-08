@@ -82,12 +82,12 @@ class IssueAssignmentTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin)
-            ->get(route('admin.dashboard'));
+            ->get('/admin/dashboard');
 
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page
             ->component('Admin/Dashboard')
-            ->has('issues', 1)
+            ->where('issues.total', 1)
         );
     }
 }

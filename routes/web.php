@@ -49,6 +49,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/staff/{user}', [AdminController::class, 'destroyStaff'])->name('staff.destroy');
 
         Route::get('/staff/{user}/issues', [AdminController::class, 'staffIssues'])->name('staff.issues');
+
+        Route::get('/issues/{issue}', [AdminController::class, 'showIssue'])->name('issues.show');
     });
 });
 
