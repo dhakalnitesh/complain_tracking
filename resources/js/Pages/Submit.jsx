@@ -25,6 +25,7 @@ export default function Submit({ locations, organizations, selected_organization
     reporter_phone: '',
     reporter_email: user?.email || '',
     is_anonymous: !user,
+    sms_opt_in: false,
     photo: null,
     website: '',
   });
@@ -369,6 +370,15 @@ export default function Submit({ locations, organizations, selected_organization
                     <div>
                       <span className="text-sm font-medium text-gray-900">{t('submit.anonymous_label')}</span>
                       <p className="text-xs text-gray-500">{t('submit.anonymous_desc')}</p>
+                    </div>
+                  </label>
+
+                  <label className="flex items-start sm:items-center gap-3 cursor-pointer p-4 bg-blue-50/50 rounded-xl border border-blue-100 hover:bg-blue-50 transition-colors">
+                    <input type="checkbox" checked={data.sms_opt_in} onChange={e => setData('sms_opt_in', e.target.checked)}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-0.5 sm:mt-0" />
+                    <div>
+                      <span className="text-sm font-medium text-gray-900">{t('submit.sms_opt_in')}</span>
+                      <p className="text-xs text-gray-500">{t('submit.sms_opt_in_desc')}</p>
                     </div>
                   </label>
                 </div>

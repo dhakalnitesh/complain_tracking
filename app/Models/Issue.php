@@ -28,6 +28,7 @@ class Issue extends Model
         'status',
         'assigned_to',
         'assigned_user_id',
+        'sms_opt_in',
         'resolved_at',
         'rating',
         'feedback_comment',
@@ -40,6 +41,7 @@ class Issue extends Model
             'resolved_at' => 'datetime',
             'feedback_at' => 'datetime',
             'is_anonymous' => 'boolean',
+            'sms_opt_in' => 'boolean',
         ];
     }
 

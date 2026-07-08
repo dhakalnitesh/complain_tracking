@@ -60,6 +60,7 @@ class IssueController extends Controller
             'reporter_phone' => 'nullable|string|max:20|regex:/^(98|97|96)\d{8}$/',
             'reporter_email' => 'nullable|email|max:255',
             'is_anonymous' => 'boolean',
+            'sms_opt_in' => 'boolean',
             'photo' => 'nullable|image|max:5120',
         ]);
 
@@ -81,6 +82,7 @@ class IssueController extends Controller
             'reporter_phone' => $validated['reporter_phone'] ?? null,
             'reporter_email' => $validated['reporter_email'] ?? null,
             'is_anonymous' => $request->boolean('is_anonymous', true),
+            'sms_opt_in' => $request->boolean('sms_opt_in', false),
             'photo_path' => $photoPath,
         ]);
 
@@ -96,6 +98,7 @@ class IssueController extends Controller
                 'category' => $category->name,
                 'is_anonymous' => $issue->is_anonymous,
             ],
+            'is_public' => true,
         ]);
 
         return redirect()->route('issues.show-reference', [
@@ -107,7 +110,7 @@ class IssueController extends Controller
     {
         $issue = Issue::where('reference_code', $referenceCode)
             ->with(['location', 'organization', 'category', 'events' => function ($q) {
-                $q->latest()->limit(10);
+                $q->public()->latest()->limit(10);
             }])
             ->first();
 
@@ -136,6 +139,7 @@ class IssueController extends Controller
                     'id' => $e->id,
                     'type' => $e->type,
                     'description' => $e->description,
+                    'is_public' => $e->is_public,
                     'created_at' => $e->created_at->toISOString(),
                 ]),
             ],
@@ -164,6 +168,7 @@ class IssueController extends Controller
             'type' => 'feedback',
             'description' => "Feedback submitted with rating {$validated['rating']}/5.",
             'metadata' => ['rating' => $validated['rating']],
+            'is_public' => true,
         ]);
 
         return back()->with('success', 'Thank you for your feedback!');
@@ -175,7 +180,9 @@ class IssueController extends Controller
         $error = null;
 
         if ($request->filled('code')) {
-            $issue = Issue::with(['location', 'organization'])
+            $issue = Issue::with(['location', 'organization', 'events' => function ($q) {
+                    $q->public()->latest()->limit(20);
+                }])
                 ->where('reference_code', strtoupper($request->code))
                 ->first();
 
@@ -200,6 +207,13 @@ class IssueController extends Controller
                 'rating' => $issue->rating,
                 'feedback_comment' => $issue->feedback_comment,
                 'photo_path' => $issue->photo_path ? route('issues.photo', $issue->reference_code) : null,
+                'events' => $issue->events->map(fn($e) => [
+                    'id' => $e->id,
+                    'type' => $e->type,
+                    'description' => $e->description,
+                    'is_public' => $e->is_public,
+                    'created_at' => $e->created_at->toISOString(),
+                ]),
             ] : null,
             'error' => $error,
         ]);

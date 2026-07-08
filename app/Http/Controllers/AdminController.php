@@ -145,6 +145,7 @@ class AdminController extends Controller
             'type' => 'status_changed',
             'description' => "Status changed from {$oldStatus} to {$validated['status']}.",
             'metadata' => ['from' => $oldStatus, 'to' => $validated['status']],
+            'is_public' => true,
         ]);
 
         return redirect()->route('admin.dashboard')->with('success', 'Issue status updated successfully.');
@@ -266,6 +267,7 @@ class AdminController extends Controller
                 'assigned_to' => $validated['assigned_to'],
                 'assigned_user_id' => $validated['assigned_user_id'],
             ],
+            'is_public' => true,
         ]);
 
         return redirect()->route('admin.dashboard')->with('success', "Issue assigned to {$validated['assigned_to']}.");

@@ -28,6 +28,16 @@ return Application::configure(basePath: dirname(__DIR__))
                 }
                 return $next($request);
             },
+            'staff' => function (Request $request, $next) {
+                if (!Auth::check()) {
+                    return redirect()->route('login');
+                }
+                $user = Auth::user();
+                if (!$user->is_staff && !$user->isSuperAdmin()) {
+                    abort(403, 'Staff access required.');
+                }
+                return $next($request);
+            },
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

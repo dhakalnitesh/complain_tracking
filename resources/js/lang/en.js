@@ -47,6 +47,8 @@ export default {
     email_label: 'Email Address',
     anonymous_label: 'Submit Anonymously',
     anonymous_desc: 'Your identity will not be revealed to the organization',
+    sms_opt_in: 'Get SMS Updates',
+    sms_opt_in_desc: 'Receive SMS notifications when your complaint status changes',
     optional: 'Optional',
     submit_btn: 'Submit Complaint',
     submitting: 'Submitting...',

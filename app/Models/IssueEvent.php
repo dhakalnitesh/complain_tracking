@@ -13,12 +13,14 @@ class IssueEvent extends Model
         'type',
         'description',
         'metadata',
+        'is_public',
     ];
 
     protected function casts(): array
     {
         return [
             'metadata' => 'array',
+            'is_public' => 'boolean',
         ];
     }
 
@@ -30,5 +32,10 @@ class IssueEvent extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function scopePublic($query)
+    {
+        return $query->where('is_public', true);
     }
 }

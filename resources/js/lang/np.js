@@ -47,6 +47,8 @@ export default {
     email_label: 'इमेल ठेगाना',
     anonymous_label: 'गुमनाम रूपमा पठाउनुहोस्',
     anonymous_desc: 'तपाईंको पहिचान संस्थालाई खुलाइने छैन',
+    sms_opt_in: 'SMS सूचना प्राप्त गर्नुहोस्',
+    sms_opt_in_desc: 'उजुरीको स्थिति परिवर्तन हुँदा SMS सूचना प्राप्त गर्नुहोस्',
     optional: 'वैकल्पिक',
     submit_btn: 'उजुरी पठाउनुहोस्',
     submitting: 'पठाउँदै...',

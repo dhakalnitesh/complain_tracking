@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\PhotoController;
+use App\Http\Controllers\Staff\IssueController as StaffIssueController;
 use App\Http\Controllers\StatsController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -49,6 +50,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/staff/{user}/issues', [AdminController::class, 'staffIssues'])->name('staff.issues');
     });
+});
+
+Route::middleware(['auth', 'staff'])->prefix('staff')->name('staff.')->group(function () {
+    Route::get('/issues/{issue}', [StaffIssueController::class, 'show'])->name('issues.show');
+    Route::post('/issues/{issue}/comment', [StaffIssueController::class, 'comment'])->name('issues.comment');
 });
 
 Route::get('/api/stats/overview', [StatsController::class, 'overview']);
