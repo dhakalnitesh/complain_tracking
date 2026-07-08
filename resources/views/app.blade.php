@@ -10,7 +10,17 @@
     @inertiaHead
 </head>
 <body class="bg-gray-50 antialiased">
-    <script id="broadcast-data" type="application/json">@json(config('broadcasting'))</script>
+    @php
+        $__reverb = config('broadcasting.connections.reverb');
+        $__broadcast = [
+            'enabled' => config('broadcasting.default') === 'reverb',
+            'key' => $__reverb['key'] ?? null,
+            'host' => $__reverb['options']['host'] ?? 'localhost',
+            'port' => $__reverb['options']['port'] ?? 8080,
+            'scheme' => $__reverb['options']['scheme'] ?? 'http',
+        ];
+    @endphp
+    <script id="broadcast-data" type="application/json">{!! json_encode($__broadcast) !!}</script>
     @inertia
 </body>
 </html>

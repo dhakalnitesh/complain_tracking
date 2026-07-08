@@ -20,9 +20,14 @@ export default function useRealtime() {
       addToast(`${e.reference_code} status changed to ${e.status}`);
     });
 
+    channel.listen('.IssueCommentAdded', (e) => {
+      addToast(`New update on issue #${e.issue_id}: ${e.description}`, 'info');
+    });
+
     return () => {
       channel.stopListening('.IssueCreated');
       channel.stopListening('.IssueStatusChanged');
+      channel.stopListening('.IssueCommentAdded');
     };
   }, [user, broadcasting?.enabled]);
 }
