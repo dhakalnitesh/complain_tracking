@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\IssueStatusChanged;
+use App\Models\Category;
 use App\Models\Issue;
 use App\Models\IssueEvent;
 use App\Models\Organization;
@@ -74,6 +75,15 @@ class AdminController extends Controller
                   ->orWhere('description', 'like', "%{$s}%");
             });
         }
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+        if ($request->filled('assigned_user_id')) {
+            $query->where('assigned_user_id', $request->assigned_user_id);
+        }
 
         $perPage = min((int) $request->get('per_page', 50), 100);
         $issues = $query->orderBy('created_at', 'desc')
@@ -128,6 +138,9 @@ class AdminController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'organization_id']);
 
+        $organizations = Organization::orderBy('name')->get(['id', 'name']);
+        $categories = Category::active()->sorted()->get(['id', 'name']);
+
         return Inertia::render('Admin/Dashboard', [
             'stats' => $stats,
             'issues' => $issues,
@@ -136,7 +149,9 @@ class AdminController extends Controller
             'issues_over_time' => $issuesOverTime,
             'avg_resolution_hours' => $avgResolution ? round($avgResolution, 1) : null,
             'staff_users' => $staffUsers,
-            'filters' => $request->only(['status', 'priority', 'organization_id', 'search', 'per_page']),
+            'organizations' => $organizations,
+            'categories' => $categories,
+            'filters' => $request->only(['status', 'priority', 'organization_id', 'search', 'per_page', 'date_from', 'date_to', 'assigned_user_id']),
         ]);
     }
 
@@ -147,7 +162,7 @@ class AdminController extends Controller
         ]);
 
         if ($validated['status'] === $issue->status) {
-            return redirect()->route('admin.dashboard')->with('error', 'Issue is already in this status.');
+            return redirect()->back()->with('error', 'Issue is already in this status.');
         }
 
         $oldStatus = $issue->status;
@@ -174,7 +189,7 @@ class AdminController extends Controller
 
         broadcast(new IssueStatusChanged($issue, $oldStatus));
 
-        return redirect()->route('admin.dashboard')->with('success', 'Issue status updated successfully.');
+        return redirect()->back()->with('success', 'Issue status updated successfully.');
     }
 
     public function staff()
@@ -296,7 +311,80 @@ class AdminController extends Controller
             'is_public' => true,
         ]);
 
-        return redirect()->route('admin.dashboard')->with('success', "Issue assigned to {$validated['assigned_to']}.");
+        return redirect()->back()->with('success', "Issue assigned to {$validated['assigned_to']}.");
+    }
+
+    public function exportCsv(Request $request)
+    {
+        $query = Issue::with(['location', 'organization', 'assignedUser']);
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('priority')) {
+            $query->where('priority', $request->priority);
+        }
+        if ($request->filled('organization_id')) {
+            $query->where('organization_id', $request->organization_id);
+        }
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+        if ($request->filled('assigned_user_id')) {
+            $query->where('assigned_user_id', $request->assigned_user_id);
+        }
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(function ($q) use ($s) {
+                $q->where('reference_code', 'like', "%{$s}%")
+                  ->orWhere('description', 'like', "%{$s}%");
+            });
+        }
+
+        $issues = $query->orderBy('created_at', 'desc')->get();
+
+        $filename = 'issues-export-' . now()->format('Y-m-d-His') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($issues) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, [
+                'Reference Code', 'Status', 'Priority', 'Category', 'Organization',
+                'Location', 'Assigned To', 'Reporter Name', 'Reporter Phone',
+                'Reporter Email', 'Description', 'Submitted At', 'Resolved At',
+                'Rating', 'SMS Opt-in',
+            ]);
+
+            foreach ($issues as $issue) {
+                fputcsv($handle, [
+                    $issue->reference_code,
+                    $issue->status,
+                    $issue->priority,
+                    $issue->category,
+                    $issue->organization?->name ?? '',
+                    $issue->location?->name ?? '',
+                    $issue->assignedUser?->name ?? $issue->assigned_to ?? '',
+                    $issue->is_anonymous ? 'Anonymous' : ($issue->reporter_name ?? ''),
+                    $issue->is_anonymous ? '' : ($issue->reporter_phone ?? ''),
+                    $issue->is_anonymous ? '' : ($issue->reporter_email ?? ''),
+                    $issue->description,
+                    $issue->created_at->toISOString(),
+                    $issue->resolved_at?->toISOString() ?? '',
+                    $issue->rating ?? '',
+                    $issue->sms_opt_in ? 'Yes' : 'No',
+                ]);
+            }
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     public function showIssue(Issue $issue)
@@ -305,9 +393,15 @@ class AdminController extends Controller
             $q->latest()->limit(50);
         }]);
 
+        $staffUsers = User::staff()
+            ->with('organization')
+            ->orderBy('name')
+            ->get(['id', 'name', 'organization_id']);
+
         return Inertia::render('Admin/IssueDetail', [
             'issue' => [
                 'id' => $issue->id,
+                'organization_id' => $issue->organization_id,
                 'reference_code' => $issue->reference_code,
                 'category' => $issue->category,
                 'priority' => $issue->priority,
@@ -316,6 +410,7 @@ class AdminController extends Controller
                 'description' => $issue->description,
                 'status' => $issue->status,
                 'assigned_to' => $issue->assigned_to,
+                'assigned_user_id' => $issue->assigned_user_id,
                 'assigned_user_name' => $issue->assignedUser?->name,
                 'reporter_name' => $issue->is_anonymous ? 'Anonymous' : $issue->reporter_name,
                 'reporter_phone' => $issue->is_anonymous ? null : $issue->reporter_phone,
@@ -337,6 +432,7 @@ class AdminController extends Controller
                     'created_at' => $e->created_at->toISOString(),
                 ]),
             ],
+            'staff_users' => $staffUsers,
         ]);
     }
 }

@@ -15,23 +15,85 @@ function getNextStatus(current) {
     return idx < statusOptions.length - 1 ? statusOptions[idx + 1] : null;
 }
 
-export default function AdminDashboard({ stats, issues, category_stats, org_stats, issues_over_time, avg_resolution_hours, staff_users = [], filters = {} }) {
+export default function AdminDashboard({ stats, issues, category_stats, org_stats, issues_over_time, avg_resolution_hours, staff_users = [], organizations = [], categories = [], filters = {} }) {
     useRealtime();
     const [statusFilter, setStatusFilter] = useState(filters.status || 'all');
+    const [priorityFilter, setPriorityFilter] = useState(filters.priority || 'all');
+    const [orgFilter, setOrgFilter] = useState(filters.organization_id || 'all');
+    const [staffFilter, setStaffFilter] = useState(filters.assigned_user_id || 'all');
     const [search, setSearch] = useState(filters.search || '');
+    const [dateFrom, setDateFrom] = useState(filters.date_from || '');
+    const [dateTo, setDateTo] = useState(filters.date_to || '');
+
+    function buildParams(overrides = {}) {
+        return {
+            status: overrides.status !== undefined ? overrides.status : (statusFilter !== 'all' ? statusFilter : ''),
+            priority: overrides.priority !== undefined ? overrides.priority : (priorityFilter !== 'all' ? priorityFilter : ''),
+            organization_id: overrides.organization_id !== undefined ? overrides.organization_id : (orgFilter !== 'all' ? orgFilter : ''),
+            assigned_user_id: overrides.assigned_user_id !== undefined ? overrides.assigned_user_id : (staffFilter !== 'all' ? staffFilter : ''),
+            search: overrides.search !== undefined ? overrides.search : search,
+            date_from: overrides.date_from !== undefined ? overrides.date_from : (dateFrom || ''),
+            date_to: overrides.date_to !== undefined ? overrides.date_to : (dateTo || ''),
+        };
+    }
 
     function applyFilters(params) {
-        router.get(route('admin.dashboard'), params, { preserveState: true, replace: true });
+        const clean = {};
+        Object.entries(params).forEach(([k, v]) => { if (v) clean[k] = v; });
+        router.get(route('admin.dashboard'), clean, { preserveState: true, replace: true });
     }
 
     function handleSearch(e) {
         e.preventDefault();
-        applyFilters({ status: statusFilter !== 'all' ? statusFilter : '', search });
+        applyFilters(buildParams());
     }
 
     function handleStatusChange(val) {
         setStatusFilter(val);
-        applyFilters({ status: val !== 'all' ? val : '', search });
+        applyFilters(buildParams({ status: val !== 'all' ? val : '' }));
+    }
+
+    function handlePriorityChange(val) {
+        setPriorityFilter(val);
+        applyFilters(buildParams({ priority: val !== 'all' ? val : '' }));
+    }
+
+    function handleOrgChange(val) {
+        setOrgFilter(val);
+        applyFilters(buildParams({ organization_id: val !== 'all' ? val : '' }));
+    }
+
+    function handleStaffChange(val) {
+        setStaffFilter(val);
+        applyFilters(buildParams({ assigned_user_id: val !== 'all' ? val : '' }));
+    }
+
+    function handleDateFromChange(val) {
+        setDateFrom(val);
+        applyFilters(buildParams({ date_from: val || '' }));
+    }
+
+    function handleDateToChange(val) {
+        setDateTo(val);
+        applyFilters(buildParams({ date_to: val || '' }));
+    }
+
+    function clearFilters() {
+        setStatusFilter('all');
+        setPriorityFilter('all');
+        setOrgFilter('all');
+        setStaffFilter('all');
+        setSearch('');
+        setDateFrom('');
+        setDateTo('');
+        router.get(route('admin.dashboard'), {}, { preserveState: true, replace: true });
+    }
+
+    function exportCsv() {
+        const params = buildParams();
+        const qs = new URLSearchParams();
+        Object.entries(params).forEach(([k, v]) => { if (v) qs.set(k, v); });
+        window.open(`${route('admin.issues.export-csv')}?${qs.toString()}`, '_blank');
     }
 
     function handleStatusUpdate(issueId, newStatus) {
@@ -125,28 +187,96 @@ export default function AdminDashboard({ stats, issues, category_stats, org_stat
                             <h3 className="text-lg font-semibold text-gray-900">All Issues</h3>
                             <p className="text-sm text-gray-500">{issues.total} issues</p>
                         </div>
-                        <form onSubmit={handleSearch} className="flex items-center gap-3 w-full sm:w-auto">
-                            <input
-                                type="text"
-                                value={search}
-                                onChange={e => setSearch(e.target.value)}
-                                placeholder="Search issues..."
-                                className="flex-1 sm:w-48 rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-                            />
-                            <div className="w-36">
-                                <SearchSelect
-                                    options={[
-                                        { value: 'all', label: 'All Status' },
-                                        { value: 'received', label: 'Received' },
-                                        { value: 'in_progress', label: 'In Progress' },
-                                        { value: 'resolved', label: 'Resolved' },
-                                    ]}
-                                    value={statusFilter}
-                                    onChange={handleStatusChange}
-                                    placeholder="Filter"
+                        <div className="flex flex-col gap-3 w-full sm:w-auto">
+                            <form onSubmit={handleSearch} className="flex items-center gap-3">
+                                <input
+                                    type="text"
+                                    value={search}
+                                    onChange={e => setSearch(e.target.value)}
+                                    placeholder="Search issues..."
+                                    className="flex-1 sm:w-48 rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
                                 />
+                                <div className="w-36">
+                                    <SearchSelect
+                                        options={[
+                                            { value: 'all', label: 'All Status' },
+                                            { value: 'received', label: 'Received' },
+                                            { value: 'in_progress', label: 'In Progress' },
+                                            { value: 'resolved', label: 'Resolved' },
+                                        ]}
+                                        value={statusFilter}
+                                        onChange={handleStatusChange}
+                                        placeholder="Status"
+                                    />
+                                </div>
+                            </form>
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <div className="w-32">
+                                    <SearchSelect
+                                        options={[
+                                            { value: 'all', label: 'All Priority' },
+                                            { value: 'low', label: 'Low' },
+                                            { value: 'medium', label: 'Medium' },
+                                            { value: 'high', label: 'High' },
+                                            { value: 'critical', label: 'Critical' },
+                                        ]}
+                                        value={priorityFilter}
+                                        onChange={handlePriorityChange}
+                                        placeholder="Priority"
+                                    />
+                                </div>
+                                <div className="w-40">
+                                    <SearchSelect
+                                        options={[
+                                            { value: 'all', label: 'All Organizations' },
+                                            ...organizations.map(o => ({ value: String(o.id), label: o.name })),
+                                        ]}
+                                        value={orgFilter}
+                                        onChange={handleOrgChange}
+                                        placeholder="Organization"
+                                    />
+                                </div>
+                                <div className="w-40">
+                                    <SearchSelect
+                                        options={[
+                                            { value: 'all', label: 'All Staff' },
+                                            ...staff_users.map(s => ({ value: String(s.id), label: s.name })),
+                                        ]}
+                                        value={staffFilter}
+                                        onChange={handleStaffChange}
+                                        placeholder="Assigned Staff"
+                                    />
+                                </div>
+                                <input
+                                    type="date"
+                                    value={dateFrom}
+                                    onChange={e => handleDateFromChange(e.target.value)}
+                                    className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                                    title="Date from"
+                                />
+                                <input
+                                    type="date"
+                                    value={dateTo}
+                                    onChange={e => handleDateToChange(e.target.value)}
+                                    className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                                    title="Date to"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={exportCsv}
+                                    className="px-3 py-2 text-xs font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors whitespace-nowrap"
+                                >
+                                    Export CSV
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={clearFilters}
+                                    className="px-3 py-2 text-xs font-medium text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
+                                >
+                                    Clear
+                                </button>
                             </div>
-                        </form>
+                        </div>
                     </div>
 
                     <div className="space-y-3">

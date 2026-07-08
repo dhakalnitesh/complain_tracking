@@ -1,7 +1,33 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { StatusBadge, PriorityBadge } from '../../Components/Badge';
+import { useState } from 'react';
 
-export default function IssueDetail({ issue }) {
+const statusOptions = ['received', 'in_progress', 'resolved'];
+
+function getNextStatus(current) {
+    const idx = statusOptions.indexOf(current);
+    return idx < statusOptions.length - 1 ? statusOptions[idx + 1] : null;
+}
+
+export default function IssueDetail({ issue, staff_users = [] }) {
+  const [assigning, setAssigning] = useState(false);
+
+  function handleStatusUpdate(newStatus) {
+    router.patch(route('admin.issues.update-status', issue.id), { status: newStatus });
+  }
+
+  function handleAssign(staffId, staffName) {
+    router.post(route('admin.issues.assign', issue.id), {
+      assigned_to: staffName,
+      assigned_user_id: staffId || null,
+    });
+    setAssigning(false);
+  }
+
+  function orgStaff() {
+    return staff_users.filter(s => s.organization_id === issue.organization_id || !s.organization_id);
+  }
+
   return (
     <>
       <Head title={`${issue.reference_code} - Admin`} />
@@ -14,7 +40,7 @@ export default function IssueDetail({ issue }) {
             </Link>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{issue.reference_code}</h1>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             <StatusBadge status={issue.status} />
             <PriorityBadge priority={issue.priority} />
           </div>
@@ -55,6 +81,62 @@ export default function IssueDetail({ issue }) {
               <p className="text-xs font-medium text-gray-400 uppercase">Anonymous</p>
               <p className="font-medium text-gray-900">{issue.is_anonymous ? 'Yes' : 'No'}</p>
             </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-gray-100">
+            {issue.status !== 'resolved' ? (
+              <>
+                <button
+                  onClick={() => {
+                    const next = getNextStatus(issue.status);
+                    if (next) handleStatusUpdate(next);
+                  }}
+                  className="text-sm bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                >
+                  {issue.status === 'received' ? 'Start Progress' : 'Resolve'}
+                </button>
+                <div className="relative">
+                  <button
+                    onClick={() => setAssigning(!assigning)}
+                    className="text-sm bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    {issue.assigned_user_name || issue.assigned_to || 'Assign'}
+                  </button>
+                  {assigning && (
+                    <div className="absolute left-0 top-full mt-1 w-56 bg-white rounded-lg border border-gray-200 shadow-lg z-50 max-h-48 overflow-y-auto">
+                      <button
+                        onClick={() => handleAssign(null, '')}
+                        className="w-full text-left px-3 py-2 text-xs text-gray-500 hover:bg-gray-50 border-b border-gray-100"
+                      >
+                        Unassign
+                      </button>
+                      {orgStaff().map(s => (
+                        <button
+                          key={s.id}
+                          onClick={() => handleAssign(s.id, s.name)}
+                          className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 ${
+                            issue.assigned_user_id === s.id ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-700'
+                          }`}
+                        >
+                          {s.name}
+                        </button>
+                      ))}
+                      {orgStaff().length === 0 && (
+                        <div className="px-3 py-2 text-xs text-gray-400">No staff available</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <button
+                onClick={() => handleStatusUpdate('received')}
+                className="text-sm bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                Reopen
+              </button>
+            )}
           </div>
 
           {issue.is_sla_breached && (
