@@ -17,7 +17,7 @@ export default function Submit({ locations, organizations, selected_organization
 
   const { data, setData, post, processing, errors, reset } = useForm({
     organization_id: selected_organization?.id || '',
-    category: '',
+    category_id: '',
     priority: 'medium',
     location_id: '',
     description: '',
@@ -26,6 +26,7 @@ export default function Submit({ locations, organizations, selected_organization
     reporter_email: user?.email || '',
     is_anonymous: !user,
     photo: null,
+    website: '',
   });
 
   function handleSubmit(e) {
@@ -33,7 +34,7 @@ export default function Submit({ locations, organizations, selected_organization
     post('/issues', {
       forceFormData: true,
       onSuccess: () => {
-        reset('category', 'location_id', 'description', 'photo');
+        reset('category_id', 'location_id', 'description', 'photo');
         setPhotoPreview(null);
         setStep(0);
       },
@@ -92,7 +93,7 @@ export default function Submit({ locations, organizations, selected_organization
   }
 
   function canProceed() {
-    if (step === 0) return data.organization_id && data.category && data.priority && data.location_id;
+    if (step === 0) return data.organization_id && data.category_id && data.priority && data.location_id;
     if (step === 1) return data.description && data.description.length >= 10;
     return true;
   }
@@ -100,7 +101,7 @@ export default function Submit({ locations, organizations, selected_organization
   function stepError() {
     if (step === 0) {
       if (!data.organization_id) return lang === 'np' ? 'कृपया संस्था चयन गर्नुहोस्' : 'Please select an organization';
-      if (!data.category) return lang === 'np' ? 'कृपया श्रेणी चयन गर्नुहोस्' : 'Please select a category';
+      if (!data.category_id) return lang === 'np' ? 'कृपया श्रेणी चयन गर्नुहोस्' : 'Please select a category';
       if (!data.location_id) return lang === 'np' ? 'कृपया स्थान चयन गर्नुहोस्' : 'Please select a location';
     }
     if (step === 1) {
@@ -164,6 +165,10 @@ export default function Submit({ locations, organizations, selected_organization
         {/* Step content */}
         <div className="transition-all duration-300">
           <form onSubmit={handleSubmit} encType="multipart/form-data">
+            {/* Honeypot - invisible to humans, bots fill it */}
+            <div className="absolute opacity-0 pointer-events-none" tabIndex={-1} aria-hidden="true">
+              <input type="text" name="website" autoComplete="off" />
+            </div>
             {/* Step 1: Issue Details */}
             {step === 0 && (
               <div className="animate-fade-in">
@@ -194,11 +199,11 @@ export default function Submit({ locations, organizations, selected_organization
                     <div>
                       <label className="block text-xs font-semibold text-gray-700 mb-1.5">{t('submit.category_label')} *</label>
                       <SearchSelect
-                        options={categories.map(c => ({ value: c, label: t(`categories.${c}`) }))}
-                        value={data.category}
-                        onChange={v => setData('category', v)}
+                        options={categories.map(c => ({ value: c.id, label: c.name }))}
+                        value={data.category_id}
+                        onChange={v => setData('category_id', v)}
                         placeholder={lang === 'np' ? 'श्रेणी खोज्नुहोस्...' : 'Search category...'}
-                        error={errors.category}
+                        error={errors.category_id}
                       />
                     </div>
                   </div>
@@ -379,7 +384,7 @@ export default function Submit({ locations, organizations, selected_organization
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     {[
                       { label: t('submit.org_label'), value: organizations.find(o => o.id === data.organization_id)?.name },
-                      { label: t('submit.category_label'), value: data.category ? t(`categories.${data.category}`) : '' },
+                      { label: t('submit.category_label'), value: data.category_id ? categories.find(c => c.id === data.category_id)?.name || '' : '' },
                       { label: t('submit.priority_label'), value: data.priority ? t(`priorities.${data.priority}`) : '' },
                       { label: t('submit.location_label'), value: groupedLocations.flatMap(g => g.children.length ? g.children : [g]).find(l => l.id === data.location_id)?.name },
                     ].filter(i => i.value).map((item, i) => (

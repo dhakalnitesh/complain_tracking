@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\StatsController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -16,8 +17,9 @@ Route::get('/org/{organization:slug}', [DashboardController::class, 'organizatio
 Route::get('/submit', [IssueController::class, 'create'])->name('issues.create');
 Route::post('/issues', [IssueController::class, 'store'])->name('issues.store')->middleware('throttle:3,1');
 Route::get('/issues/reference/{reference_code}', [IssueController::class, 'showReference'])->name('issues.show-reference');
-Route::get('/status', [IssueController::class, 'trackStatus'])->name('status.check');
-Route::post('/issues/{issue}/feedback', [IssueController::class, 'submitFeedback'])->name('issues.feedback');
+Route::get('/status', [IssueController::class, 'trackStatus'])->name('status.check')->middleware('throttle:10,1');
+Route::post('/issues/{issue}/feedback', [IssueController::class, 'submitFeedback'])->name('issues.feedback')->middleware('throttle:5,1');
+Route::get('/issues/photo/{reference_code}', [PhotoController::class, 'show'])->name('issues.photo');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

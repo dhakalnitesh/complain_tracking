@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
 use App\Models\Issue;
 use App\Models\IssueEvent;
 use App\Models\Location;
@@ -14,6 +15,20 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // === CATEGORIES ===
+        $categoryOrder = [
+            'Canteen/Food', 'Toilet/Sanitation', 'Furniture/Equipment',
+            'Projector/Board', 'Library', 'Class Scheduling', 'Exam Concern',
+            'Admin/Account Delay', 'Cleanliness', 'Electricity/Water',
+            'Safety/Security', 'Harassment', 'Road/Infrastructure',
+            'Health/Medical', 'Other',
+        ];
+        $categoryMap = [];
+        foreach ($categoryOrder as $i => $name) {
+            $cat = Category::create(['name' => $name, 'sort_order' => $i, 'is_active' => true]);
+            $categoryMap[$name] = $cat->id;
+        }
+
         // === REAL NEPAL ORGANIZATIONS ===
         $education = Organization::create([
             'name' => 'Tribhuvan University',
@@ -67,7 +82,7 @@ class DatabaseSeeder extends Seeder
             'is_admin' => true,
         ]);
 
-        User::create([
+        $tuAdmin = User::create([
             'name' => 'TU Admin',
             'email' => 'tu@nagariksarokar.com',
             'password' => Hash::make('password'),
@@ -157,7 +172,7 @@ class DatabaseSeeder extends Seeder
                 'location' => 'Admin Building',
                 'category' => 'Admin/Account Delay',
                 'priority' => 'high',
-                'description' => "Scholarship form bujhauna 3 hapta bhayo, tara account section le 'pachi aau' bhandai pathairaheko chha. University ko deadline next week ho.",
+                'description' => 'Scholarship form bujhauna 3 hapta bhayo, tara account section le \'pachi aau\' bhandai pathairaheko chha. University ko deadline next week ho.',
                 'status' => 'resolved',
                 'days_ago' => 8,
                 'resolved' => true,
@@ -258,10 +273,12 @@ class DatabaseSeeder extends Seeder
             if (!$loc) continue;
 
             $createdAt = now()->subDays($data['days_ago']);
+            $catId = $categoryMap[$data['category']] ?? null;
 
             $issue = Issue::create([
                 'organization_id' => $org->id,
                 'category' => $data['category'],
+                'category_id' => $catId,
                 'priority' => $data['priority'],
                 'location_id' => $loc->id,
                 'description' => $data['description'],

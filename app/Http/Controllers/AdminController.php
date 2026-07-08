@@ -53,18 +53,22 @@ class AdminController extends Controller
             'total_users' => User::count(),
         ];
 
-        $issues = Issue::with(['location', 'organization'])
+        $issues = Issue::with(['location', 'organization', 'assignedUser'])
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(fn($issue) => [
                 'id' => $issue->id,
                 'reference_code' => $issue->reference_code,
                 'category' => $issue->category,
+                'category_id' => $issue->category_id,
                 'priority' => $issue->priority,
                 'location' => $issue->location?->name,
                 'organization' => $issue->organization?->name,
                 'description' => $issue->description,
                 'status' => $issue->status,
+                'assigned_to' => $issue->assigned_to,
+                'assigned_user_id' => $issue->assigned_user_id,
+                'assigned_user_name' => $issue->assignedUser?->name,
                 'is_escalated' => $issue->status !== 'resolved' && $issue->created_at->lt(now()->subHours(24)),
                 'is_sla_breached' => $issue->isSlaBreached(),
                 'created_at' => $issue->created_at->toISOString(),
@@ -141,16 +145,23 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'assigned_to' => 'required|string|max:255',
+            'assigned_user_id' => 'nullable|exists:users,id',
         ]);
 
-        $issue->update(['assigned_to' => $validated['assigned_to']]);
+        $issue->update([
+            'assigned_to' => $validated['assigned_to'],
+            'assigned_user_id' => $validated['assigned_user_id'] ?? null,
+        ]);
 
         IssueEvent::create([
             'issue_id' => $issue->id,
             'user_id' => Auth::id(),
             'type' => 'assigned',
             'description' => "Issue assigned to {$validated['assigned_to']}.",
-            'metadata' => ['assigned_to' => $validated['assigned_to']],
+            'metadata' => [
+                'assigned_to' => $validated['assigned_to'],
+                'assigned_user_id' => $validated['assigned_user_id'],
+            ],
         ]);
 
         return redirect()->route('admin.dashboard')->with('success', "Issue assigned to {$validated['assigned_to']}.");

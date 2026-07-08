@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Issue;
 use App\Models\IssueEvent;
 use App\Models\Location;
@@ -22,26 +23,13 @@ class IssueController extends Controller
 
         $locations = Location::orderBy('name')->get(['id', 'name', 'parent_id', 'organization_id']);
         $organizations = Organization::where('is_active', true)->orderBy('name')->get();
+        $categories = Category::active()->sorted()->get(['id', 'name']);
 
         return Inertia::render('Submit', [
             'locations' => $locations,
             'organizations' => $organizations,
             'selected_organization' => $organization,
-            'categories' => [
-                'Canteen/Food',
-                'Toilet/Sanitation',
-                'Furniture/Equipment',
-                'Projector/Board',
-                'Library',
-                'Class Scheduling',
-                'Exam Concern',
-                'Admin/Account Delay',
-                'Cleanliness',
-                'Electricity/Water',
-                'Safety/Security',
-                'Harassment',
-                'Other',
-            ],
+            'categories' => $categories,
             'priorities' => [
                 'low' => 'Low',
                 'medium' => 'Medium',
@@ -53,9 +41,13 @@ class IssueController extends Controller
 
     public function store(Request $request)
     {
+        if ($request->filled('website')) {
+            return redirect()->route('dashboard');
+        }
+
         $validated = $request->validate([
             'organization_id' => 'required|exists:organizations,id',
-            'category' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
             'priority' => 'required|in:low,medium,high,critical',
             'location_id' => [
                 'required',
@@ -65,11 +57,13 @@ class IssueController extends Controller
             ],
             'description' => 'required|string|min:10|max:5000',
             'reporter_name' => 'nullable|string|max:255',
-            'reporter_phone' => 'nullable|string|max:20',
+            'reporter_phone' => 'nullable|string|max:20|regex:/^(98|97|96)\d{8}$/',
             'reporter_email' => 'nullable|email|max:255',
             'is_anonymous' => 'boolean',
             'photo' => 'nullable|image|max:5120',
         ]);
+
+        $category = Category::findOrFail($validated['category_id']);
 
         $photoPath = null;
         if ($request->hasFile('photo')) {
@@ -78,7 +72,8 @@ class IssueController extends Controller
 
         $issue = Issue::create([
             'organization_id' => $validated['organization_id'],
-            'category' => $validated['category'],
+            'category' => $category->name,
+            'category_id' => $category->id,
             'priority' => $validated['priority'],
             'location_id' => $validated['location_id'],
             'description' => $validated['description'],
@@ -98,7 +93,7 @@ class IssueController extends Controller
             'description' => 'Issue submitted successfully.',
             'metadata' => [
                 'priority' => $validated['priority'],
-                'category' => $validated['category'],
+                'category' => $category->name,
                 'is_anonymous' => $issue->is_anonymous,
             ],
         ]);
@@ -111,7 +106,7 @@ class IssueController extends Controller
     public function showReference($referenceCode)
     {
         $issue = Issue::where('reference_code', $referenceCode)
-            ->with(['location', 'organization', 'events' => function ($q) {
+            ->with(['location', 'organization', 'category', 'events' => function ($q) {
                 $q->latest()->limit(10);
             }])
             ->first();
@@ -125,6 +120,7 @@ class IssueController extends Controller
                 'id' => $issue->id,
                 'reference_code' => $issue->reference_code,
                 'category' => $issue->category,
+                'category_name' => $issue->category?->name ?? $issue->category,
                 'priority' => $issue->priority,
                 'location' => $issue->location?->name,
                 'organization' => $issue->organization?->name,
@@ -135,7 +131,7 @@ class IssueController extends Controller
                 'resolved_at' => $issue->resolved_at?->toISOString(),
                 'rating' => $issue->rating,
                 'feedback_comment' => $issue->feedback_comment,
-                'photo_path' => $issue->photo_path ? \Illuminate\Support\Facades\Storage::url($issue->photo_path) : null,
+                'photo_path' => $issue->photo_path ? route('issues.photo', $issue->reference_code) : null,
                 'events' => $issue->events->map(fn($e) => [
                     'id' => $e->id,
                     'type' => $e->type,
@@ -203,7 +199,7 @@ class IssueController extends Controller
                 'resolved_at' => $issue->resolved_at?->toISOString(),
                 'rating' => $issue->rating,
                 'feedback_comment' => $issue->feedback_comment,
-                'photo_path' => $issue->photo_path ? Storage::url($issue->photo_path) : null,
+                'photo_path' => $issue->photo_path ? route('issues.photo', $issue->reference_code) : null,
             ] : null,
             'error' => $error,
         ]);

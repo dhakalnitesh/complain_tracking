@@ -5,12 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Issue extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'reference_code',
         'category',
+        'category_id',
         'priority',
         'location_id',
         'organization_id',
@@ -22,6 +26,7 @@ class Issue extends Model
         'is_anonymous',
         'status',
         'assigned_to',
+        'assigned_user_id',
         'resolved_at',
         'rating',
         'feedback_comment',
@@ -47,6 +52,16 @@ class Issue extends Model
         return $this->belongsTo(Organization::class);
     }
 
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function assignedUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_user_id');
+    }
+
     public function events(): HasMany
     {
         return $this->hasMany(IssueEvent::class);
@@ -57,7 +72,7 @@ class Issue extends Model
         $org = Organization::find($orgId);
         $clean = $org ? preg_replace('/[^A-Za-z0-9]/', '', $org->name) : '';
         $prefix = strtoupper(substr($clean, 0, 3)) ?: 'GRV';
-        $count = static::where('organization_id', $orgId)->count() + 1;
+        $count = static::withTrashed()->where('organization_id', $orgId)->count() + 1;
         return $prefix . '-' . str_pad($count, 4, '0', STR_PAD_LEFT);
     }
 
