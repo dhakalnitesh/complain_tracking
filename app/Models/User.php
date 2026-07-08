@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -18,6 +19,7 @@ class User extends Authenticatable
         'password',
         'organization_id',
         'is_admin',
+        'is_staff',
     ];
 
     protected $hidden = [
@@ -31,6 +33,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
+            'is_staff' => 'boolean',
         ];
     }
 
@@ -44,6 +47,11 @@ class User extends Authenticatable
         return $this->hasMany(IssueEvent::class);
     }
 
+    public function scopeStaff(Builder $query): Builder
+    {
+        return $query->where('is_staff', true);
+    }
+
     public function isSuperAdmin(): bool
     {
         return $this->is_admin;
@@ -52,5 +60,10 @@ class User extends Authenticatable
     public function isOrgAdmin(): bool
     {
         return $this->organization_id !== null;
+    }
+
+    public function isStaff(): bool
+    {
+        return $this->is_staff;
     }
 }

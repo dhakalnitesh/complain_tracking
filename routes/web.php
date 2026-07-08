@@ -41,6 +41,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/organizations', [OrganizationController::class, 'index'])->name('organizations');
         Route::post('/organizations', [OrganizationController::class, 'store'])->name('organizations.store');
         Route::post('/organizations/{organization}/toggle', [OrganizationController::class, 'toggleActive'])->name('organizations.toggle');
+
+        Route::get('/staff', [AdminController::class, 'staff'])->name('staff');
+        Route::get('/staff/create', [AdminController::class, 'createStaff'])->name('staff.create');
+        Route::post('/staff', [AdminController::class, 'storeStaff'])->name('staff.store');
+        Route::delete('/staff/{user}', [AdminController::class, 'destroyStaff'])->name('staff.destroy');
+
+        Route::get('/staff/{user}/issues', [AdminController::class, 'staffIssues'])->name('staff.issues');
     });
 });
 

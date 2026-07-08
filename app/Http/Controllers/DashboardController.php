@@ -101,8 +101,9 @@ class DashboardController extends Controller
     private function getAvgResolutionTime(): ?string
     {
         $avg = Issue::whereNotNull('resolved_at')
-            ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, created_at, resolved_at)) as avg_hours')
-            ->value('avg_hours');
+            ->get()
+            ->map(fn($i) => $i->created_at->diffInHours($i->resolved_at))
+            ->average();
 
         return $avg ? round($avg, 1) . ' hrs' : null;
     }

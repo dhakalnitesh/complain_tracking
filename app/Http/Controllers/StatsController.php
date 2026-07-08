@@ -18,8 +18,9 @@ class StatsController extends Controller
                 ->where('created_at', '<', now()->subHours(24))->count(),
             'total_organizations' => Organization::count(),
             'avg_resolution_hours' => Issue::whereNotNull('resolved_at')
-                ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, created_at, resolved_at)) as avg')
-                ->value('avg'),
+                ->get()
+                ->map(fn($i) => $i->created_at->diffInHours($i->resolved_at))
+                ->average(),
         ]);
     }
 

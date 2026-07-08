@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class AdminController extends Controller
@@ -96,8 +97,14 @@ class AdminController extends Controller
             ->get();
 
         $avgResolution = Issue::whereNotNull('resolved_at')
-            ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, created_at, resolved_at)) as avg')
-            ->value('avg');
+            ->get()
+            ->map(fn($i) => $i->created_at->diffInHours($i->resolved_at))
+            ->average();
+
+        $staffUsers = User::staff()
+            ->with('organization')
+            ->orderBy('name')
+            ->get(['id', 'name', 'organization_id']);
 
         return Inertia::render('Admin/Dashboard', [
             'stats' => $stats,
@@ -106,6 +113,7 @@ class AdminController extends Controller
             'org_stats' => $orgStats,
             'issues_over_time' => $issuesOverTime,
             'avg_resolution_hours' => $avgResolution ? round($avgResolution, 1) : null,
+            'staff_users' => $staffUsers,
         ]);
     }
 
@@ -141,11 +149,106 @@ class AdminController extends Controller
         return redirect()->route('admin.dashboard')->with('success', 'Issue status updated successfully.');
     }
 
+    public function staff()
+    {
+        $organizations = Organization::withCount('issues')->orderBy('name')->get();
+
+        $staff = User::staff()
+            ->with('organization')
+            ->orderBy('name')
+            ->get()
+            ->map(fn($user) => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'organization_id' => $user->organization_id,
+                'organization_name' => $user->organization?->name,
+                'issues_count' => Issue::where('assigned_user_id', $user->id)->count(),
+                'created_at' => $user->created_at->toISOString(),
+            ]);
+
+        return Inertia::render('Admin/Staff', [
+            'staff' => $staff,
+            'organizations' => $organizations,
+        ]);
+    }
+
+    public function createStaff()
+    {
+        return Inertia::render('Admin/StaffCreate', [
+            'organizations' => Organization::orderBy('name')->get(),
+        ]);
+    }
+
+    public function storeStaff(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+            'organization_id' => 'required|exists:organizations,id',
+        ]);
+
+        User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'organization_id' => $validated['organization_id'],
+            'is_staff' => true,
+        ]);
+
+        return redirect()->route('admin.staff')->with('success', 'Staff member created successfully.');
+    }
+
+    public function destroyStaff(User $user)
+    {
+        if (!$user->is_staff) {
+            return back()->with('error', 'Cannot delete non-staff user.');
+        }
+
+        Issue::where('assigned_user_id', $user->id)->update(['assigned_user_id' => null]);
+        $user->delete();
+
+        return redirect()->route('admin.staff')->with('success', 'Staff member removed.');
+    }
+
+    public function staffIssues(User $user)
+    {
+        if (!$user->is_staff) {
+            return redirect()->route('admin.staff')->with('error', 'User is not a staff member.');
+        }
+
+        $issues = Issue::with(['location', 'organization'])
+            ->where('assigned_user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(fn($issue) => [
+                'id' => $issue->id,
+                'reference_code' => $issue->reference_code,
+                'category' => $issue->category,
+                'priority' => $issue->priority,
+                'location' => $issue->location?->name,
+                'description' => $issue->description,
+                'status' => $issue->status,
+                'created_at' => $issue->created_at->toISOString(),
+            ]);
+
+        return Inertia::render('Admin/StaffIssues', [
+            'staff' => ['id' => $user->id, 'name' => $user->name],
+            'issues' => $issues,
+        ]);
+    }
+
     public function assignIssue(Request $request, Issue $issue)
     {
         $validated = $request->validate([
             'assigned_to' => 'required|string|max:255',
-            'assigned_user_id' => 'nullable|exists:users,id',
+            'assigned_user_id' => [
+                'nullable',
+                Rule::exists('users', 'id')->where(function ($q) {
+                    $q->where('is_staff', true);
+                }),
+            ],
         ]);
 
         $issue->update([
