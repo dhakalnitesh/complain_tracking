@@ -14,9 +14,10 @@ function getNextStatus(current) {
     return idx < statusOptions.length - 1 ? statusOptions[idx + 1] : null;
 }
 
-export default function AdminDashboard({ stats, issues, category_stats, org_stats, issues_over_time, avg_resolution_hours }) {
+export default function AdminDashboard({ stats, issues, category_stats, org_stats, issues_over_time, avg_resolution_hours, staff_users = [] }) {
     const [filter, setFilter] = useState('all');
     const [search, setSearch] = useState('');
+    const [assigning, setAssigning] = useState(null);
 
     const filteredIssues = issues.filter(issue => {
         if (filter !== 'all' && issue.status !== filter) return false;
@@ -29,11 +30,16 @@ export default function AdminDashboard({ stats, issues, category_stats, org_stat
         router.patch(route('admin.issues.update-status', issueId), { status: newStatus });
     }
 
-    function handleAssign(issueId) {
-        const name = prompt('Assign to (name):');
-        if (name) {
-            router.post(route('admin.issues.assign', issueId), { assigned_to: name });
-        }
+    function handleAssign(issueId, staffId, staffName) {
+        router.post(route('admin.issues.assign', issueId), {
+            assigned_to: staffName,
+            assigned_user_id: staffId || null,
+        });
+        setAssigning(null);
+    }
+
+    function currentOrgStaff(issue) {
+        return staff_users.filter(s => s.organization_id === issue.organization_id || !s.organization_id);
     }
 
     return (
@@ -190,12 +196,38 @@ export default function AdminDashboard({ stats, issues, category_stats, org_stat
                                                 >
                                                     {issue.status === 'received' ? 'Start Progress' : 'Resolve'}
                                                 </button>
-                                                <button
-                                                    onClick={() => handleAssign(issue.id)}
-                                                    className="text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
-                                                >
-                                                    {issue.assigned_to || 'Assign'}
-                                                </button>
+                                                <div className="relative">
+                                                    <button
+                                                        onClick={() => setAssigning(assigning === issue.id ? null : issue.id)}
+                                                        className="text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
+                                                    >
+                                                        {issue.assigned_to || 'Assign'}
+                                                    </button>
+                                                    {assigning === issue.id && (
+                                                        <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-lg border border-gray-200 shadow-lg z-50 max-h-48 overflow-y-auto">
+                                                            <button
+                                                                onClick={() => handleAssign(issue.id, null, '')}
+                                                                className="w-full text-left px-3 py-2 text-xs text-gray-500 hover:bg-gray-50 border-b border-gray-100"
+                                                            >
+                                                                Unassign
+                                                            </button>
+                                                            {currentOrgStaff(issue).map(s => (
+                                                                <button
+                                                                    key={s.id}
+                                                                    onClick={() => handleAssign(issue.id, s.id, s.name)}
+                                                                    className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 ${
+                                                                        issue.assigned_user_id === s.id ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-700'
+                                                                    }`}
+                                                                >
+                                                                    {s.name}
+                                                                </button>
+                                                            ))}
+                                                            {currentOrgStaff(issue).length === 0 && (
+                                                                <div className="px-3 py-2 text-xs text-gray-400">No staff available</div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </>
                                         )}
                                         {issue.status === 'resolved' && (

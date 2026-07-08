@@ -89,6 +89,25 @@ class DatabaseSeeder extends Seeder
             'organization_id' => $education->id,
         ]);
 
+        // === STAFF USERS ===
+        $staffData = [
+            ['name' => 'Ram Prasad Sharma', 'email' => 'ram.sharma@tu.edu.np', 'org' => $education],
+            ['name' => 'Sita Devi Neupane', 'email' => 'sita.neupane@tu.edu.np', 'org' => $education],
+            ['name' => 'Hari Bahadur KC', 'email' => 'hari.kc@kmc.gov.np', 'org' => $municipality],
+            ['name' => 'Gita Kumari Thapa', 'email' => 'gita.thapa@birhospital.gov.np', 'org' => $hospital],
+            ['name' => 'Krishna Acharya', 'email' => 'krishna@passport.gov.np', 'org' => $govt],
+        ];
+
+        foreach ($staffData as $s) {
+            User::create([
+                'name' => $s['name'],
+                'email' => $s['email'],
+                'password' => Hash::make('password'),
+                'organization_id' => $s['org']->id,
+                'is_staff' => true,
+            ]);
+        }
+
         // === LOCATIONS ===
         // TU Locations
         $tuParents = ['Kirtipur Main Campus', 'Patan Campus', 'Mechi Campus', 'Central Library'];

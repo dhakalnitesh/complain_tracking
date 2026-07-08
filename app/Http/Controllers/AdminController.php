@@ -65,6 +65,7 @@ class AdminController extends Controller
                 'priority' => $issue->priority,
                 'location' => $issue->location?->name,
                 'organization' => $issue->organization?->name,
+                'organization_id' => $issue->organization_id,
                 'description' => $issue->description,
                 'status' => $issue->status,
                 'assigned_to' => $issue->assigned_to,
