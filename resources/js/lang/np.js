@@ -6,6 +6,7 @@ export default {
   },
   nav: {
     home: 'गृहपृष्ठ',
+    feed: 'फीड',
     submit: 'उजुरी दिनुहोस्',
     track: 'उजुरी ट्र्याक गर्नुहोस्',
     login: 'लगइन',

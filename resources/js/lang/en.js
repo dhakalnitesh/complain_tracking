@@ -6,6 +6,7 @@ export default {
   },
   nav: {
     home: 'Home',
+    feed: 'Feed',
     submit: 'Submit',
     track: 'Track',
     login: 'Login',

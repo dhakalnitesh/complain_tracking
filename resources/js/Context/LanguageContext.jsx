@@ -7,8 +7,8 @@ const LanguageContext = createContext();
 
 export function LanguageProvider({ children }) {
   const [lang, setLang] = useState(() => {
-    try { return localStorage.getItem('nagarik_lang') || 'en'; }
-    catch { return 'en'; }
+    try { return localStorage.getItem('nagarik_lang') || 'np'; }
+    catch { return 'np'; }
   });
 
   const t = useCallback((key, params = {}) => {
