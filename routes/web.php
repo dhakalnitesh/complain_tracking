@@ -9,6 +9,8 @@ use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\Staff\IssueController as StaffIssueController;
 use App\Http\Controllers\StatsController;
+use App\Http\Controllers\FlagController;
+use App\Http\Controllers\Admin\ModerationController;
 use App\Http\Controllers\UpvoteController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -55,6 +57,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/issues/{issue}', [AdminController::class, 'showIssue'])->name('issues.show');
         Route::get('/export/csv', [AdminController::class, 'exportCsv'])->name('issues.export-csv');
+
+        Route::get('/moderation', [ModerationController::class, 'index'])->name('moderation');
+        Route::post('/moderation/{flag}/dismiss', [ModerationController::class, 'dismiss'])->name('moderation.dismiss');
+        Route::post('/moderation/{flag}/hide', [ModerationController::class, 'hide'])->name('moderation.hide');
+        Route::delete('/moderation/{flag}', [ModerationController::class, 'deleteContent'])->name('moderation.delete');
     });
 });
 
@@ -71,6 +78,9 @@ Route::post('/api/issues/{issue}/upvote', [UpvoteController::class, 'toggle'])->
 Route::get('/issues/{issue}/comments', [CommentController::class, 'index'])->name('comments.index');
 Route::post('/issues/{issue}/comments', [CommentController::class, 'store'])->name('comments.store');
 Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+
+Route::post('/issues/{issue}/flag', [FlagController::class, 'flagIssue'])->name('issues.flag');
+Route::post('/comments/{comment}/flag', [FlagController::class, 'flagComment'])->name('comments.flag');
 
 Route::prefix('org-admin')->name('org-admin.')->middleware(['auth'])->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\OrgAdminController::class, 'dashboard'])->name('dashboard');

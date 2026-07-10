@@ -19,6 +19,7 @@ class Comment extends Model
         'body',
         'is_public',
         'is_approved',
+        'hidden_at',
     ];
 
     protected function casts(): array
@@ -26,6 +27,7 @@ class Comment extends Model
         return [
             'is_public' => 'boolean',
             'is_approved' => 'boolean',
+            'hidden_at' => 'datetime',
         ];
     }
 

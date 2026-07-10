@@ -36,6 +36,7 @@ class Issue extends Model
         'feedback_at',
         'duplicate_of_id',
         'department_id',
+        'hidden_at',
     ];
 
     protected function casts(): array
@@ -43,6 +44,7 @@ class Issue extends Model
         return [
             'resolved_at' => 'datetime',
             'feedback_at' => 'datetime',
+            'hidden_at' => 'datetime',
             'is_anonymous' => 'boolean',
             'sms_opt_in' => 'boolean',
         ];

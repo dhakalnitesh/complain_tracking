@@ -352,7 +352,8 @@ Implement upvoting/"Me Too" system and citizen commenting on complaints. Citizen
 
 ## Epic 9: Multi-Tenant Org-Admin & Department Hierarchy
 
-**Status:** 🔴 Not Started
+**Status:** ✅ Completed (Jul 10, 2026)
+**Commits:** `be249de`
 **Target:** Jul 20 — Jul 27
 
 ### What
@@ -420,7 +421,8 @@ Implement proper multi-tenant scoping so org admins see only their org's data. A
 
 ## Epic 10: Smart Workflow Engine — SLA, Escalation, Transfer
 
-**Status:** 🔴 Not Started
+**Status:** ✅ Completed (Jul 10, 2026)
+**Commits:** `b52406a`
 **Target:** Jul 27 — Aug 3
 
 ### What
@@ -767,7 +769,8 @@ This is deferred until production deployment and user feedback confirms demand.
 |------|------|--------|-------|
 | Jul 10, 2026 | Epic 7 | ✅ Completed | BS Date service, Feed page, ComplaintCard, filters, 66 tests |
 | Jul 10, 2026 | Epic 8 | ✅ Completed | Upvotes, Comments, Duplicate Detection — 80 tests all passing |
-| Jul 10, 2026 | Epic 9 | 🔴 In Progress | Multi-Tenant, Departments, Auto-Routing |
+| Jul 10, 2026 | Epic 9 | ✅ Completed | Multi-Tenant, Departments, Auto-Routing — 16 tests |
+| Jul 10, 2026 | Epic 10 | ✅ Completed | SLA, Escalation, Transfer, Merge — 101 total tests |
 
 ---
 
