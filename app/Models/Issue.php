@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 
 class Issue extends Model
 {
@@ -33,6 +34,7 @@ class Issue extends Model
         'rating',
         'feedback_comment',
         'feedback_at',
+        'duplicate_of_id',
     ];
 
     protected function casts(): array
@@ -73,6 +75,41 @@ class Issue extends Model
     public function notificationLogs(): HasMany
     {
         return $this->hasMany(NotificationLog::class);
+    }
+
+    public function upvotes(): HasMany
+    {
+        return $this->hasMany(Upvote::class);
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    public function duplicateOf(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'duplicate_of_id');
+    }
+
+    public function duplicates(): HasMany
+    {
+        return $this->hasMany(self::class, 'duplicate_of_id');
+    }
+
+    public function upvotesCount(): int
+    {
+        return Cache::remember("upvote_count_{$this->id}", 300, fn() => $this->upvotes()->count());
+    }
+
+    public function commentsCount(): int
+    {
+        return $this->comments()->count();
+    }
+
+    public function isUpvotedBy(?int $userId, ?string $sessionId): bool
+    {
+        return Upvote::hasUpvoted($this->id, $userId, $sessionId);
     }
 
     public static function generateReferenceCode(int $orgId): string

@@ -8,7 +8,8 @@
 
 ## Epic 7: UI/UX Transformation — Modern Social Feed & Citizen Feed
 
-**Status:** 🔴 Not Started
+**Status:** ✅ Completed (Jul 10, 2026)
+**Commits:** `0f82b1f`
 **Target:** Jul 10 — Jul 14
 
 ### What
@@ -117,7 +118,155 @@ Transform the current landing page into a modern, Facebook/Reddit-inspired socia
 - Feature: ComplaintCard renders photo, description, badges
 
 ### Commit
-`feat(feed): complete Epic 7 — modern social feed with BS dates, photo display, infinite scroll`
+`feat(feed): complete Epic 7 — modern social feed with BS dates, photo display, infinite scroll, mobile-first UI`
+
+---
+
+## Epic 8: Upvoting, Citizen Comments & Social Features
+
+**Status:** 🔴 In Progress
+**Target:** Jul 10 — Jul 16
+
+### What
+Implement upvoting/"Me Too" system and citizen commenting on complaints. Citizens can upvote complaints (reducing duplicates), comment publicly on complaints, and follow issues.
+
+### Why
+- FixMyStreet's #1 feature: upvoting creates community pressure and surfaces important issues
+- Citizens want to say "Me too" instead of filing duplicate complaints
+- Public comments increase transparency and trust between citizens and government
+- Comment threads enable citizen-official-citizen dialogue
+- Reduces duplicate complaints by allowing citizens to join existing complaints
+
+### How
+
+#### A. Upvotes Table Migration
+- `create_upvotes_table.php`
+- Columns: `id`, `user_id` (nullable FK → users, for registered), `session_id` (nullable string, for anonymous), `issue_id` (FK → issues, cascade delete), `created_at`
+- Unique composite: `user_id + issue_id` when user_id is not null
+- Unique composite: `session_id + issue_id` when user_id is null
+- Index on `issue_id` for efficient count queries
+
+#### B. Comments Table Migration
+- `create_comments_table.php`
+- Columns: `id`, `issue_id` (FK → issues, cascade), `user_id` (nullable FK → users), `session_id` (nullable string), `parent_id` (nullable FK → comments, self-referencing for threading), `body` (text), `is_public` (boolean, default true), `is_approved` (boolean, default false for moderation), `created_at`, `updated_at`
+- Indexes: `issue_id`, `parent_id`
+- Staff/super admin can moderate (approve/delete/hide comments)
+
+#### C. Upvote Model
+- `app/Models/Upvote.php`
+- Fillable: `user_id, session_id, issue_id`
+- Relations: `belongsTo(Issue)`, `belongsTo(User)`
+- Helper methods: `hasUpvoted(Issue $issue, ?User $user, ?string $sessionId): bool`
+- Scopes: `scopeBySession($sessionId)`, `scopeByUser($userId)`
+
+#### D. Comment Model
+- `app/Models/Comment.php`
+- Fillable: `issue_id, user_id, session_id, parent_id, body, is_public, is_approved`
+- Relations: `belongsTo(Issue)`, `belongsTo(User)`, `belongsTo(Comment, 'parent_id')` (parent), `hasMany(Comment, 'parent_id')` (replies)
+- Scopes: `scopeApproved()`, `scopePublic()`
+
+#### E. API Controllers (Inertia-friendly, not pure API)
+- UpvoteController: `toggle(Issue $issue, Request $request)` — adds or removes upvote
+  - Uses `session_id` from `session()->getId()` for anonymous users
+  - Returns JSON `{upvoted: bool, count: int}` for dynamic UI update
+- CommentController: `index(Issue $issue)` — paginated comments with replies
+  - `store(Issue $issue, Request $request)` — add comment (validates body min:1 max:2000)
+  - `update(Request $request, Comment $comment)` — edit own comment within 5 min
+  - `destroy(Comment $comment)` — delete own comment
+  - `report(Comment $comment, Request $request)` — report inappropriate
+
+#### F. Frontend Components
+- **UpvoteButton.jsx** — Heart/thumbs-up icon, animated counter, optimistic toggle
+  - Shows filled/unfilled state based on `has_upvoted` prop
+  - Sends POST to toggle endpoint via Inertia visit or axios
+  - Animated number transition on count change
+- **CommentSection.jsx** — Threaded comment display with reply nesting
+  - List of comments with author info, timestamp (BS date), body
+  - Reply button to show nested CommentForm
+  - Report button on each comment
+  - Load more replies if nested
+- **CommentForm.jsx** — Textarea + submit button with character count
+  - For new comments and replies
+  - Shows "Reply to @user" indicator when in reply mode
+  - Cancel reply button
+
+#### G. Duplicate Detection
+- Before complaint submission, check recent issues for description similarity
+- Simple approach: tokenize description, compare word overlap with recent issues (last 30 days, same org)
+- If >60% word overlap, show warning with link to existing issue
+- Store `duplicate_of_id` (nullable FK → issues) for future merging
+- `AddDuplicateOfToIssues` migration: `duplicate_of_id` bigint unsigned nullable FK
+
+#### H. Issue Model Updates
+- `upvotes()`: HasMany relation to Upvote
+- `comments()`: HasMany relation to Comment
+- `upvotesCount()`: attribute for count
+- `commentsCount()`: attribute for count
+- `isUpvotedBy(?User $user, ?string $sessionId): bool`
+- `duplicate()`: BelongsTo relation to self (duplicate_of_id)
+
+### Database Changes
+1. `database/migrations/2026_07_10_000001_create_upvotes_table.php`
+2. `database/migrations/2026_07_10_000002_create_comments_table.php`
+3. `database/migrations/2026_07_10_000003_add_duplicate_of_to_issues.php`
+4. Add composite indexes for upvote uniqueness
+
+### Files to Create
+1. `app/Models/Upvote.php`
+2. `app/Models/Comment.php`
+3. `app/Http/Controllers/UpvoteController.php`
+4. `app/Http/Controllers/CommentController.php`
+5. `app/Services/DuplicateDetectionService.php`
+6. `resources/js/Components/UpvoteButton.jsx`
+7. `resources/js/Components/CommentSection.jsx`
+8. `resources/js/Components/CommentForm.jsx`
+9. `database/factories/CommentFactory.php`
+10. `database/factories/UpvoteFactory.php`
+
+### Files to Modify
+1. `app/Models/Issue.php` — add relationships, isUpvotedBy, upvotes_comments counts
+2. `routes/web.php` — upvote/comment routes
+3. `app/Http/Controllers/FeedController.php` — include upvote/comment data in feed
+4. `app/Http/Controllers/IssueController.php` — duplicate detection on store
+5. `resources/js/Components/ComplaintCard.jsx` — wire upvote/comment display
+6. `resources/js/Pages/Feed.jsx` — pass upvote data
+7. `app/Http/Controllers/IssueController.php` — showReference includes comments
+8. `database/seeders/DatabaseSeeder.php` — seed comments + upvotes
+
+### Tests
+- Unit: Upvote toggles correctly (add/remove)
+- Unit: Comment belongs to issue and user
+- Feature: Citizen can upvote without account (session-based)
+- Feature: Citizen can comment on public complaint
+- Feature: Duplicate detection flags similar descriptions
+- Feature: Upvote count increments on feed page
+- Feature: Comment appears in reference page
+
+### Details & Requirements
+
+#### Upvote Business Logic
+- One upvote per user/session per issue (toggle)
+- Upvote count is cached (5 min TTL, invalidated on toggle)
+- Upvotes are anonymous (no public list of who upvoted)
+- Feed sorted by "Most Upvoted" uses upvote count
+
+#### Comment Business Logic
+- Comments require session (trackable) — fully anonymous not allowed
+- Comments are auto-approved for registered users
+- Comments from session-only users require admin approval
+- Staff/super admin can approve/delete/hide any comment
+- Reports are queued in moderation queue (Epic 11)
+
+#### Duplicate Detection Logic
+- Compare against issues from same org, last 30 days
+- Tokenize: lowercase, remove punctuation, split by whitespace
+- Calculate Jaccard similarity: |A ∩ B| / |A ∪ B|
+- If similarity > 0.6 and description length > 20 chars, flag as potential duplicate
+- Show max 3 similar issues
+- User can still submit (not forced), just warned
+
+### Commit
+`feat(social): complete Epic 8 — upvoting, citizen comments, duplicate detection`
 
 ---
 
@@ -615,8 +764,8 @@ This is deferred until production deployment and user feedback confirms demand.
 
 | Date | Epic | Status | Notes |
 |------|------|--------|-------|
-| Jul 10, 2026 | Epic 7 | 🔴 Not Started | Planning complete |
-| | | | |
+| Jul 10, 2026 | Epic 7 | ✅ Completed | BS Date service, Feed page, ComplaintCard, filters, 66 tests |
+| Jul 10, 2026 | Epic 8 | 🔴 In Progress | Upvoting, citizen comments, duplicate detection |
 
 ---
 

@@ -2,12 +2,14 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\Staff\IssueController as StaffIssueController;
 use App\Http\Controllers\StatsController;
+use App\Http\Controllers\UpvoteController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -64,3 +66,8 @@ Route::middleware(['auth', 'staff'])->prefix('staff')->name('staff.')->group(fun
 Route::get('/api/stats/overview', [StatsController::class, 'overview']);
 Route::get('/api/stats/categories', [StatsController::class, 'categoryBreakdown']);
 Route::get('/api/stats/trends', [StatsController::class, 'issuesOverTime']);
+
+Route::post('/api/issues/{issue}/upvote', [UpvoteController::class, 'toggle'])->name('upvote.toggle');
+Route::get('/issues/{issue}/comments', [CommentController::class, 'index'])->name('comments.index');
+Route::post('/issues/{issue}/comments', [CommentController::class, 'store'])->name('comments.store');
+Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');

@@ -8,6 +8,8 @@ use App\Models\Issue;
 use App\Models\IssueEvent;
 use App\Models\Location;
 use App\Models\Organization;
+use App\Services\BsDateService;
+use App\Services\DuplicateDetectionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -67,6 +69,11 @@ class IssueController extends Controller
 
         $category = Category::findOrFail($validated['category_id']);
 
+        $duplicates = DuplicateDetectionService::findDuplicates(
+            $validated['description'],
+            $validated['organization_id']
+        );
+
         $photoPath = null;
         if ($request->hasFile('photo')) {
             $photoPath = $request->file('photo')->store('issue-photos', 'public');
@@ -104,17 +111,26 @@ class IssueController extends Controller
 
         broadcast(new IssueCreated($issue));
 
-        return redirect()->route('issues.show-reference', [
+        $redirect = redirect()->route('issues.show-reference', [
             'reference_code' => $issue->reference_code,
         ]);
+
+        if (!empty($duplicates)) {
+            $redirect->with('warning', 'Similar issues found: ' . collect($duplicates)->pluck('reference_code')->implode(', '));
+            $redirect->with('duplicates', $duplicates);
+        }
+
+        return $redirect;
     }
 
     public function showReference($referenceCode)
     {
         $issue = Issue::where('reference_code', $referenceCode)
-            ->with(['location', 'organization', 'category', 'events' => function ($q) {
-                $q->public()->latest()->limit(10);
-            }])
+            ->with([
+                'location', 'organization', 'category',
+                'events' => fn($q) => $q->public()->latest()->limit(10),
+                'comments' => fn($q) => $q->approved()->public()->root()->latest()->with(['user', 'replies.user']),
+            ])
             ->first();
 
         if (!$issue) {
@@ -144,7 +160,25 @@ class IssueController extends Controller
                     'description' => $e->description,
                     'is_public' => $e->is_public,
                     'created_at' => $e->created_at->toISOString(),
+                    'bs_date' => BsDateService::toBsString($e->created_at, 'datetime'),
                 ]),
+                'comments' => $issue->comments->map(fn($c) => [
+                    'id' => $c->id,
+                    'body' => $c->body,
+                    'author' => $c->authorName(),
+                    'parent_id' => $c->parent_id,
+                    'created_at' => $c->created_at->toISOString(),
+                    'bs_date' => BsDateService::toBsString($c->created_at, 'datetime'),
+                    'replies' => $c->replies->map(fn($r) => [
+                        'id' => $r->id,
+                        'body' => $r->body,
+                        'author' => $r->authorName(),
+                        'created_at' => $r->created_at->toISOString(),
+                        'bs_date' => BsDateService::toBsString($r->created_at, 'datetime'),
+                    ]),
+                ]),
+                'upvotes_count' => $issue->upvotesCount(),
+                'comments_count' => $issue->commentsCount(),
             ],
         ]);
     }

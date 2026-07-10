@@ -7,6 +7,7 @@ use App\Models\Issue;
 use App\Models\Location;
 use App\Services\BsDateService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 
 class FeedController extends Controller
@@ -38,7 +39,10 @@ class FeedController extends Controller
 
         $perPage = min((int) $request->get('per_page', 20), 50);
 
-        $issues = $query->paginate($perPage)->through(function ($issue) {
+        $userId = auth()->id();
+        $sessionId = $userId ? null : session()->getId();
+
+        $issues = $query->paginate($perPage)->through(function ($issue) use ($userId, $sessionId) {
             return [
                 'id' => $issue->id,
                 'reference_code' => $issue->reference_code,
@@ -58,6 +62,9 @@ class FeedController extends Controller
                 'resolved_at' => $issue->resolved_at?->toISOString(),
                 'bs_date' => BsDateService::toBsString($issue->created_at, 'datetime'),
                 'bs_date_short' => BsDateService::toBsString($issue->created_at, 'short'),
+                'upvotes_count' => Cache::remember("upvote_count_{$issue->id}", 300, fn() => $issue->upvotes()->count()),
+                'comments_count' => $issue->comments()->count(),
+                'has_upvoted' => $issue->isUpvotedBy($userId, $sessionId),
             ];
         });
 

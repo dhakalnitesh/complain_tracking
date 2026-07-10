@@ -3,16 +3,18 @@ import { route } from '../ziggy';
 import { useLanguage } from '../Context/LanguageContext';
 import { StatusBadge, PriorityBadge } from './Badge';
 import { toBsString } from '../utils/bsDate';
+import UpvoteButton from './UpvoteButton';
 
 export default function ComplaintCard({ issue }) {
   const { t, lang } = useLanguage();
   const isNp = lang === 'np';
 
   return (
-    <Link
-      href={route('issues.show-reference', issue.reference_code)}
-      className="block bg-white rounded-xl border border-gray-200/60 hover:shadow-md hover:border-gray-300 transition-all active:scale-[0.99] overflow-hidden group"
-    >
+    <div className="bg-white rounded-xl border border-gray-200/60 hover:shadow-md hover:border-gray-300 transition-all overflow-hidden group">
+      <Link
+        href={route('issues.show-reference', issue.reference_code)}
+        className="block"
+      >
       {issue.has_photo && issue.photo_path && (
         <div className="relative aspect-[16/9] sm:aspect-[16/10] bg-gray-100 overflow-hidden">
           <img
@@ -58,20 +60,19 @@ export default function ComplaintCard({ issue }) {
         </div>
 
         <div className="flex items-center gap-3 mt-1.5">
-          <span className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400">
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-            <span>0</span>
-          </span>
+          <UpvoteButton
+            issueId={issue.id}
+            initialCount={issue.upvotes_count || 0}
+            initialUpvoted={issue.has_upvoted || false}
+          />
           <span className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400">
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
-            <span>0</span>
+            <span>{issue.comments_count || 0}</span>
           </span>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
