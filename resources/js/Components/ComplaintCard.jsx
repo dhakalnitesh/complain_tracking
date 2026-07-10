@@ -5,11 +5,13 @@ import { useLanguage } from '../Context/LanguageContext';
 import { StatusBadge, PriorityBadge } from './Badge';
 import { toBsString } from '../utils/bsDate';
 import UpvoteButton from './UpvoteButton';
+import CommentSection from './CommentSection';
 import PhotoLightbox from './PhotoLightbox';
 
 export default function ComplaintCard({ issue }) {
   const { t, lang } = useLanguage();
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [showComments, setShowComments] = useState(false);
 
   const bsDate = issue.bs_date_short || toBsString(issue.created_at, 'short');
   const fullBsDate = issue.bs_date || toBsString(issue.created_at, 'datetime');
@@ -92,16 +94,27 @@ export default function ComplaintCard({ issue }) {
               initialCount={issue.upvotes_count || 0}
               initialUpvoted={issue.has_upvoted || false}
             />
-            <Link
-              href={route('issues.show-reference', issue.reference_code)}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100 hover:text-gray-700 transition-all"
+            <button
+              onClick={() => setShowComments(!showComments)}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
+                showComments
+                  ? 'bg-indigo-50 text-indigo-600 border-indigo-200'
+                  : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100 hover:text-gray-700'
+              }`}
             >
               <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
               <span>{issue.comments_count || 0}</span>
-            </Link>
+            </button>
           </div>
+
+          {/* Inline Comment Section */}
+          {showComments && (
+            <div className="mt-2 pt-2 border-t border-gray-100">
+              <CommentSection issueId={issue.id} comments={[]} />
+            </div>
+          )}
         </div>
       </div>
 

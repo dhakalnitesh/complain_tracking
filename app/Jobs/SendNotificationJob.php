@@ -24,7 +24,7 @@ class SendNotificationJob implements ShouldQueue
     public function handle(): void
     {
         $issue = Issue::withTrashed()->findOrFail($this->issueId);
-        $event = IssueEvent::findOrFail($this->eventId);
+        $event = $this->eventId > 0 ? IssueEvent::find($this->eventId) : null;
 
         if ($issue->reporter_phone && $issue->sms_opt_in) {
             $channel = app(LogChannel::class);
@@ -43,14 +43,14 @@ class SendNotificationJob implements ShouldQueue
 
     private function logDelivery(
         Issue $issue,
-        IssueEvent $event,
+        ?IssueEvent $event,
         string $channel,
         string $recipient,
         array $result,
     ): void {
         NotificationLog::create([
             'issue_id' => $issue->id,
-            'issue_event_id' => $event->id,
+            'issue_event_id' => $event?->id,
             'channel' => $channel,
             'recipient' => $recipient,
             'message' => $this->message,

@@ -39,7 +39,8 @@ class BsDateServiceTest extends TestCase
         $date = Carbon::create(2024, 4, 13, 0, 0, 0);
         $result = BsDateService::toBsString($date, 'short');
 
-        $this->assertStringContainsString('२०८१', $result);
+        $this->assertStringContainsString('2081', $result);
+        $this->assertStringContainsString('-01-01', $result);
     }
 
     public function test_to_bs_string_returns_full_date_format(): void

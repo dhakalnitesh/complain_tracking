@@ -20,6 +20,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
+            'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
+            'guest' => \Illuminate\Auth\Middleware\RedirectIfAuthenticated::class,
+            'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
             'admin' => function (Request $request, $next) {
                 if (!Auth::check() || !Auth::user()->isSuperAdmin()) {
                     if ($request->expectsJson()) {
@@ -40,6 +43,17 @@ return Application::configure(basePath: dirname(__DIR__))
                 return $next($request);
             },
         ]);
+
+        $middleware->redirectUsersTo(function (Request $request) {
+            $user = $request->user();
+            if ($user->isSuperAdmin()) {
+                return route('admin.dashboard');
+            }
+            if ($user->organization_id) {
+                return route('org.dashboard', $user->organization);
+            }
+            return route('dashboard');
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

@@ -50,6 +50,7 @@ return [
     */
 
     'templates' => [
+        'issue_created' => 'Your complaint :reference_code has been registered. Track at :track_url. Description: :description',
         'status_change' => 'Your complaint :reference_code status: :status. Track at :track_url',
         'comment_added' => 'Update on :reference_code: :comment',
     ],

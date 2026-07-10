@@ -37,7 +37,7 @@ class CommentController extends Controller
             'parent_id' => $validated['parent_id'] ?? null,
             'body' => $validated['body'],
             'is_public' => true,
-            'is_approved' => auth()->check(),
+            'is_approved' => true,
         ]);
 
         if ($request->wantsJson()) {

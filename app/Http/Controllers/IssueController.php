@@ -10,6 +10,7 @@ use App\Models\Location;
 use App\Models\Organization;
 use App\Services\BsDateService;
 use App\Services\DuplicateDetectionService;
+use App\Services\NotificationService;
 use App\Services\RoutingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -111,6 +112,10 @@ class IssueController extends Controller
         ]);
 
         broadcast(new IssueCreated($issue));
+
+        if ($issue->reporter_email) {
+            app(NotificationService::class)->sendIssueCreated($issue, $issue->events()->latest()->first());
+        }
 
         RoutingService::autoRoute($issue);
 

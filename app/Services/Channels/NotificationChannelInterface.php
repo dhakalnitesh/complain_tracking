@@ -12,5 +12,5 @@ interface NotificationChannelInterface
      *
      * @return array{success: bool, response: string}
      */
-    public function send(Issue $issue, IssueEvent $event, string $message): array;
+    public function send(Issue $issue, ?IssueEvent $event, string $message): array;
 }

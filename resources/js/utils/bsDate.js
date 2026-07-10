@@ -158,7 +158,7 @@ export function toBsString(isoDate, format = 'full') {
 
   switch (format) {
     case 'short':
-      return `${npYear}-${String(bs.month).padStart(2, '0')}-${String(bs.day).padStart(2, '0')}`;
+      return `${bs.year}-${String(bs.month).padStart(2, '0')}-${String(bs.day).padStart(2, '0')}`;
     case 'date':
       return `${npYear} साल ${NEPALI_MONTHS[npMonth] || ''} ${npDay} गते`;
     case 'date_en':

@@ -166,7 +166,7 @@ class BsDateService
         $npMin = self::toNepaliNum($bs['minute']);
 
         return match ($format) {
-            'short' => "{$npYear}-" . str_pad($bs['month'], 2, '0', STR_PAD_LEFT) . '-' . str_pad($bs['day'], 2, '0', STR_PAD_LEFT),
+            'short' => ($bs['year']) . '-' . str_pad($bs['month'], 2, '0', STR_PAD_LEFT) . '-' . str_pad($bs['day'], 2, '0', STR_PAD_LEFT),
             'date' => "{$npYear} साल " . (self::NEPALI_MONTHS[$npMonth] ?? '') . " {$npDay} गते",
             'date_en' => ($bs['year']) . ' ' . (self::ENGLISH_MONTHS[$npMonth] ?? '') . ' ' . $bs['day'],
             'datetime' => "{$npYear} साल " . (self::NEPALI_MONTHS[$npMonth] ?? '') . " {$npDay} गते, {$npHour}:{$npMin} बजे",

@@ -394,7 +394,7 @@ export default function Submit({ locations, organizations, selected_organization
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     {[
                       { label: t('submit.org_label'), value: organizations.find(o => o.id === data.organization_id)?.name },
-                      { label: t('submit.category_label'), value: data.category_id ? categories.find(c => c.id === data.category_id)?.name || '' : '' },
+                      { label: t('submit.category_label'), value: data.category_id ? categories.find(c => String(c.id) === String(data.category_id))?.name || '' : '' },
                       { label: t('submit.priority_label'), value: data.priority ? t(`priorities.${data.priority}`) : '' },
                       { label: t('submit.location_label'), value: groupedLocations.flatMap(g => g.children.length ? g.children : [g]).find(l => l.id === data.location_id)?.name },
                     ].filter(i => i.value).map((item, i) => (

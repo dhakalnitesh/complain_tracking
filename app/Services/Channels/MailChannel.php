@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Mail;
 
 class MailChannel implements NotificationChannelInterface
 {
-    public function send(Issue $issue, IssueEvent $event, string $message): array
+    public function send(Issue $issue, ?IssueEvent $event, string $message): array
     {
         try {
             Mail::raw($message, function ($msg) use ($issue) {

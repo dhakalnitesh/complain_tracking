@@ -28,9 +28,9 @@ class DashboardController extends Controller
             'avg_resolution_time' => $this->getAvgResolutionTime(),
         ];
 
-        $recentIssues = Issue::with(['location', 'organization'])
+        $recentIssues = Issue::with(['location', 'organization', 'category'])
             ->latest()
-            ->take(5)
+            ->take(10)
             ->get()
             ->map(fn($i) => $this->formatIssue($i));
 
@@ -119,6 +119,8 @@ class DashboardController extends Controller
             'id' => $issue->id,
             'reference_code' => $issue->reference_code,
             'category' => $issue->category,
+            'category_name' => $issue->category?->name ?? $issue->category,
+            'category_id' => $issue->category_id,
             'priority' => $issue->priority,
             'location' => $issue->location?->name,
             'organization' => $issue->organization?->name,
@@ -129,6 +131,8 @@ class DashboardController extends Controller
             'resolved_at' => $issue->resolved_at?->toISOString(),
             'bs_date' => BsDateService::toBsString($issue->created_at, 'datetime'),
             'bs_date_short' => BsDateService::toBsString($issue->created_at, 'short'),
+            'upvotes_count' => $issue->upvotes()?->count() ?? 0,
+            'comments_count' => $issue->comments()?->count() ?? 0,
         ];
     }
 }

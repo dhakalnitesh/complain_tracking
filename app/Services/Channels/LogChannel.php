@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 
 class LogChannel implements NotificationChannelInterface
 {
-    public function send(Issue $issue, IssueEvent $event, string $message): array
+    public function send(Issue $issue, ?IssueEvent $event, string $message): array
     {
         Log::info("SMS to {$issue->reporter_phone}: {$message}");
 

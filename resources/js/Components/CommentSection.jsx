@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '../Context/LanguageContext';
 import CommentForm from './CommentForm';
 import { toBsString } from '../utils/bsDate';
@@ -64,6 +64,18 @@ export default function CommentSection({ issueId, comments: initialComments = []
   const { t, lang } = useLanguage();
   const [comments, setComments] = useState(initialComments);
   const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    if (initialComments.length === 0) {
+      fetch(`/issues/${issueId}/comments`)
+        .then(res => res.json())
+        .then(data => {
+          const list = data.data || data;
+          if (Array.isArray(list) && list.length > 0) setComments(list);
+        })
+        .catch(() => {});
+    }
+  }, [issueId]);
 
   function handleCommentAdded() {
     setShowForm(false);

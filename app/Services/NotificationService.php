@@ -8,6 +8,17 @@ use App\Models\IssueEvent;
 
 class NotificationService
 {
+    public function sendIssueCreated(Issue $issue, ?IssueEvent $event = null): void
+    {
+        if (!$issue->reporter_email) {
+            return;
+        }
+
+        $message = $this->buildIssueCreatedMessage($issue);
+
+        SendNotificationJob::dispatch($issue->id, $event?->id ?? 0, $message);
+    }
+
     public function sendStatusChange(Issue $issue, IssueEvent $event): void
     {
         if (!$this->shouldNotify($issue)) {
@@ -41,6 +52,17 @@ class NotificationService
         }
 
         return $issue->reporter_phone || $issue->reporter_email;
+    }
+
+    private function buildIssueCreatedMessage(Issue $issue): string
+    {
+        $template = config('notifications.templates.issue_created');
+
+        return str_replace(
+            [':reference_code', ':track_url', ':description'],
+            [$issue->reference_code, route('issues.show-reference', $issue->reference_code), substr($issue->description, 0, 100)],
+            $template,
+        );
     }
 
     private function buildStatusMessage(Issue $issue): string
