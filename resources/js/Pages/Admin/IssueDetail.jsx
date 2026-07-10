@@ -45,11 +45,17 @@ export default function IssueDetail({ issue, staff_users = [] }) {
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         <div className="flex items-center justify-between mb-6">
-          <div>
-            <Link href={route('admin.dashboard')} className="text-sm text-indigo-600 hover:text-indigo-800 mb-1 inline-block">
-              &larr; Back to Dashboard
+          <div className="flex items-center gap-2">
+            <Link href={route('admin.dashboard')} className="px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-all">
+              Dashboard
             </Link>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{issue.reference_code}</h1>
+            <Link href={route('admin.issues.index')} className="px-3 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-all">
+              Issues
+            </Link>
+            <Link href={route('admin.staff')} className="px-3 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-all">
+              Staff
+            </Link>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 ml-2">{issue.reference_code}</h1>
           </div>
           <div className="flex gap-2 items-center">
             <StatusBadge status={issue.status} />
@@ -82,7 +88,7 @@ export default function IssueDetail({ issue, staff_users = [] }) {
             </div>
             <div>
               <p className="text-xs font-medium text-gray-400 uppercase">Submitted</p>
-              <p className="font-medium text-gray-900">{new Date(issue.created_at).toLocaleDateString()}</p>
+              <p className="font-medium text-gray-900">{issue.bs_created_at}</p>
             </div>
             <div>
               <p className="text-xs font-medium text-gray-400 uppercase">SMS Opt-in</p>
@@ -190,7 +196,7 @@ export default function IssueDetail({ issue, staff_users = [] }) {
                       <span className="text-[10px] font-medium text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">Internal</span>
                     )}
                   </div>
-                  <p className="text-xs text-gray-400 mt-0.5">{new Date(event.created_at).toLocaleString()}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{event.bs_created_at}</p>
                 </div>
               </div>
             ))}

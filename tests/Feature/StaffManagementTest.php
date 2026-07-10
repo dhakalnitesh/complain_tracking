@@ -39,7 +39,7 @@ class StaffManagementTest extends TestCase
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page
             ->component('Admin/Staff')
-            ->has('staff', 3)
+            ->has('staff.data', 3)
         );
     }
 
@@ -51,6 +51,8 @@ class StaffManagementTest extends TestCase
             'password' => 'password123',
             'password_confirmation' => 'password123',
             'organization_id' => $this->org->id,
+            'identity_type' => 'citizenship',
+            'identity_number' => '23-01-12345678',
         ];
 
         $response = $this->actingAs($this->admin)

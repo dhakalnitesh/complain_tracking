@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -21,11 +22,22 @@ class User extends Authenticatable
         'organization_id',
         'is_admin',
         'is_staff',
+        'identity_type',
+        'identity_number',
+        'identity_document_front',
+        'identity_document_back',
+        'phone',
+        'address',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $appends = [
+        'identity_document_front_url',
+        'identity_document_back_url',
     ];
 
     protected function casts(): array
@@ -36,6 +48,20 @@ class User extends Authenticatable
             'is_admin' => 'boolean',
             'is_staff' => 'boolean',
         ];
+    }
+
+    public function getIdentityDocumentFrontUrlAttribute(): ?string
+    {
+        return $this->identity_document_front
+            ? route('admin.staff.identity-document', ['user' => $this->id, 'side' => 'front'])
+            : null;
+    }
+
+    public function getIdentityDocumentBackUrlAttribute(): ?string
+    {
+        return $this->identity_document_back
+            ? route('admin.staff.identity-document', ['user' => $this->id, 'side' => 'back'])
+            : null;
     }
 
     public function organization(): BelongsTo

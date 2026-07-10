@@ -1,23 +1,26 @@
 import { createInertiaApp } from '@inertiajs/react';
 import { createRoot } from 'react-dom/client';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 import { LanguageProvider } from './Context/LanguageContext';
 import { ToastProvider } from './Components/Toast';
 import Layout from './Components/Layout';
+import Pusher from 'pusher-js';
+import Echo from 'laravel-echo';
+
+window.Pusher = Pusher;
 
 const broadcastEl = document.getElementById('broadcast-data');
 if (broadcastEl) {
   const config = JSON.parse(broadcastEl.textContent);
   if (config.enabled) {
-    import('laravel-echo').then(({ default: Echo }) => {
-      window.Echo = new Echo({
-        broadcaster: 'reverb',
-        key: config.key,
-        wsHost: config.host,
-        wsPort: config.port,
-        wssPort: config.port,
-        forceTLS: config.scheme === 'https',
-        enabledTransports: ['ws', 'wss'],
-      });
+    window.Echo = new Echo({
+      broadcaster: 'reverb',
+      key: config.key,
+      wsHost: config.host,
+      wsPort: config.port,
+      wssPort: config.port,
+      forceTLS: config.scheme === 'https',
+      enabledTransports: ['ws', 'wss'],
     });
   }
 }

@@ -91,11 +91,26 @@ class DatabaseSeeder extends Seeder
 
         // === STAFF USERS ===
         $staffData = [
-            ['name' => 'Ram Prasad Sharma', 'email' => 'ram.sharma@tu.edu.np', 'org' => $education],
-            ['name' => 'Sita Devi Neupane', 'email' => 'sita.neupane@tu.edu.np', 'org' => $education],
-            ['name' => 'Hari Bahadur KC', 'email' => 'hari.kc@kmc.gov.np', 'org' => $municipality],
-            ['name' => 'Gita Kumari Thapa', 'email' => 'gita.thapa@birhospital.gov.np', 'org' => $hospital],
-            ['name' => 'Krishna Acharya', 'email' => 'krishna@passport.gov.np', 'org' => $govt],
+            // Tribhuvan University
+            ['name' => 'Ram Prasad Sharma', 'email' => 'ram.sharma@tu.edu.np', 'phone' => '9841234567', 'identity_type' => 'citizenship', 'identity_number' => 'TU-01-001', 'org' => $education],
+            ['name' => 'Sita Devi Neupane', 'email' => 'sita.neupane@tu.edu.np', 'phone' => '9851122334', 'identity_type' => 'citizenship', 'identity_number' => 'TU-01-002', 'org' => $education],
+            ['name' => 'Bishnu Kumar Rai', 'email' => 'bishnu.rai@tu.edu.np', 'phone' => '9865544332', 'identity_type' => 'citizenship', 'identity_number' => 'TU-01-003', 'org' => $education],
+            ['name' => 'Anita Tamang', 'email' => 'anita.tamang@tu.edu.np', 'phone' => '9812345678', 'identity_type' => 'citizenship', 'identity_number' => 'TU-01-004', 'org' => $education],
+
+            // Kathmandu Metropolitan City
+            ['name' => 'Hari Bahadur KC', 'email' => 'hari.kc@kmc.gov.np', 'phone' => '9849988776', 'identity_type' => 'citizenship', 'identity_number' => 'KMC-02-001', 'org' => $municipality],
+            ['name' => 'Shyam Thapa Magar', 'email' => 'shyam.thapa@kmc.gov.np', 'phone' => '9850076543', 'identity_type' => 'citizenship', 'identity_number' => 'KMC-02-002', 'org' => $municipality],
+            ['name' => 'Maya Devi Poudel', 'email' => 'maya.poudel@kmc.gov.np', 'phone' => '9861122334', 'identity_type' => 'citizenship', 'identity_number' => 'KMC-02-003', 'org' => $municipality],
+            ['name' => 'Rajesh Shahi', 'email' => 'rajesh.shahi@kmc.gov.np', 'phone' => '9845566778', 'identity_type' => 'citizenship', 'identity_number' => 'KMC-02-004', 'org' => $municipality],
+
+            // Bir Hospital
+            ['name' => 'Gita Kumari Thapa', 'email' => 'gita.thapa@birhospital.gov.np', 'phone' => '9841239876', 'identity_type' => 'citizenship', 'identity_number' => 'BH-03-001', 'org' => $hospital],
+            ['name' => 'Dr. Ramesh Acharya', 'email' => 'ramesh.acharya@birhospital.gov.np', 'phone' => '9850011223', 'identity_type' => 'passport', 'identity_number' => 'P-12345678', 'org' => $hospital],
+            ['name' => 'Nirmala Bhandari', 'email' => 'nirmala.bhandari@birhospital.gov.np', 'phone' => '9865566778', 'identity_type' => 'citizenship', 'identity_number' => 'BH-03-003', 'org' => $hospital],
+
+            // Department of Passports
+            ['name' => 'Krishna Acharya', 'email' => 'krishna@passport.gov.np', 'phone' => '9843322110', 'identity_type' => 'citizenship', 'identity_number' => 'DP-04-001', 'org' => $govt],
+            ['name' => 'Pooja Shrestha', 'email' => 'pooja@passport.gov.np', 'phone' => '9859988776', 'identity_type' => 'citizenship', 'identity_number' => 'DP-04-002', 'org' => $govt],
         ];
 
         foreach ($staffData as $s) {
@@ -105,6 +120,9 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'organization_id' => $s['org']->id,
                 'is_staff' => true,
+                'identity_type' => $s['identity_type'],
+                'identity_number' => $s['identity_number'],
+                'phone' => $s['phone'],
             ]);
         }
 

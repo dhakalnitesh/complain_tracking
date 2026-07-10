@@ -22,7 +22,7 @@ function CommentItem({ comment, issueId, depth = 0 }) {
           </div>
           <span className="text-xs font-medium text-gray-700">{comment.author}</span>
           <span className="text-[10px] text-gray-400">
-            {lang === 'np' ? comment.bs_date : new Date(comment.created_at).toLocaleDateString()}
+            {comment.bs_created_at || (lang === 'np' ? comment.bs_date : new Date(comment.created_at).toLocaleDateString())}
           </span>
         </div>
         <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">{comment.body}</p>

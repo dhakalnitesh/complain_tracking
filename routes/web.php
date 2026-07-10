@@ -52,7 +52,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/staff', [AdminController::class, 'staff'])->name('staff');
         Route::get('/staff/create', [AdminController::class, 'createStaff'])->name('staff.create');
         Route::post('/staff', [AdminController::class, 'storeStaff'])->name('staff.store');
+        Route::get('/staff/{user}/edit', [AdminController::class, 'editStaff'])->name('staff.edit');
+        Route::match(['put', 'post'], '/staff/{user}', [AdminController::class, 'updateStaff'])->name('staff.update');
         Route::delete('/staff/{user}', [AdminController::class, 'destroyStaff'])->name('staff.destroy');
+
+        Route::get('/staff/{user}/identity-document/{side}', [App\Http\Controllers\Admin\IdentityDocumentController::class, 'show'])->name('staff.identity-document');
 
         Route::get('/staff/{user}/issues', [AdminController::class, 'staffIssues'])->name('staff.issues');
 

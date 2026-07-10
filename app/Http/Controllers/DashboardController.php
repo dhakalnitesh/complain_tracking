@@ -128,6 +128,7 @@ class DashboardController extends Controller
             'status' => $issue->status,
             'is_anonymous' => $issue->is_anonymous,
             'created_at' => $issue->created_at->toISOString(),
+            'bs_created_at' => BsDateService::toBsString($issue->created_at, 'short'),
             'resolved_at' => $issue->resolved_at?->toISOString(),
             'bs_date' => BsDateService::toBsString($issue->created_at, 'datetime'),
             'bs_date_short' => BsDateService::toBsString($issue->created_at, 'short'),

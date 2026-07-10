@@ -31,7 +31,7 @@ export default function StaffIssues({ staff, issues }) {
                                     </div>
                                     <p className="text-sm text-gray-600 mb-1">{issue.category} &middot; {issue.location}</p>
                                     <p className="text-sm text-gray-700 line-clamp-2">{issue.description}</p>
-                                    <p className="text-xs text-gray-400 mt-1">{new Date(issue.created_at).toLocaleDateString()}</p>
+                                    <p className="text-xs text-gray-400 mt-1">{issue.bs_created_at}</p>
                                 </div>
                             </div>
                         </div>

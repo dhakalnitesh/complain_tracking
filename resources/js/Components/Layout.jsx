@@ -3,11 +3,14 @@ import { route } from '../ziggy';
 import { useLanguage } from '../Context/LanguageContext';
 import LanguageToggle from './LanguageToggle';
 import TrackModal from './TrackModal';
+import Footer from './Footer';
 import { useToast } from './Toast';
 import { useState, useEffect } from 'react';
 
 export default function Layout({ children }) {
-  const { auth, flash } = usePage().props;
+  const page = usePage();
+  const { auth, flash } = page.props;
+  const isDashboard = page.component === 'Dashboard';
   const { t, lang } = useLanguage();
   const { addToast } = useToast();
   const [trackOpen, setTrackOpen] = useState(false);
@@ -190,7 +193,8 @@ export default function Layout({ children }) {
 
       <TrackModal open={trackOpen} onClose={() => setTrackOpen(false)} />
 
-      {/* Trust Bar */}
+      {/* Trust Bar — only on public dashboard */}
+      {isDashboard && (
       <div className="bg-gradient-to-r from-indigo-900 via-blue-900 to-blue-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8">
@@ -213,21 +217,9 @@ export default function Layout({ children }) {
           </div>
         </div>
       </div>
+      )}
 
-      <footer className="bg-white/50 border-t border-gray-200/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
-              <span className="font-semibold text-gray-700">{t('app.name')}</span>
-              <span className="text-gray-300 hidden xs:inline">|</span>
-              <span className="hidden xs:inline">{t('footer.tagline')}</span>
-            </div>
-            <p className="text-[10px] sm:text-xs text-gray-400">
-              &copy; {new Date().getFullYear()} {t('app.name')}. {t('footer.built_with')} &hearts; {t('app.subtitle')}.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

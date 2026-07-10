@@ -60,7 +60,7 @@ export default function IssueDetail({ issue }) {
             </div>
             <div>
               <p className="text-xs font-medium text-gray-400 uppercase">Submitted</p>
-              <p className="font-medium text-gray-900">{new Date(issue.created_at).toLocaleDateString()}</p>
+              <p className="font-medium text-gray-900">{issue.bs_created_at}</p>
             </div>
           </div>
 
@@ -96,7 +96,7 @@ export default function IssueDetail({ issue }) {
                       <span className="text-[10px] font-medium text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">Internal</span>
                     )}
                   </div>
-                  <p className="text-xs text-gray-400 mt-0.5">{new Date(event.created_at).toLocaleString()}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{event.bs_created_at}</p>
                 </div>
               </div>
             ))}

@@ -96,7 +96,7 @@ export default function StatusCheck({ issue, error }) {
                     </svg>
                     <span className="text-gray-500 text-[10px] sm:text-xs">{t('status.resolved_on')}:</span>
                     <span className="font-medium text-gray-900 text-xs sm:text-sm">
-                      {new Date(issue.resolved_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                      {issue.bs_resolved_at || new Date(issue.resolved_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                     </span>
                   </div>
                 )}

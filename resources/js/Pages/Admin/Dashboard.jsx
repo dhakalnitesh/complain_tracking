@@ -20,15 +20,21 @@ export default function AdminDashboard({ stats, recent_issues, category_stats, i
                         <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
                         <p className="text-sm text-gray-500">Super admin overview &amp; management</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <Link href={route('admin.issues.index')} className="px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors">
+                    <div className="flex items-center gap-2">
+                        <Link href={route('admin.issues.index')} className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-sm transition-all">
                             All Issues
                         </Link>
-                        <Link href={route('admin.organizations')} className="px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors">
-                            Organizations
+                        <Link href={route('admin.staff')} className="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-all">
+                            Staff
                         </Link>
-                        <Link href={route('dashboard')} className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
-                            View Site
+                        <Link href={route('admin.organizations')} className="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-all">
+                            Orgs
+                        </Link>
+                        <Link href={route('admin.moderation')} className="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-all">
+                            Moderation
+                        </Link>
+                        <Link href={route('dashboard')} className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all">
+                            Site
                         </Link>
                     </div>
                 </div>
@@ -122,7 +128,7 @@ export default function AdminDashboard({ stats, recent_issues, category_stats, i
                             <h3 className="text-lg font-semibold text-gray-900">Recent Issues</h3>
                             <p className="text-sm text-gray-500">Latest 5 complaints</p>
                         </div>
-                        <Link href={route('admin.issues.index')} className="text-sm font-medium text-indigo-600 hover:text-indigo-800">
+                        <Link href={route('admin.issues.index')} className="text-sm font-medium text-white bg-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-700 transition-all">
                             View All &rarr;
                         </Link>
                     </div>
@@ -140,7 +146,7 @@ export default function AdminDashboard({ stats, recent_issues, category_stats, i
                                     </div>
                                     <p className="text-sm text-gray-700 line-clamp-1">{issue.description}</p>
                                     <p className="text-xs text-gray-400 mt-0.5">
-                                        {issue.organization || issue.location} &middot; {new Date(issue.created_at).toLocaleDateString()}
+                                        {issue.organization || issue.location} &middot; {issue.bs_created_at}
                                     </p>
                                 </div>
                             </div>

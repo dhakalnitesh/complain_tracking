@@ -38,6 +38,7 @@ class IssueController extends Controller
                 'assigned_to' => $issue->assigned_to,
                 'reporter_name' => $issue->is_anonymous ? 'Anonymous' : $issue->reporter_name,
                 'created_at' => $issue->created_at->toISOString(),
+                'bs_created_at' => \App\Services\BsDateService::toBsString($issue->created_at, 'short'),
                 'resolved_at' => $issue->resolved_at?->toISOString(),
                 'photo_path' => $issue->photo_path ? route('issues.photo', $issue->reference_code) : null,
                 'events' => $issue->events->map(fn($e) => [
@@ -46,6 +47,7 @@ class IssueController extends Controller
                     'description' => $e->description,
                     'is_public' => $e->is_public,
                     'created_at' => $e->created_at->toISOString(),
+                    'bs_created_at' => \App\Services\BsDateService::toBsString($e->created_at, 'short'),
                 ]),
             ],
         ]);

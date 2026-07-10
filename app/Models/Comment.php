@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\BsDateService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,6 +23,10 @@ class Comment extends Model
         'hidden_at',
     ];
 
+    protected $appends = [
+        'bs_created_at',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -29,6 +34,11 @@ class Comment extends Model
             'is_approved' => 'boolean',
             'hidden_at' => 'datetime',
         ];
+    }
+
+    public function getBsCreatedAtAttribute(): ?string
+    {
+        return $this->created_at ? BsDateService::toBsString($this->created_at, 'short') : null;
     }
 
     public function issue(): BelongsTo

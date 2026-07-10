@@ -63,7 +63,7 @@ export default function ProgressSteps({ currentStatus, events = [] }) {
               <div>
                 <p className="text-sm text-gray-700">{event.description}</p>
                 <p className="text-xs text-gray-400 mt-0.5">
-                  {new Date(event.created_at).toLocaleString()}
+                  {event.bs_created_at}
                 </p>
               </div>
             </div>

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\BsDateService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -39,6 +40,12 @@ class Issue extends Model
         'hidden_at',
     ];
 
+    protected $appends = [
+        'bs_created_at',
+        'bs_updated_at',
+        'bs_resolved_at',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -48,6 +55,23 @@ class Issue extends Model
             'is_anonymous' => 'boolean',
             'sms_opt_in' => 'boolean',
         ];
+    }
+
+    public function getBsCreatedAtAttribute(): ?string
+    {
+        return $this->created_at ? BsDateService::toBsString($this->created_at, 'short') : null;
+    }
+
+    public function getBsUpdatedAtAttribute(): ?string
+    {
+        return $this->updated_at ? BsDateService::toBsString($this->updated_at, 'short') : null;
+    }
+
+    public function getBsResolvedAtAttribute(): ?string
+    {
+        return $this->resolved_at
+            ? BsDateService::toBsString($this->resolved_at, 'short')
+            : null;
     }
 
     public function location(): BelongsTo

@@ -60,7 +60,7 @@ export default function OrgAdminDashboard({ organization, stats, recent_issues }
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-[10px] text-gray-400">{issue.location}</span>
                     {issue.department && <span className="text-[10px] text-indigo-500">{issue.department}</span>}
-                    <span className="text-[10px] text-gray-400 ml-auto">{isNp ? issue.bs_date : new Date(issue.created_at).toLocaleDateString()}</span>
+                    <span className="text-[10px] text-gray-400 ml-auto">{issue.bs_created_at}</span>
                   </div>
                 </div>
               ))}

@@ -62,7 +62,9 @@ class IssueController extends Controller
                 'is_escalated' => $issue->status !== 'resolved' && $issue->created_at->lt(now()->subHours(24)),
                 'is_sla_breached' => $issue->isSlaBreached(),
                 'created_at' => $issue->created_at->toISOString(),
+                'bs_created_at' => \App\Services\BsDateService::toBsString($issue->created_at, 'short'),
                 'resolved_at' => $issue->resolved_at?->toISOString(),
+                'bs_resolved_at' => $issue->resolved_at ? \App\Services\BsDateService::toBsString($issue->resolved_at, 'short') : null,
                 'rating' => $issue->rating,
             ]);
 

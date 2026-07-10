@@ -63,7 +63,7 @@ export default function Reference({ issue }) {
                     { label: isNp ? 'संस्था' : 'Organization', value: issue.organization },
                     { label: isNp ? 'श्रेणी' : 'Category', value: issue.category_name || issue.category },
                     { label: isNp ? 'स्थान' : 'Location', value: issue.location },
-                    { label: isNp ? 'मिति' : 'Date', value: issue.created_at ? new Date(issue.created_at).toLocaleDateString() : '' },
+                    { label: isNp ? 'मिति' : 'Date', value: issue.bs_created_at || '' },
                   ].filter(i => i.value).map((item, i) => (
                     <div key={i} className="bg-gray-50 rounded-xl px-3 py-2.5">
                       <p className="text-[9px] font-medium text-gray-400 uppercase tracking-wider">{item.label}</p>

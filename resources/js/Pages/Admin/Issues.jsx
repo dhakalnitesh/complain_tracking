@@ -85,14 +85,26 @@ export default function AdminIssues({ issues, staff_users = [], organizations = 
             <Head title="Issues - Admin" />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Nav */}
                 <div className="flex items-center justify-between mb-6">
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900">All Issues</h1>
-                        <p className="text-sm text-gray-500">{issues.total} issues found</p>
+                    <div className="flex items-center gap-2">
+                        <Link href={route('admin.dashboard')} className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-sm transition-all">
+                            Dashboard
+                        </Link>
+                        <Link href={route('admin.staff')} className="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-all">
+                            Staff
+                        </Link>
+                        <Link href={route('admin.organizations')} className="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-all">
+                            Orgs
+                        </Link>
+                        <Link href={route('admin.moderation')} className="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-all">
+                            Moderation
+                        </Link>
+                        <Link href={route('dashboard')} className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all">
+                            Site
+                        </Link>
                     </div>
-                    <Link href={route('admin.dashboard')} className="text-sm text-indigo-600 hover:text-indigo-800">
-                        &larr; Back to Dashboard
-                    </Link>
+                    <p className="text-sm text-gray-500">{issues.total} issues</p>
                 </div>
 
                 {/* Filters */}
@@ -107,7 +119,7 @@ export default function AdminIssues({ issues, staff_users = [], organizations = 
                                     placeholder="Search by reference or description..."
                                     className="flex-1 sm:w-64 rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
                                 />
-                                <button type="submit" className="px-3 py-2 text-xs font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors whitespace-nowrap">
+                                <button type="submit" className="px-3 py-2 text-xs font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap">
                                     Search
                                 </button>
                             </form>
@@ -238,7 +250,7 @@ export default function AdminIssues({ issues, staff_users = [], organizations = 
                                         <span>&middot;</span>
                                         <span>{issue.organization || issue.location}</span>
                                         <span>&middot;</span>
-                                        <span>{new Date(issue.created_at).toLocaleDateString()}</span>
+                                        <span>{issue.bs_created_at}</span>
                                         {issue.rating && (
                                             <>
                                                 <span>&middot;</span>
