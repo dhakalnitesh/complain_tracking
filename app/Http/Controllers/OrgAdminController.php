@@ -14,11 +14,13 @@ use Inertia\Inertia;
 
 class OrgAdminController extends Controller
 {
-    private function getOrg(Request $request): Organization
+    private function getOrg(Request $request): ?Organization
     {
         $user = $request->user();
-        if ($user->isSuperAdmin() && $request->org_id) {
-            return Organization::findOrFail($request->org_id);
+        if ($user->isSuperAdmin()) {
+            return $request->org_id
+                ? Organization::findOrFail($request->org_id)
+                : null;
         }
         return $user->organization;
     }
@@ -63,6 +65,7 @@ class OrgAdminController extends Controller
     public function departments(Request $request)
     {
         $org = $this->getOrg($request);
+        if (!$org) abort(403);
         $departments = Department::with(['users', 'children'])
             ->where('organization_id', $org->id)
             ->sorted()
@@ -88,6 +91,7 @@ class OrgAdminController extends Controller
     public function storeDepartment(Request $request)
     {
         $org = $this->getOrg($request);
+        if (!$org) abort(403);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -110,6 +114,7 @@ class OrgAdminController extends Controller
     public function staff(Request $request)
     {
         $org = $this->getOrg($request);
+        if (!$org) abort(403);
 
         $staff = User::where('organization_id', $org->id)
             ->where('is_staff', true)
@@ -135,6 +140,7 @@ class OrgAdminController extends Controller
     public function storeStaff(Request $request)
     {
         $org = $this->getOrg($request);
+        if (!$org) abort(403);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',

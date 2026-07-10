@@ -18,6 +18,10 @@ class EscalationService
             return null;
         }
 
+        if ($issue->events()->where('type', 'escalated')->exists()) {
+            return null;
+        }
+
         $orgId = $issue->organization_id;
         $orgAdmin = User::where('organization_id', $orgId)
             ->where('is_staff', false)

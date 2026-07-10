@@ -38,7 +38,7 @@ class StaffManagementTest extends TestCase
 
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page
-            ->component('Admin/Staff')
+            ->component('Admin/Staff/Index')
             ->has('staff.data', 3)
         );
     }
@@ -104,6 +104,78 @@ class StaffManagementTest extends TestCase
             'password_confirmation' => 'password123',
             'organization_id' => $this->org->id,
         ]);
+
+        $response->assertSessionHasErrors('email');
+    }
+
+    public function test_admin_can_update_staff_without_password(): void
+    {
+        $staff = User::factory()->create([
+            'is_staff' => true,
+            'organization_id' => $this->org->id,
+            'name' => 'Old Name',
+        ]);
+
+        $response = $this->actingAs($this->admin)
+            ->put(route('admin.staff.update', $staff), [
+                'name' => 'New Name',
+                'email' => $staff->email,
+                'organization_id' => $this->org->id,
+                'identity_type' => 'passport',
+                'identity_number' => 'AB123456',
+                'phone' => '9812345678',
+                'address' => 'Kathmandu',
+            ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('users', [
+            'id' => $staff->id,
+            'name' => 'New Name',
+        ]);
+    }
+
+    public function test_admin_can_update_staff_with_new_password(): void
+    {
+        $staff = User::factory()->create([
+            'is_staff' => true,
+            'organization_id' => $this->org->id,
+        ]);
+
+        $response = $this->actingAs($this->admin)
+            ->put(route('admin.staff.update', $staff), [
+                'name' => $staff->name,
+                'email' => $staff->email,
+                'password' => 'newpassword123',
+                'password_confirmation' => 'newpassword123',
+                'organization_id' => $this->org->id,
+                'identity_type' => 'citizenship',
+                'identity_number' => '23-01-12345678',
+            ]);
+
+        $response->assertRedirect();
+    }
+
+    public function test_update_staff_email_must_be_unique(): void
+    {
+        $staff1 = User::factory()->create([
+            'is_staff' => true,
+            'organization_id' => $this->org->id,
+            'email' => 'staff1@test.org',
+        ]);
+        User::factory()->create([
+            'is_staff' => true,
+            'organization_id' => $this->org->id,
+            'email' => 'staff2@test.org',
+        ]);
+
+        $response = $this->actingAs($this->admin)
+            ->put(route('admin.staff.update', $staff1), [
+                'name' => $staff1->name,
+                'email' => 'staff2@test.org',
+                'organization_id' => $this->org->id,
+                'identity_type' => 'citizenship',
+                'identity_number' => '23-01-12345678',
+            ]);
 
         $response->assertSessionHasErrors('email');
     }

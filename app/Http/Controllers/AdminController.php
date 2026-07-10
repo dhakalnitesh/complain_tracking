@@ -181,7 +181,7 @@ class AdminController extends Controller
                 'created_at' => $user->created_at->toISOString(),
             ]);
 
-        return Inertia::render('Admin/Staff', [
+        return Inertia::render('Admin/Staff/Index', [
             'staff' => $staff,
             'organizations' => $organizations,
             'filters' => $request->only(['search', 'organization_id', 'per_page']),
@@ -190,9 +190,7 @@ class AdminController extends Controller
 
     public function createStaff()
     {
-        return Inertia::render('Admin/StaffCreate', [
-            'organizations' => Organization::orderBy('name')->get(),
-        ]);
+        return redirect()->route('admin.staff');
     }
 
     public function storeStaff(Request $request)
@@ -241,21 +239,7 @@ class AdminController extends Controller
             return redirect()->route('admin.staff')->with('error', 'User is not a staff member.');
         }
 
-        return Inertia::render('Admin/StaffEdit', [
-            'staff' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'organization_id' => $user->organization_id,
-                'identity_type' => $user->identity_type,
-                'identity_number' => $user->identity_number,
-                'phone' => $user->phone,
-                'address' => $user->address,
-                'identity_document_front_url' => $user->identity_document_front_url,
-                'identity_document_back_url' => $user->identity_document_back_url,
-            ],
-            'organizations' => Organization::orderBy('name')->get(),
-        ]);
+        return redirect()->route('admin.staff');
     }
 
     public function updateStaff(Request $request, User $user)
@@ -283,8 +267,8 @@ class AdminController extends Controller
             'organization_id' => $validated['organization_id'],
             'identity_type' => $validated['identity_type'],
             'identity_number' => $validated['identity_number'],
-            'phone' => $validated['phone'],
-            'address' => $validated['address'],
+            'phone' => $validated['phone'] ?? null,
+            'address' => $validated['address'] ?? null,
         ];
 
         if ($request->filled('password')) {
@@ -351,7 +335,7 @@ class AdminController extends Controller
                     'bs_created_at' => \App\Services\BsDateService::toBsString($issue->created_at, 'short'),
                 ]);
 
-        return Inertia::render('Admin/StaffIssues', [
+        return Inertia::render('Admin/Staff/StaffIssues', [
             'staff' => ['id' => $user->id, 'name' => $user->name],
             'issues' => $issues,
         ]);
@@ -437,21 +421,23 @@ class AdminController extends Controller
             ]);
 
             foreach ($issues as $issue) {
+                $sanitize = fn($v) => preg_match('/^[=\-+@]/', $v) ? "'" . $v : ($v ?? '');
+
                 fputcsv($handle, [
-                    $issue->reference_code,
+                    $sanitize($issue->reference_code),
                     $issue->status,
                     $issue->priority,
-                    $issue->category,
-                    $issue->organization?->name ?? '',
-                    $issue->location?->name ?? '',
-                    $issue->assignedUser?->name ?? $issue->assigned_to ?? '',
-                    $issue->is_anonymous ? 'Anonymous' : ($issue->reporter_name ?? ''),
-                    $issue->is_anonymous ? '' : ($issue->reporter_phone ?? ''),
-                    $issue->is_anonymous ? '' : ($issue->reporter_email ?? ''),
-                    $issue->description,
+                    $sanitize($issue->category),
+                    $sanitize($issue->organization?->name ?? ''),
+                    $sanitize($issue->location?->name ?? ''),
+                    $sanitize($issue->assignedUser?->name ?? $issue->assigned_to ?? ''),
+                    $sanitize($issue->is_anonymous ? 'Anonymous' : ($issue->reporter_name ?? '')),
+                    $issue->is_anonymous ? '' : ($sanitize($issue->reporter_phone ?? '')),
+                    $issue->is_anonymous ? '' : ($sanitize($issue->reporter_email ?? '')),
+                    $sanitize($issue->description),
                     $issue->created_at->toISOString(),
                     $issue->resolved_at?->toISOString() ?? '',
-                    $issue->rating ?? '',
+                    $sanitize($issue->rating ?? ''),
                     $issue->sms_opt_in ? 'Yes' : 'No',
                 ]);
             }

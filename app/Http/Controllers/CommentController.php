@@ -27,7 +27,15 @@ class CommentController extends Controller
     {
         $validated = $request->validate([
             'body' => 'required|string|min:1|max:2000',
-            'parent_id' => 'nullable|exists:comments,id',
+            'parent_id' => [
+                'nullable',
+                'exists:comments,id',
+                function ($attribute, $value, $fail) use ($issue) {
+                    if ($value && !Comment::where('id', $value)->where('issue_id', $issue->id)->exists()) {
+                        $fail('The parent comment must belong to the same issue.');
+                    }
+                },
+            ],
         ]);
 
         $comment = Comment::create([
@@ -49,8 +57,21 @@ class CommentController extends Controller
 
     public function destroy(Comment $comment, Request $request)
     {
-        if ($comment->user_id !== auth()->id() && !auth()->user()?->isSuperAdmin()) {
-            abort(403);
+        $user = auth()->user();
+
+        if ($user && $user->isSuperAdmin()) {
+            $comment->delete();
+            return back()->with('success', 'Comment deleted.');
+        }
+
+        if ($user) {
+            if ($comment->user_id !== $user->id) {
+                abort(403);
+            }
+        } else {
+            if ($comment->user_id !== null || $comment->session_id !== session()->getId()) {
+                abort(403);
+            }
         }
 
         $comment->delete();

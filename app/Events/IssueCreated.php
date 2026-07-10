@@ -3,7 +3,7 @@
 namespace App\Events;
 
 use App\Models\Issue;
-use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -22,7 +22,7 @@ class IssueCreated implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel('admin'),
+            new PrivateChannel('admin'),
         ];
     }
 

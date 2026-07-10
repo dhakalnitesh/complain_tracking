@@ -90,6 +90,28 @@ class EscalationTest extends TestCase
         $this->assertNull($result);
     }
 
+    public function test_does_not_escalate_already_escalated_issue(): void
+    {
+        $org = Organization::factory()->create();
+        $location = Location::factory()->create(['organization_id' => $org->id]);
+        $admin = User::factory()->create(['organization_id' => $org->id]);
+
+        $issue = Issue::factory()->create([
+            'organization_id' => $org->id,
+            'location_id' => $location->id,
+            'priority' => 'critical',
+            'status' => 'received',
+            'created_at' => now()->subHours(10),
+        ]);
+
+        EscalationService::escalate($issue);
+        $this->assertDatabaseCount('issue_events', 1);
+
+        $result = EscalationService::escalate($issue->fresh());
+        $this->assertNull($result);
+        $this->assertDatabaseCount('issue_events', 1);
+    }
+
     public function test_escalation_command_runs_for_all_breached_issues(): void
     {
         $org = Organization::factory()->create();

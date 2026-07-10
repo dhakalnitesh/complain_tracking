@@ -29,9 +29,9 @@ Route::get('/issues/photo/{reference_code}', [PhotoController::class, 'show'])->
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:3,1');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -88,7 +88,7 @@ Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->nam
 Route::post('/issues/{issue}/flag', [FlagController::class, 'flagIssue'])->name('issues.flag');
 Route::post('/comments/{comment}/flag', [FlagController::class, 'flagComment'])->name('comments.flag');
 
-Route::prefix('org-admin')->name('org-admin.')->middleware(['auth'])->group(function () {
+Route::prefix('org-admin')->name('org-admin.')->middleware(['auth', 'org-admin'])->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\OrgAdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/departments', [App\Http\Controllers\OrgAdminController::class, 'departments'])->name('departments');
     Route::post('/departments', [App\Http\Controllers\OrgAdminController::class, 'storeDepartment'])->name('departments.store');

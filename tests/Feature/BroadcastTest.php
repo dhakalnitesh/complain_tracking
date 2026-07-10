@@ -9,6 +9,7 @@ use App\Models\Issue;
 use App\Models\IssueEvent;
 use App\Models\Organization;
 use App\Models\User;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
@@ -17,22 +18,25 @@ class BroadcastTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_issue_created_event_broadcasts_on_admin_channel(): void
+    public function test_issue_created_uses_private_channel(): void
     {
         $org = Organization::factory()->create();
         $issue = Issue::factory()->create(['organization_id' => $org->id]);
         $event = new IssueCreated($issue);
 
-        $this->assertEquals('admin', $event->broadcastOn()[0]->name);
+        $channels = $event->broadcastOn();
+        $this->assertInstanceOf(PrivateChannel::class, $channels[0]);
+        $this->assertEquals('private-admin', $channels[0]->name);
     }
 
-    public function test_issue_status_changed_event_broadcasts_on_admin_channel(): void
+    public function test_issue_status_changed_uses_private_channel(): void
     {
         $org = Organization::factory()->create();
         $issue = Issue::factory()->create(['organization_id' => $org->id]);
         $event = new IssueStatusChanged($issue, 'received');
 
-        $this->assertEquals('admin', $event->broadcastOn()[0]->name);
+        $channels = $event->broadcastOn();
+        $this->assertInstanceOf(PrivateChannel::class, $channels[0]);
     }
 
     public function test_issue_created_dispatched_on_submit(): void
@@ -56,7 +60,7 @@ class BroadcastTest extends TestCase
         Event::assertDispatched(IssueCreated::class);
     }
 
-    public function test_comment_added_event_broadcasts_on_admin_channel(): void
+    public function test_comment_added_uses_private_channel(): void
     {
         $org = Organization::factory()->create();
         $issue = Issue::factory()->create(['organization_id' => $org->id]);
@@ -67,6 +71,7 @@ class BroadcastTest extends TestCase
         ]);
         $broadcastEvent = new IssueCommentAdded($event);
 
-        $this->assertEquals('admin', $broadcastEvent->broadcastOn()[0]->name);
+        $channels = $broadcastEvent->broadcastOn();
+        $this->assertInstanceOf(PrivateChannel::class, $channels[0]);
     }
 }

@@ -1,6 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
-import { route } from '../../ziggy';
-import { StatusBadge, PriorityBadge } from '../../Components/Badge';
+import { route } from '../../../ziggy';
+import { StatusBadge, PriorityBadge } from '../../../Components/Badge';
 
 export default function StaffIssues({ staff, issues }) {
     return (

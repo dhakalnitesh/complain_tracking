@@ -27,8 +27,8 @@ class RoutingService
         $orgId = $issue->organization_id;
         if (!$orgId) return null;
 
-        $categoryName = $issue->relationLoaded('category') && $issue->category
-            ? $issue->category->name
+        $categoryName = $issue->relationLoaded('category') && $issue->getRelation('category')
+            ? $issue->getRelation('category')->name
             : ($issue->getAttributes()['category'] ?? null);
 
         $keywords = self::$categoryDepartmentMap[$categoryName] ?? ['admin'];

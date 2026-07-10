@@ -14,6 +14,10 @@ class IdentityDocumentController extends Controller
             abort(404);
         }
 
+        if (!in_array($side, ['front', 'back'], true)) {
+            abort(404);
+        }
+
         $path = $side === 'back' ? $user->identity_document_back : $user->identity_document_front;
 
         if (!$path || !Storage::disk('public')->exists($path)) {

@@ -10,7 +10,11 @@ class NotificationService
 {
     public function sendIssueCreated(Issue $issue, ?IssueEvent $event = null): void
     {
-        if (!$issue->reporter_email) {
+        if (!$issue->sms_opt_in) {
+            return;
+        }
+
+        if (!$issue->reporter_email && !$issue->reporter_phone) {
             return;
         }
 

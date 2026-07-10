@@ -81,12 +81,12 @@ class User extends Authenticatable
 
     public function isSuperAdmin(): bool
     {
-        return $this->is_admin;
+        return (bool) $this->is_admin;
     }
 
     public function isOrgAdmin(): bool
     {
-        return $this->organization_id !== null;
+        return $this->organization_id !== null && !$this->is_staff && !$this->is_admin;
     }
 
     public function isStaff(): bool

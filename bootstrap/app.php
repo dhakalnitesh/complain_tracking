@@ -32,6 +32,19 @@ return Application::configure(basePath: dirname(__DIR__))
                 }
                 return $next($request);
             },
+            'org-admin' => function (Request $request, $next) {
+                if (!Auth::check()) {
+                    return redirect()->route('login');
+                }
+                $user = Auth::user();
+                if (!$user->isSuperAdmin() && !$user->isOrgAdmin()) {
+                    if ($request->expectsJson()) {
+                        return response()->json(['message' => 'Unauthorized.'], 403);
+                    }
+                    abort(403, 'Organization admin access required.');
+                }
+                return $next($request);
+            },
             'staff' => function (Request $request, $next) {
                 if (!Auth::check()) {
                     return redirect()->route('login');
