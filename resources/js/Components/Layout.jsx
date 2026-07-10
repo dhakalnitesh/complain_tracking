@@ -2,6 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { route } from '../ziggy';
 import { useLanguage } from '../Context/LanguageContext';
 import LanguageToggle from './LanguageToggle';
+import TrackModal from './TrackModal';
 import { useToast } from './Toast';
 import { useState, useEffect } from 'react';
 
@@ -9,6 +10,7 @@ export default function Layout({ children }) {
   const { auth, flash } = usePage().props;
   const { t, lang } = useLanguage();
   const { addToast } = useToast();
+  const [trackOpen, setTrackOpen] = useState(false);
 
   useEffect(() => {
     if (flash?.success) addToast(flash.success, 'success');
@@ -21,7 +23,6 @@ export default function Layout({ children }) {
     { href: route('dashboard'), label: t('nav.home'), icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
     { href: route('feed'), label: t('nav.feed'), icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z' },
     { href: route('issues.create'), label: t('nav.submit'), icon: 'M12 4v16m8-8H4' },
-    { href: route('status.check'), label: t('nav.track'), icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' },
   ];
 
   return (
@@ -56,6 +57,15 @@ export default function Layout({ children }) {
                   {link.label}
                 </Link>
               ))}
+              <button
+                onClick={() => setTrackOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                {t('nav.track')}
+              </button>
 
               {user?.is_admin && (
                 <Link href={route('admin.dashboard')} className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition-all">
@@ -126,6 +136,15 @@ export default function Layout({ children }) {
                   {link.label}
                 </Link>
               ))}
+              <button
+                onClick={() => { setMobileOpen(false); setTrackOpen(true); }}
+                className="flex items-center gap-3 px-3 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full"
+              >
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                {t('nav.track')}
+              </button>
 
               <div className="border-t border-gray-100 pt-2 mt-2">
                 {user ? (
@@ -168,6 +187,8 @@ export default function Layout({ children }) {
       </header>
 
       <main>{children}</main>
+
+      <TrackModal open={trackOpen} onClose={() => setTrackOpen(false)} />
 
       {/* Trust Bar */}
       <div className="bg-gradient-to-r from-indigo-900 via-blue-900 to-blue-950">

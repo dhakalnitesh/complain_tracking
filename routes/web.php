@@ -73,6 +73,7 @@ Route::middleware(['auth', 'staff'])->prefix('staff')->name('staff.')->group(fun
 Route::get('/api/stats/overview', [StatsController::class, 'overview']);
 Route::get('/api/stats/categories', [StatsController::class, 'categoryBreakdown']);
 Route::get('/api/stats/trends', [StatsController::class, 'issuesOverTime']);
+Route::get('/api/track/{reference_code}', [App\Http\Controllers\Api\TrackController::class, 'show'])->name('api.track');
 
 Route::post('/api/issues/{issue}/upvote', [UpvoteController::class, 'toggle'])->name('upvote.toggle');
 Route::get('/issues/{issue}/comments', [CommentController::class, 'index'])->name('comments.index');

@@ -492,7 +492,8 @@ Priority-based SLA enforcement, automatic escalation when SLA breached, complain
 
 ## Epic 11: Moderation & Quality Control
 
-**Status:** 🔴 Not Started
+**Status:** ✅ Completed (Jul 10, 2026)
+**Commits:** `ff7a192`
 **Target:** Aug 3 — Aug 8
 
 ### What
@@ -770,7 +771,7 @@ This is deferred until production deployment and user feedback confirms demand.
 | Jul 10, 2026 | Epic 7 | ✅ Completed | BS Date service, Feed page, ComplaintCard, filters, 66 tests |
 | Jul 10, 2026 | Epic 8 | ✅ Completed | Upvotes, Comments, Duplicate Detection — 80 tests all passing |
 | Jul 10, 2026 | Epic 9 | ✅ Completed | Multi-Tenant, Departments, Auto-Routing — 16 tests |
-| Jul 10, 2026 | Epic 10 | ✅ Completed | SLA, Escalation, Transfer, Merge — 101 total tests |
+| Jul 10, 2026 | Epic 11 | ✅ Completed | Moderation, flags, abuse detection, hidden content — 112 total tests |
 
 ---
 

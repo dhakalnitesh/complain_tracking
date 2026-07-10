@@ -3,11 +3,13 @@ import { route } from '../ziggy';
 import { useLanguage } from '../Context/LanguageContext';
 import ComplaintCard from '../Components/ComplaintCard';
 import FeedFilters from '../Components/FeedFilters';
+import TrackModal from '../Components/TrackModal';
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 export default function Feed({ issues, filters, categories, locations }) {
   const { t, lang } = useLanguage();
   const isNp = lang === 'np';
+  const [trackOpen, setTrackOpen] = useState(false);
 
   return (
     <>
@@ -48,15 +50,15 @@ export default function Feed({ issues, filters, categories, locations }) {
                 </svg>
                 {t('submit.submit_btn')}
               </Link>
-              <Link
-                href={route('status.check')}
+              <button
+                onClick={() => setTrackOpen(true)}
                 className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/10 text-white text-sm font-medium rounded-xl hover:bg-white/20 transition-all border border-white/20"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 {t('nav.track')}
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -154,6 +156,7 @@ export default function Feed({ issues, filters, categories, locations }) {
           </>
         )}
       </div>
+      <TrackModal open={trackOpen} onClose={() => setTrackOpen(false)} />
     </>
   );
 }

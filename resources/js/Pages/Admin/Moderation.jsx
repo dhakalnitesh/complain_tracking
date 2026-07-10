@@ -1,21 +1,20 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useLanguage } from '../../Context/LanguageContext';
-import { Inertia } from '@inertiajs/inertia';
 
 export default function Moderation({ flags }) {
   const { t, lang } = useLanguage();
 
   const handleDismiss = (flagId) => {
-    Inertia.post(route('admin.moderation.dismiss', flagId));
+    router.post(route('admin.moderation.dismiss', flagId));
   };
 
   const handleHide = (flagId) => {
-    Inertia.post(route('admin.moderation.hide', flagId));
+    router.post(route('admin.moderation.hide', flagId));
   };
 
   const handleDelete = (flagId) => {
     if (confirm('Are you sure? This will permanently delete the content.')) {
-      Inertia.delete(route('admin.moderation.delete', flagId));
+      router.delete(route('admin.moderation.delete', flagId));
     }
   };
 

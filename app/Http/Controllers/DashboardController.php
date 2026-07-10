@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Issue;
 use App\Models\Location;
 use App\Models\Organization;
+use App\Services\BsDateService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -32,10 +34,13 @@ class DashboardController extends Controller
             ->get()
             ->map(fn($i) => $this->formatIssue($i));
 
-        $categoryStats = Issue::selectRaw('category, COUNT(*) as total')
-            ->groupBy('category')
-            ->orderByDesc('total')
-            ->get();
+        $categoryStats = Category::active()->sorted()
+            ->withCount('issues')
+            ->get()
+            ->map(fn($c) => [
+                'name' => $c->name,
+                'total' => $c->issues_count,
+            ]);
 
         $issuesOverTime = Issue::selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->where('created_at', '>=', now()->subDays(7))
@@ -122,6 +127,8 @@ class DashboardController extends Controller
             'is_anonymous' => $issue->is_anonymous,
             'created_at' => $issue->created_at->toISOString(),
             'resolved_at' => $issue->resolved_at?->toISOString(),
+            'bs_date' => BsDateService::toBsString($issue->created_at, 'datetime'),
+            'bs_date_short' => BsDateService::toBsString($issue->created_at, 'short'),
         ];
     }
 }
