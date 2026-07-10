@@ -73,6 +73,7 @@ export default function ComplaintCard({ issue }) {
           </span>
         </div>
       </div>
+      </Link>
     </div>
   );
 }

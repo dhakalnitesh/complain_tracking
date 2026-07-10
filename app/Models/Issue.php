@@ -135,11 +135,15 @@ class Issue extends Model
 
     public function slaDeadline(): ?\DateTimeInterface
     {
-        return $this->created_at->addHours(48);
+        $hours = config("sla.priorities.{$this->priority}.hours", 48);
+        return $this->created_at->addHours($hours);
     }
 
     public function isSlaBreached(): bool
     {
-        return $this->status !== 'resolved' && now()->greaterThan($this->slaDeadline());
+        if (in_array($this->status, ['resolved', 'merged'], true)) {
+            return false;
+        }
+        return now()->greaterThan($this->slaDeadline());
     }
 }
