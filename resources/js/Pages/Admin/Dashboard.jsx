@@ -2,116 +2,13 @@ import { Head, Link, router } from '@inertiajs/react';
 import { route } from '../../ziggy';
 import StatsCard from '../../Components/StatsCard';
 import { StatusBadge, PriorityBadge } from '../../Components/Badge';
-import SearchSelect from '../../Components/SearchSelect';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { useState } from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LineChart, Line } from 'recharts';
 import useRealtime from '../../hooks/useRealtime';
 
 const COLORS = ['#2563eb', '#dc2626', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
-const statusOptions = ['received', 'in_progress', 'resolved'];
 
-function getNextStatus(current) {
-    const idx = statusOptions.indexOf(current);
-    return idx < statusOptions.length - 1 ? statusOptions[idx + 1] : null;
-}
-
-export default function AdminDashboard({ stats, issues, category_stats, org_stats, issues_over_time, avg_resolution_hours, staff_users = [], organizations = [], categories = [], filters = {} }) {
+export default function AdminDashboard({ stats, recent_issues, category_stats, issues_over_time, avg_resolution_hours }) {
     useRealtime();
-    const [statusFilter, setStatusFilter] = useState(filters.status || 'all');
-    const [priorityFilter, setPriorityFilter] = useState(filters.priority || 'all');
-    const [orgFilter, setOrgFilter] = useState(filters.organization_id || 'all');
-    const [staffFilter, setStaffFilter] = useState(filters.assigned_user_id || 'all');
-    const [search, setSearch] = useState(filters.search || '');
-    const [dateFrom, setDateFrom] = useState(filters.date_from || '');
-    const [dateTo, setDateTo] = useState(filters.date_to || '');
-
-    function buildParams(overrides = {}) {
-        return {
-            status: overrides.status !== undefined ? overrides.status : (statusFilter !== 'all' ? statusFilter : ''),
-            priority: overrides.priority !== undefined ? overrides.priority : (priorityFilter !== 'all' ? priorityFilter : ''),
-            organization_id: overrides.organization_id !== undefined ? overrides.organization_id : (orgFilter !== 'all' ? orgFilter : ''),
-            assigned_user_id: overrides.assigned_user_id !== undefined ? overrides.assigned_user_id : (staffFilter !== 'all' ? staffFilter : ''),
-            search: overrides.search !== undefined ? overrides.search : search,
-            date_from: overrides.date_from !== undefined ? overrides.date_from : (dateFrom || ''),
-            date_to: overrides.date_to !== undefined ? overrides.date_to : (dateTo || ''),
-        };
-    }
-
-    function applyFilters(params) {
-        const clean = {};
-        Object.entries(params).forEach(([k, v]) => { if (v) clean[k] = v; });
-        router.get(route('admin.dashboard'), clean, { preserveState: true, replace: true });
-    }
-
-    function handleSearch(e) {
-        e.preventDefault();
-        applyFilters(buildParams());
-    }
-
-    function handleStatusChange(val) {
-        setStatusFilter(val);
-        applyFilters(buildParams({ status: val !== 'all' ? val : '' }));
-    }
-
-    function handlePriorityChange(val) {
-        setPriorityFilter(val);
-        applyFilters(buildParams({ priority: val !== 'all' ? val : '' }));
-    }
-
-    function handleOrgChange(val) {
-        setOrgFilter(val);
-        applyFilters(buildParams({ organization_id: val !== 'all' ? val : '' }));
-    }
-
-    function handleStaffChange(val) {
-        setStaffFilter(val);
-        applyFilters(buildParams({ assigned_user_id: val !== 'all' ? val : '' }));
-    }
-
-    function handleDateFromChange(val) {
-        setDateFrom(val);
-        applyFilters(buildParams({ date_from: val || '' }));
-    }
-
-    function handleDateToChange(val) {
-        setDateTo(val);
-        applyFilters(buildParams({ date_to: val || '' }));
-    }
-
-    function clearFilters() {
-        setStatusFilter('all');
-        setPriorityFilter('all');
-        setOrgFilter('all');
-        setStaffFilter('all');
-        setSearch('');
-        setDateFrom('');
-        setDateTo('');
-        router.get(route('admin.dashboard'), {}, { preserveState: true, replace: true });
-    }
-
-    function exportCsv() {
-        const params = buildParams();
-        const qs = new URLSearchParams();
-        Object.entries(params).forEach(([k, v]) => { if (v) qs.set(k, v); });
-        window.open(`${route('admin.issues.export-csv')}?${qs.toString()}`, '_blank');
-    }
-
-    function handleStatusUpdate(issueId, newStatus) {
-        router.patch(route('admin.issues.update-status', issueId), { status: newStatus });
-    }
-
-    function handleAssign(issueId, staffId, staffName) {
-        router.post(route('admin.issues.assign', issueId), {
-            assigned_to: staffName,
-            assigned_user_id: staffId || null,
-        });
-    }
-
-    function currentOrgStaff(issue) {
-        return staff_users.filter(s => s.organization_id === issue.organization_id || !s.organization_id);
-    }
-
-    const [assigning, setAssigning] = useState(null);
 
     return (
         <>
@@ -124,6 +21,9 @@ export default function AdminDashboard({ stats, issues, category_stats, org_stat
                         <p className="text-sm text-gray-500">Super admin overview &amp; management</p>
                     </div>
                     <div className="flex items-center gap-3">
+                        <Link href={route('admin.issues.index')} className="px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors">
+                            All Issues
+                        </Link>
                         <Link href={route('admin.organizations')} className="px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors">
                             Organizations
                         </Link>
@@ -133,14 +33,49 @@ export default function AdminDashboard({ stats, issues, category_stats, org_stat
                     </div>
                 </div>
 
-                {/* Stats */}
+                {/* Stats Cards — Clickable */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-                    <StatsCard label="Total" value={stats.total_issues} icon="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" color="indigo" />
-                    <StatsCard label="Open" value={stats.open_issues} icon="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" color="amber" />
-                    <StatsCard label="Resolved" value={stats.resolved_issues} icon="M5 13l4 4L19 7" color="green" />
-                    <StatsCard label="Escalated" value={stats.escalated_issues} icon="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" color="red" />
-                    <StatsCard label="Organizations" value={stats.total_organizations} icon="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" color="purple" />
-                    <StatsCard label="Avg Resolution" value={avg_resolution_hours ? `${avg_resolution_hours}h` : 'N/A'} icon="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" color="blue" />
+                    <StatsCard
+                        label="Total"
+                        value={stats.total_issues}
+                        icon="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                        color="indigo"
+                        href={route('admin.issues.index')}
+                    />
+                    <StatsCard
+                        label="Open"
+                        value={stats.open_issues}
+                        icon="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        color="amber"
+                        href={`${route('admin.issues.index')}?status=received`}
+                    />
+                    <StatsCard
+                        label="Resolved"
+                        value={stats.resolved_issues}
+                        icon="M5 13l4 4L19 7"
+                        color="green"
+                        href={`${route('admin.issues.index')}?status=resolved`}
+                    />
+                    <StatsCard
+                        label="Escalated"
+                        value={stats.escalated_issues}
+                        icon="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+                        color="red"
+                        href={route('admin.issues.index')}
+                    />
+                    <StatsCard
+                        label="Organizations"
+                        value={stats.total_organizations}
+                        icon="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                        color="purple"
+                        href={route('admin.organizations')}
+                    />
+                    <StatsCard
+                        label="Avg Resolution"
+                        value={avg_resolution_hours ? `${avg_resolution_hours}h` : 'N/A'}
+                        icon="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                        color="blue"
+                    />
                 </div>
 
                 {/* Charts */}
@@ -180,244 +115,41 @@ export default function AdminDashboard({ stats, issues, category_stats, org_stat
                     </div>
                 </div>
 
-                {/* Issues List */}
+                {/* Recent Issues — 5 items, no filters */}
                 <div className="bg-white rounded-xl border border-gray-200/60 p-6">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                    <div className="flex items-center justify-between mb-4">
                         <div>
-                            <h3 className="text-lg font-semibold text-gray-900">All Issues</h3>
-                            <p className="text-sm text-gray-500">{issues.total} issues</p>
+                            <h3 className="text-lg font-semibold text-gray-900">Recent Issues</h3>
+                            <p className="text-sm text-gray-500">Latest 5 complaints</p>
                         </div>
-                        <div className="flex flex-col gap-3 w-full sm:w-auto">
-                            <form onSubmit={handleSearch} className="flex items-center gap-3">
-                                <input
-                                    type="text"
-                                    value={search}
-                                    onChange={e => setSearch(e.target.value)}
-                                    placeholder="Search issues..."
-                                    className="flex-1 sm:w-48 rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-                                />
-                                <div className="w-36">
-                                    <SearchSelect
-                                        options={[
-                                            { value: 'all', label: 'All Status' },
-                                            { value: 'received', label: 'Received' },
-                                            { value: 'in_progress', label: 'In Progress' },
-                                            { value: 'resolved', label: 'Resolved' },
-                                        ]}
-                                        value={statusFilter}
-                                        onChange={handleStatusChange}
-                                        placeholder="Status"
-                                    />
-                                </div>
-                            </form>
-                            <div className="flex items-center gap-2 flex-wrap">
-                                <div className="w-32">
-                                    <SearchSelect
-                                        options={[
-                                            { value: 'all', label: 'All Priority' },
-                                            { value: 'low', label: 'Low' },
-                                            { value: 'medium', label: 'Medium' },
-                                            { value: 'high', label: 'High' },
-                                            { value: 'critical', label: 'Critical' },
-                                        ]}
-                                        value={priorityFilter}
-                                        onChange={handlePriorityChange}
-                                        placeholder="Priority"
-                                    />
-                                </div>
-                                <div className="w-40">
-                                    <SearchSelect
-                                        options={[
-                                            { value: 'all', label: 'All Organizations' },
-                                            ...organizations.map(o => ({ value: String(o.id), label: o.name })),
-                                        ]}
-                                        value={orgFilter}
-                                        onChange={handleOrgChange}
-                                        placeholder="Organization"
-                                    />
-                                </div>
-                                <div className="w-40">
-                                    <SearchSelect
-                                        options={[
-                                            { value: 'all', label: 'All Staff' },
-                                            ...staff_users.map(s => ({ value: String(s.id), label: s.name })),
-                                        ]}
-                                        value={staffFilter}
-                                        onChange={handleStaffChange}
-                                        placeholder="Assigned Staff"
-                                    />
-                                </div>
-                                <input
-                                    type="date"
-                                    value={dateFrom}
-                                    onChange={e => handleDateFromChange(e.target.value)}
-                                    className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-                                    title="Date from"
-                                />
-                                <input
-                                    type="date"
-                                    value={dateTo}
-                                    onChange={e => handleDateToChange(e.target.value)}
-                                    className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-                                    title="Date to"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={exportCsv}
-                                    className="px-3 py-2 text-xs font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors whitespace-nowrap"
-                                >
-                                    Export CSV
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={clearFilters}
-                                    className="px-3 py-2 text-xs font-medium text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
-                                >
-                                    Clear
-                                </button>
-                            </div>
-                        </div>
+                        <Link href={route('admin.issues.index')} className="text-sm font-medium text-indigo-600 hover:text-indigo-800">
+                            View All &rarr;
+                        </Link>
                     </div>
 
                     <div className="space-y-3">
-                        {issues.data.map(issue => (
-                            <div
-                                key={issue.id}
-                                className={`rounded-xl border p-4 transition-all ${
-                                    issue.is_sla_breached
-                                        ? 'border-red-300 bg-red-50/50'
-                                        : issue.is_escalated
-                                        ? 'border-orange-200 bg-orange-50/30'
-                                        : 'border-gray-200/60 bg-white hover:border-gray-300'
-                                }`}
-                            >
-                                <div className="flex items-start justify-between gap-4">
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                            <Link href={route('admin.issues.show', issue.id)} className="font-mono text-sm font-bold text-indigo-600 hover:text-indigo-800">
-                                                {issue.reference_code}
-                                            </Link>
-                                            {issue.is_sla_breached && (
-                                                <span className="inline-flex items-center gap-1 bg-red-100 text-red-700 text-xs font-medium px-2 py-0.5 rounded-full">
-                                                    SLA Breached
-                                                </span>
-                                            )}
-                                            {issue.is_escalated && !issue.is_sla_breached && (
-                                                <span className="inline-flex items-center gap-1 bg-orange-100 text-orange-700 text-xs font-medium px-2 py-0.5 rounded-full">
-                                                    Escalated
-                                                </span>
-                                            )}
-                                            <StatusBadge status={issue.status} />
-                                            <PriorityBadge priority={issue.priority} />
-                                        </div>
-                                        <div className="flex items-center gap-2 text-xs text-gray-500 mb-2 flex-wrap">
-                                            <span>{issue.category}</span>
-                                            <span>&middot;</span>
-                                            <span>{issue.organization || issue.location}</span>
-                                            <span>&middot;</span>
-                                            <span>{new Date(issue.created_at).toLocaleDateString()}</span>
-                                            {issue.rating && (
-                                                <>
-                                                    <span>&middot;</span>
-                                                    <span className="text-amber-600">Rating: {issue.rating}/5</span>
-                                                </>
-                                            )}
-                                        </div>
-                                        <p className="text-sm text-gray-700 line-clamp-2">{issue.description}</p>
+                        {recent_issues.map(issue => (
+                            <div key={issue.id} className="flex items-start justify-between gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                        <Link href={route('admin.issues.show', issue.id)} className="font-mono text-xs font-bold text-indigo-600 hover:text-indigo-800">
+                                            {issue.reference_code}
+                                        </Link>
+                                        <StatusBadge status={issue.status} />
+                                        <PriorityBadge priority={issue.priority} />
                                     </div>
-                                    <div className="flex flex-col gap-2 shrink-0">
-                                        {issue.status !== 'resolved' && (
-                                            <>
-                                                <button
-                                                    onClick={() => {
-                                                        const next = getNextStatus(issue.status);
-                                                        if (next) handleStatusUpdate(issue.id, next);
-                                                    }}
-                                                    className="text-xs bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap"
-                                                >
-                                                    {issue.status === 'received' ? 'Start Progress' : 'Resolve'}
-                                                </button>
-                                                <div className="relative">
-                                                    <button
-                                                        onClick={() => setAssigning(assigning === issue.id ? null : issue.id)}
-                                                        className="text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
-                                                    >
-                                                        {issue.assigned_to || 'Assign'}
-                                                    </button>
-                                                    {assigning === issue.id && (
-                                                        <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-lg border border-gray-200 shadow-lg z-50 max-h-48 overflow-y-auto">
-                                                            <button
-                                                                onClick={() => handleAssign(issue.id, null, '')}
-                                                                className="w-full text-left px-3 py-2 text-xs text-gray-500 hover:bg-gray-50 border-b border-gray-100"
-                                                            >
-                                                                Unassign
-                                                            </button>
-                                                            {currentOrgStaff(issue).map(s => (
-                                                                <button
-                                                                    key={s.id}
-                                                                    onClick={() => handleAssign(issue.id, s.id, s.name)}
-                                                                    className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 ${
-                                                                        issue.assigned_user_id === s.id ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-700'
-                                                                    }`}
-                                                                >
-                                                                    {s.name}
-                                                                </button>
-                                                            ))}
-                                                            {currentOrgStaff(issue).length === 0 && (
-                                                                <div className="px-3 py-2 text-xs text-gray-400">No staff available</div>
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </>
-                                        )}
-                                        {issue.status === 'resolved' && (
-                                            <button
-                                                onClick={() => handleStatusUpdate(issue.id, 'received')}
-                                                className="text-xs bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-300 transition-colors whitespace-nowrap"
-                                            >
-                                                Reopen
-                                            </button>
-                                        )}
-                                    </div>
+                                    <p className="text-sm text-gray-700 line-clamp-1">{issue.description}</p>
+                                    <p className="text-xs text-gray-400 mt-0.5">
+                                        {issue.organization || issue.location} &middot; {new Date(issue.created_at).toLocaleDateString()}
+                                    </p>
                                 </div>
                             </div>
                         ))}
 
-                        {issues.data.length === 0 && (
-                            <div className="text-center py-12 text-gray-400">
-                                <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                <p className="text-sm">No issues found</p>
-                            </div>
+                        {recent_issues.length === 0 && (
+                            <div className="text-center py-8 text-gray-400 text-sm">No issues yet</div>
                         )}
                     </div>
-
-                    {/* Pagination */}
-                    {issues.links && issues.links.length > 3 && (
-                        <div className="flex items-center justify-center gap-2 mt-6">
-                            {issues.links.map((link, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => {
-                                        if (link.url && !link.active) {
-                                            router.get(link.url, {}, { preserveState: true, replace: true });
-                                        }
-                                    }}
-                                    disabled={!link.url}
-                                    className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
-                                        link.active
-                                            ? 'bg-indigo-600 text-white'
-                                            : link.url
-                                            ? 'text-gray-600 hover:bg-gray-100'
-                                            : 'text-gray-300 cursor-not-allowed'
-                                    }`}
-                                    dangerouslySetInnerHTML={{ __html: link.label }}
-                                />
-                            ))}
-                        </div>
-                    )}
                 </div>
             </div>
         </>

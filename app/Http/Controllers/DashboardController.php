@@ -30,7 +30,7 @@ class DashboardController extends Controller
 
         $recentIssues = Issue::with(['location', 'organization', 'category'])
             ->latest()
-            ->take(10)
+            ->take(5)
             ->get()
             ->map(fn($i) => $this->formatIssue($i));
 
@@ -77,7 +77,7 @@ class DashboardController extends Controller
         $recentIssues = Issue::with('location')
             ->where('organization_id', $organization->id)
             ->latest()
-            ->take(10)
+            ->take(5)
             ->get()
             ->map(fn($i) => $this->formatIssue($i));
 

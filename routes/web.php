@@ -42,6 +42,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+        Route::get('/issues', [App\Http\Controllers\Admin\IssueController::class, 'index'])->name('issues.index');
         Route::patch('/issues/{issue}/status', [AdminController::class, 'updateStatus'])->name('issues.update-status');
         Route::post('/issues/{issue}/assign', [AdminController::class, 'assignIssue'])->name('issues.assign');
         Route::get('/organizations', [OrganizationController::class, 'index'])->name('organizations');

@@ -11,16 +11,27 @@ function getNextStatus(current) {
 
 export default function IssueDetail({ issue, staff_users = [] }) {
   const [assigning, setAssigning] = useState(false);
+  const [reopenModal, setReopenModal] = useState(false);
+  const [reopenReason, setReopenReason] = useState('');
 
   function handleStatusUpdate(newStatus) {
-    router.patch(route('admin.issues.update-status', issue.id), { status: newStatus });
+    router.patch(route('admin.issues.update-status', issue.id), { status: newStatus }, { preserveScroll: true });
+  }
+
+  function handleReopen() {
+    router.patch(route('admin.issues.update-status', issue.id), {
+      status: 'received',
+      reason: reopenReason,
+    }, { preserveScroll: true });
+    setReopenModal(false);
+    setReopenReason('');
   }
 
   function handleAssign(staffId, staffName) {
     router.post(route('admin.issues.assign', issue.id), {
       assigned_to: staffName,
       assigned_user_id: staffId || null,
-    });
+    }, { preserveScroll: true });
     setAssigning(false);
   }
 
@@ -130,18 +141,21 @@ export default function IssueDetail({ issue, staff_users = [] }) {
                 </div>
               </>
             ) : (
-              <button
-                onClick={() => handleStatusUpdate('received')}
-                className="text-sm bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
-              >
-                Reopen
-              </button>
+              <>
+                <button
+                  onClick={() => setReopenModal(true)}
+                  className="text-sm bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 transition-colors"
+                >
+                  Reopen
+                </button>
+                <p className="text-xs text-gray-400">Reopening will ask for a reason</p>
+              </>
             )}
           </div>
 
           {issue.is_sla_breached && (
             <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-              <p className="text-sm font-medium text-red-800">SLA Breached — exceeded 48h resolution time</p>
+              <p className="text-sm font-medium text-red-800">SLA Breached — exceeded resolution time</p>
             </div>
           )}
 
@@ -195,6 +209,40 @@ export default function IssueDetail({ issue, staff_users = [] }) {
           </div>
         )}
       </div>
+
+      {/* Reopen Reason Modal */}
+      {reopenModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Reopen Issue</h3>
+            <p className="text-sm text-gray-500 mb-4">Provide a reason for reopening this resolved issue.</p>
+            <textarea
+              value={reopenReason}
+              onChange={e => setReopenReason(e.target.value)}
+              placeholder="Reason for reopening..."
+              rows={3}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none"
+              autoFocus
+            />
+            <p className="text-xs text-gray-400 mt-1">This reason will be recorded in the issue timeline.</p>
+            <div className="flex items-center justify-end gap-3 mt-4">
+              <button
+                onClick={() => { setReopenModal(false); setReopenReason(''); }}
+                className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReopen}
+                disabled={!reopenReason.trim()}
+                className="px-4 py-2 text-sm font-medium text-white bg-amber-500 rounded-lg hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Confirm Reopen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

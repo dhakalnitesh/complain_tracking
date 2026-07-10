@@ -87,7 +87,7 @@ class IssueAssignmentTest extends TestCase
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page
             ->component('Admin/Dashboard')
-            ->where('issues.total', 1)
+            ->where('stats.total_issues', 1)
         );
     }
 }

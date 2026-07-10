@@ -16,6 +16,7 @@
     },
     "dependencies": {
         "@inertiajs/react": "^3.6.0",
+        "@sajanm/nepali-date-picker": "^5.0.6",
         "@vitejs/plugin-react": "^6.0.3",
         "laravel-echo": "^2.3.7",
         "pusher-js": "^8.5.0",

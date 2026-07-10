@@ -45,7 +45,7 @@ class AdminController extends Controller
         return back()->withErrors(['email' => 'Invalid credentials.']);
     }
 
-    public function dashboard(Request $request)
+    public function dashboard()
     {
         $stats = [
             'total_issues' => Issue::count(),
@@ -57,70 +57,26 @@ class AdminController extends Controller
             'total_users' => User::count(),
         ];
 
-        $query = Issue::with(['location', 'organization', 'assignedUser']);
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-        if ($request->filled('priority')) {
-            $query->where('priority', $request->priority);
-        }
-        if ($request->filled('organization_id')) {
-            $query->where('organization_id', $request->organization_id);
-        }
-        if ($request->filled('search')) {
-            $s = $request->search;
-            $query->where(function ($q) use ($s) {
-                $q->where('reference_code', 'like', "%{$s}%")
-                  ->orWhere('description', 'like', "%{$s}%");
-            });
-        }
-        if ($request->filled('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
-        }
-        if ($request->filled('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
-        }
-        if ($request->filled('assigned_user_id')) {
-            $query->where('assigned_user_id', $request->assigned_user_id);
-        }
-
-        $perPage = min((int) $request->get('per_page', 50), 100);
-        $issues = $query->orderBy('created_at', 'desc')
-            ->paginate($perPage)
-            ->through(fn($issue) => [
-                'id' => $issue->id,
-                'reference_code' => $issue->reference_code,
-                'category' => $issue->category,
-                'category_id' => $issue->category_id,
-                'priority' => $issue->priority,
-                'location' => $issue->location?->name,
-                'organization' => $issue->organization?->name,
-                'organization_id' => $issue->organization_id,
-                'description' => $issue->description,
-                'status' => $issue->status,
-                'assigned_to' => $issue->assigned_to,
-                'assigned_user_id' => $issue->assigned_user_id,
-                'assigned_user_name' => $issue->assignedUser?->name,
-                'is_escalated' => $issue->status !== 'resolved' && $issue->created_at->lt(now()->subHours(24)),
-                'is_sla_breached' => $issue->isSlaBreached(),
-                'created_at' => $issue->created_at->toISOString(),
-                'resolved_at' => $issue->resolved_at?->toISOString(),
-                'rating' => $issue->rating,
+        $recentIssues = Issue::with(['location', 'organization'])
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(fn($i) => [
+                'id' => $i->id,
+                'reference_code' => $i->reference_code,
+                'category' => $i->category,
+                'priority' => $i->priority,
+                'location' => $i->location?->name,
+                'organization' => $i->organization?->name,
+                'description' => $i->description,
+                'status' => $i->status,
+                'created_at' => $i->created_at->toISOString(),
             ]);
 
         $categoryStats = Issue::selectRaw('category, COUNT(*) as total')
             ->groupBy('category')
             ->orderByDesc('total')
             ->get();
-
-        $orgStats = Organization::withCount('issues')
-            ->orderByDesc('issues_count')
-            ->get()
-            ->map(fn($o) => [
-                'name' => $o->name,
-                'total' => $o->issues_count,
-            ]);
 
         $issuesOverTime = Issue::selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->where('created_at', '>=', now()->subDays(14))
@@ -133,25 +89,12 @@ class AdminController extends Controller
             ->map(fn($i) => $i->created_at->diffInHours($i->resolved_at))
             ->average();
 
-        $staffUsers = User::staff()
-            ->with('organization')
-            ->orderBy('name')
-            ->get(['id', 'name', 'organization_id']);
-
-        $organizations = Organization::orderBy('name')->get(['id', 'name']);
-        $categories = Category::active()->sorted()->get(['id', 'name']);
-
         return Inertia::render('Admin/Dashboard', [
             'stats' => $stats,
-            'issues' => $issues,
+            'recent_issues' => $recentIssues,
             'category_stats' => $categoryStats,
-            'org_stats' => $orgStats,
             'issues_over_time' => $issuesOverTime,
             'avg_resolution_hours' => $avgResolution ? round($avgResolution, 1) : null,
-            'staff_users' => $staffUsers,
-            'organizations' => $organizations,
-            'categories' => $categories,
-            'filters' => $request->only(['status', 'priority', 'organization_id', 'search', 'per_page', 'date_from', 'date_to', 'assigned_user_id']),
         ]);
     }
 
@@ -176,12 +119,18 @@ class AdminController extends Controller
 
         $issue->save();
 
+        $reason = $request->input('reason');
+        $description = "Status changed from {$oldStatus} to {$validated['status']}.";
+        if ($reason) {
+            $description .= " Reason: {$reason}";
+        }
+
         $event = IssueEvent::create([
             'issue_id' => $issue->id,
             'user_id' => Auth::id(),
             'type' => 'status_changed',
-            'description' => "Status changed from {$oldStatus} to {$validated['status']}.",
-            'metadata' => ['from' => $oldStatus, 'to' => $validated['status']],
+            'description' => $description,
+            'metadata' => ['from' => $oldStatus, 'to' => $validated['status'], 'reason' => $reason],
             'is_public' => true,
         ]);
 
