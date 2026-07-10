@@ -140,6 +140,7 @@ export default function Feed({ issues, filters, categories, locations }) {
                       key={i}
                       href={route('feed', Object.fromEntries(params))}
                       preserveState
+                      preserveScroll
                       className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                         link.active
                           ? 'bg-indigo-600 text-white'

@@ -98,7 +98,7 @@ export default function OrgDashboard({ organization, locations, stats, recent_is
                                         <PriorityBadge priority={issue.priority} />
                                     </div>
                                     <p className="text-sm text-gray-700 line-clamp-1">{issue.description}</p>
-                                    <p className="text-xs text-gray-400 mt-0.5">{issue.category} &middot; {new Date(issue.created_at).toLocaleDateString()}</p>
+                                    <p className="text-xs text-gray-400 mt-0.5">{issue.category} &middot; {issue.bs_date_short || new Date(issue.created_at).toLocaleDateString()}</p>
                                 </div>
                             </div>
                         ))}

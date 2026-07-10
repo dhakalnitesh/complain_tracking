@@ -210,7 +210,7 @@ export default function Dashboard({ organizations, stats, recent_issues, categor
                     </div>
                     <p className="text-xs sm:text-sm text-gray-700 line-clamp-2">{issue.description}</p>
                     <p className="text-[10px] sm:text-xs text-gray-400 mt-1">
-                      {issue.organization || issue.location} &middot; {new Date(issue.created_at).toLocaleDateString()}
+                      {issue.organization || issue.location} &middot; {issue.bs_date_short || new Date(issue.created_at).toLocaleDateString()}
                     </p>
                   </div>
                   <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-300 shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
