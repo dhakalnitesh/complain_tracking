@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useLanguage } from '../Context/LanguageContext';
+import { useLanguage } from '../../Context/LanguageContext';
 
 export default function VoiceInput({ onText, disabled = false }) {
   const { t } = useLanguage();

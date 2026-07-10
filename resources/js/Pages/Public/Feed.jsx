@@ -4,7 +4,7 @@ import { useLanguage } from '../../Context/LanguageContext';
 import ComplaintCard from '../../Components/Feed/ComplaintCard';
 import FeedFilters from '../../Components/Feed/FeedFilters';
 import TrackModal from '../../Components/TrackModal';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState } from 'react';
 
 export default function Feed({ issues, filters, categories, locations }) {
   const { t, lang } = useLanguage();

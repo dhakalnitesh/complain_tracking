@@ -69,7 +69,10 @@ class CommentController extends Controller
                 abort(403);
             }
         } else {
-            if ($comment->user_id !== null || $comment->session_id !== session()->getId()) {
+            if ($comment->user_id !== null) {
+                abort(403);
+            }
+            if ($comment->session_id !== session()->getId()) {
                 abort(403);
             }
         }

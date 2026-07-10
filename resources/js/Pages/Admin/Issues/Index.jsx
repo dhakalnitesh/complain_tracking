@@ -348,7 +348,7 @@ export default function AdminIssues({ issues, staff_users = [], organizations = 
                                         ? 'text-gray-600 hover:bg-gray-100'
                                         : 'text-gray-300 cursor-not-allowed'
                                 }`}
-                                dangerouslySetInnerHTML={{ __html: link.label }}
+                                dangerouslySetInnerHTML={{ __html: link.label.replace(/</g, '&lt;').replace(/>/g, '&gt;') }}
                             />
                         ))}
                     </div>

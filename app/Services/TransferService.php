@@ -13,6 +13,10 @@ class TransferService
     {
         $dept = Department::findOrFail($departmentId);
 
+        if ($dept->organization_id !== $issue->organization_id) {
+            throw new \InvalidArgumentException('Department must belong to the same organization as the issue.');
+        }
+
         $issue->update(['department_id' => $dept->id]);
 
         IssueEvent::create([

@@ -24,6 +24,7 @@ class EscalationService
 
         $orgId = $issue->organization_id;
         $orgAdmin = User::where('organization_id', $orgId)
+            ->whereNotNull('organization_id')
             ->where('is_staff', false)
             ->where(function ($q) {
                 $q->whereNull('is_admin')->orWhere('is_admin', false);

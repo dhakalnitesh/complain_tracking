@@ -25,7 +25,9 @@ class Issue extends Model
         'reporter_name',
         'reporter_phone',
         'reporter_email',
+        'reporter_ip',
         'photo_path',
+        'video_path',
         'is_anonymous',
         'status',
         'assigned_to',
@@ -44,6 +46,7 @@ class Issue extends Model
         'bs_created_at',
         'bs_updated_at',
         'bs_resolved_at',
+        'has_video',
     ];
 
     protected function casts(): array
@@ -149,8 +152,11 @@ class Issue extends Model
         $org = Organization::find($orgId);
         $clean = $org ? preg_replace('/[^A-Za-z0-9]/', '', $org->name) : '';
         $prefix = strtoupper(substr($clean, 0, 3)) ?: 'GRV';
-        $count = static::withTrashed()->where('organization_id', $orgId)->count() + 1;
-        return $prefix . '-' . str_pad($count, 4, '0', STR_PAD_LEFT);
+        $maxSeq = static::withTrashed()->where('organization_id', $orgId)
+            ->where('reference_code', 'LIKE', $prefix . '-%')
+            ->selectRaw('COALESCE(MAX(CAST(SUBSTR(reference_code, LENGTH(?) + 2) AS UNSIGNED)), 0) as max_seq', [$prefix . '-'])
+            ->value('max_seq');
+        return $prefix . '-' . str_pad($maxSeq + 1, 4, '0', STR_PAD_LEFT);
     }
 
     public function isEscalated(): bool
@@ -163,6 +169,11 @@ class Issue extends Model
     {
         $hours = config("sla.priorities.{$this->priority}.hours", 48);
         return $this->created_at->addHours($hours);
+    }
+
+    public function getHasVideoAttribute(): bool
+    {
+        return !is_null($this->video_path);
     }
 
     public function isSlaBreached(): bool

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useLanguage } from '../Context/LanguageContext';
+import { useLanguage } from '../../Context/LanguageContext';
 import CommentForm from './CommentForm';
-import { toBsString } from '../utils/bsDate';
+import { toBsString } from '../../utils/bsDate';
 
 function CommentItem({ comment, issueId, depth = 0 }) {
   const { t, lang } = useLanguage();

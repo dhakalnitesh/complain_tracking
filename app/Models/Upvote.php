@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 
 class Upvote extends Model
 {
@@ -39,33 +40,35 @@ class Upvote extends Model
 
     public static function toggle(int $issueId, ?int $userId, ?string $sessionId): array
     {
-        $query = static::where('issue_id', $issueId);
+        return DB::transaction(function () use ($issueId, $userId, $sessionId) {
+            $query = static::where('issue_id', $issueId);
 
-        if ($userId) {
-            $query->where('user_id', $userId);
-        } elseif ($sessionId) {
-            $query->where('session_id', $sessionId);
-        } else {
-            return ['upvoted' => false, 'count' => static::where('issue_id', $issueId)->count()];
-        }
+            if ($userId) {
+                $query->where('user_id', $userId);
+            } elseif ($sessionId) {
+                $query->where('session_id', $sessionId);
+            } else {
+                return ['upvoted' => false, 'count' => static::where('issue_id', $issueId)->count()];
+            }
 
-        $existing = $query->first();
+            $existing = $query->lockForUpdate()->first();
 
-        if ($existing) {
-            $existing->delete();
-            $upvoted = false;
-        } else {
-            static::create([
-                'issue_id' => $issueId,
-                'user_id' => $userId,
-                'session_id' => $sessionId,
-            ]);
-            $upvoted = true;
-        }
+            if ($existing) {
+                $existing->delete();
+                $upvoted = false;
+            } else {
+                static::create([
+                    'issue_id' => $issueId,
+                    'user_id' => $userId,
+                    'session_id' => $sessionId,
+                ]);
+                $upvoted = true;
+            }
 
-        return [
-            'upvoted' => $upvoted,
-            'count' => static::where('issue_id', $issueId)->count(),
-        ];
+            return [
+                'upvoted' => $upvoted,
+                'count' => static::where('issue_id', $issueId)->count(),
+            ];
+        });
     }
 }

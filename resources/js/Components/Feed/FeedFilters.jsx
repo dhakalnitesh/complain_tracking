@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { router } from '@inertiajs/react';
-import { useLanguage } from '../Context/LanguageContext';
-import SearchSelect from './SearchSelect';
+import { useLanguage } from '../../Context/LanguageContext';
+import SearchSelect from '../UI/SearchSelect';
 
 export default function FeedFilters({ categories, locations, currentFilters }) {
   const { t, lang } = useLanguage();

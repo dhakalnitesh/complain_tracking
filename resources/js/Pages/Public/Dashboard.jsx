@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { route } from '../../ziggy';
 import { useLanguage } from '../../Context/LanguageContext';

@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Issue;
 use App\Models\Organization;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class StatsController extends Controller
 {
@@ -27,10 +29,10 @@ class StatsController extends Controller
     public function categoryBreakdown()
     {
         return response()->json(
-            Issue::selectRaw('category, COUNT(*) as total')
-                ->groupBy('category')
-                ->orderByDesc('total')
-                ->get()
+            Category::withCount('issues')
+                ->having('issues_count', '>', 0)
+                ->orderByDesc('issues_count')
+                ->get(['id', 'name', 'issues_count'])
         );
     }
 

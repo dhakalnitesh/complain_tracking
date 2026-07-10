@@ -42,6 +42,8 @@ class FeedController extends Controller
         $userId = auth()->id();
         $sessionId = $userId ? null : session()->getId();
 
+        $query->withCount(['upvotes', 'comments']);
+
         $issues = $query->paginate($perPage)->through(function ($issue) use ($userId, $sessionId) {
             return [
                 'id' => $issue->id,
@@ -58,12 +60,14 @@ class FeedController extends Controller
                 'is_anonymous' => $issue->is_anonymous,
                 'photo_path' => $issue->photo_path ? route('issues.photo', $issue->reference_code) : null,
                 'has_photo' => !is_null($issue->photo_path),
+                'video_path' => $issue->video_path ? route('issues.photo', $issue->reference_code) : null,
+                'has_video' => !is_null($issue->video_path),
                 'created_at' => $issue->created_at->toISOString(),
                 'resolved_at' => $issue->resolved_at?->toISOString(),
                 'bs_date' => BsDateService::toBsString($issue->created_at, 'datetime'),
                 'bs_date_short' => BsDateService::toBsString($issue->created_at, 'short'),
-                'upvotes_count' => Cache::remember("upvote_count_{$issue->id}", 300, fn() => $issue->upvotes()->count()),
-                'comments_count' => $issue->comments()->count(),
+                'upvotes_count' => $issue->upvotes_count,
+                'comments_count' => $issue->comments_count,
                 'has_upvoted' => $issue->isUpvotedBy($userId, $sessionId),
             ];
         });

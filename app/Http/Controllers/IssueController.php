@@ -67,6 +67,7 @@ class IssueController extends Controller
             'is_anonymous' => 'boolean',
             'sms_opt_in' => 'boolean',
             'photo' => 'nullable|image|max:5120',
+            'video' => 'nullable|mimes:mp4,webm,ogg,avi,mov|max:51200',
         ]);
 
         $category = Category::findOrFail($validated['category_id']);
@@ -81,6 +82,11 @@ class IssueController extends Controller
             $photoPath = $request->file('photo')->store('issue-photos', 'public');
         }
 
+        $videoPath = null;
+        if ($request->hasFile('video')) {
+            $videoPath = $request->file('video')->store('issue-videos', 'public');
+        }
+
         $issue = Issue::create([
             'organization_id' => $validated['organization_id'],
             'category' => $category->name,
@@ -91,9 +97,11 @@ class IssueController extends Controller
             'reporter_name' => $validated['reporter_name'] ?? null,
             'reporter_phone' => $validated['reporter_phone'] ?? null,
             'reporter_email' => $validated['reporter_email'] ?? null,
+            'reporter_ip' => $request->ip(),
             'is_anonymous' => $request->boolean('is_anonymous', true),
             'sms_opt_in' => $request->boolean('sms_opt_in', false),
             'photo_path' => $photoPath,
+            'video_path' => $videoPath,
         ]);
 
         $referenceCode = Issue::generateReferenceCode($validated['organization_id']);
@@ -111,7 +119,9 @@ class IssueController extends Controller
             'is_public' => true,
         ]);
 
-        broadcast(new IssueCreated($issue));
+        if (config('broadcasting.default') !== 'log') {
+            broadcast(new IssueCreated($issue));
+        }
 
         if ($issue->reporter_email) {
             app(NotificationService::class)->sendIssueCreated($issue, $issue->events()->latest()->first());
@@ -162,6 +172,8 @@ class IssueController extends Controller
                 'rating' => $issue->rating,
                 'feedback_comment' => $issue->feedback_comment,
                 'photo_path' => $issue->photo_path ? route('issues.photo', $issue->reference_code) : null,
+                'video_path' => $issue->video_path ? route('issues.photo', $issue->reference_code) : null,
+                'has_video' => !is_null($issue->video_path),
                 'events' => $issue->events->map(fn($e) => [
                     'id' => $e->id,
                     'type' => $e->type,
@@ -253,6 +265,8 @@ class IssueController extends Controller
                 'rating' => $issue->rating,
                 'feedback_comment' => $issue->feedback_comment,
                 'photo_path' => $issue->photo_path ? route('issues.photo', $issue->reference_code) : null,
+                'video_path' => $issue->video_path ? route('issues.photo', $issue->reference_code) : null,
+                'has_video' => !is_null($issue->video_path),
                 'events' => $issue->events->map(fn($e) => [
                     'id' => $e->id,
                     'type' => $e->type,

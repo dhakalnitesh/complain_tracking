@@ -21,7 +21,9 @@ class CommentService
         $notificationService = app(NotificationService::class);
         $notificationService->sendCommentAdded($issue, $event);
 
-        broadcast(new IssueCommentAdded($event));
+        if (config('broadcasting.default') !== 'log') {
+            broadcast(new IssueCommentAdded($event));
+        }
 
         return $event;
     }

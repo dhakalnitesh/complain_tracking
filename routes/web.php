@@ -1,15 +1,20 @@
 <?php
 
-use App\Http\Controllers\Admin\AuthController as AdminAuthController;
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\Admin\IssueController as AdminIssueController;
-use App\Http\Controllers\Admin\ModerationController;
-use App\Http\Controllers\Admin\StaffController as AdminStaffController;
+use App\Http\Controllers\Admin\Auth\AuthController as AdminAuthController;
+use App\Http\Controllers\Admin\Dashboard\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\Export\ExportController as AdminExportController;
+use App\Http\Controllers\Admin\Issues\IssueController as AdminIssueController;
+use App\Http\Controllers\Admin\Moderation\ModerationController;
+use App\Http\Controllers\Admin\Organizations\OrganizationController;
+use App\Http\Controllers\Admin\Staff\IdentityDocumentController;
+use App\Http\Controllers\Admin\Staff\StaffController as AdminStaffController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IssueController;
-use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\OrgAdmin\Dashboard\DashboardController as OrgAdminDashboardController;
+use App\Http\Controllers\OrgAdmin\Departments\DepartmentController;
+use App\Http\Controllers\OrgAdmin\Staff\StaffController as OrgAdminStaffController;
 use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\Staff\IssueController as StaffIssueController;
 use App\Http\Controllers\StatsController;
@@ -28,7 +33,7 @@ Route::post('/issues', [IssueController::class, 'store'])->name('issues.store')-
 Route::get('/issues/reference/{reference_code}', [IssueController::class, 'showReference'])->name('issues.show-reference');
 Route::get('/status', [IssueController::class, 'trackStatus'])->name('status.check')->middleware('throttle:10,1');
 Route::post('/issues/{issue}/feedback', [IssueController::class, 'submitFeedback'])->name('issues.feedback')->middleware('throttle:5,1');
-Route::get('/issues/photo/{reference_code}', [PhotoController::class, 'show'])->name('issues.photo');
+Route::get('/issues/photo/{reference_code}', [PhotoController::class, 'show'])->name('issues.photo')->middleware('throttle:30,1');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -59,12 +64,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::match(['put', 'post'], '/staff/{user}', [AdminStaffController::class, 'update'])->name('staff.update');
         Route::delete('/staff/{user}', [AdminStaffController::class, 'destroy'])->name('staff.destroy');
 
-        Route::get('/staff/{user}/identity-document/{side}', [App\Http\Controllers\Admin\IdentityDocumentController::class, 'show'])->name('staff.identity-document');
+        Route::get('/staff/{user}/identity-document/{side}', [IdentityDocumentController::class, 'show'])->name('staff.identity-document');
 
         Route::get('/staff/{user}/issues', [AdminStaffController::class, 'issues'])->name('staff.issues');
 
         Route::get('/issues/{issue}', [AdminIssueController::class, 'show'])->name('issues.show');
-        Route::get('/export/csv', [AdminIssueController::class, 'exportCsv'])->name('issues.export-csv');
+        Route::get('/export/csv', [AdminExportController::class, 'csv'])->name('issues.export-csv');
 
         Route::get('/moderation', [ModerationController::class, 'index'])->name('moderation');
         Route::post('/moderation/{flag}/dismiss', [ModerationController::class, 'dismiss'])->name('moderation.dismiss');
@@ -83,18 +88,18 @@ Route::get('/api/stats/categories', [StatsController::class, 'categoryBreakdown'
 Route::get('/api/stats/trends', [StatsController::class, 'issuesOverTime']);
 Route::get('/api/track/{reference_code}', [App\Http\Controllers\Api\TrackController::class, 'show'])->name('api.track');
 
-Route::post('/api/issues/{issue}/upvote', [UpvoteController::class, 'toggle'])->name('upvote.toggle');
-Route::get('/issues/{issue}/comments', [CommentController::class, 'index'])->name('comments.index');
-Route::post('/issues/{issue}/comments', [CommentController::class, 'store'])->name('comments.store');
-Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+Route::post('/api/issues/{issue}/upvote', [UpvoteController::class, 'toggle'])->name('upvote.toggle')->middleware('throttle:30,1');
+Route::get('/issues/{issue}/comments', [CommentController::class, 'index'])->name('comments.index')->middleware('throttle:30,1');
+Route::post('/issues/{issue}/comments', [CommentController::class, 'store'])->name('comments.store')->middleware('throttle:10,1');
+Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy')->middleware('throttle:10,1');
 
-Route::post('/issues/{issue}/flag', [FlagController::class, 'flagIssue'])->name('issues.flag');
-Route::post('/comments/{comment}/flag', [FlagController::class, 'flagComment'])->name('comments.flag');
+Route::post('/issues/{issue}/flag', [FlagController::class, 'flagIssue'])->name('issues.flag')->middleware('throttle:5,1');
+Route::post('/comments/{comment}/flag', [FlagController::class, 'flagComment'])->name('comments.flag')->middleware('throttle:5,1');
 
 Route::prefix('org-admin')->name('org-admin.')->middleware(['auth', 'org-admin'])->group(function () {
-    Route::get('/dashboard', [App\Http\Controllers\OrgAdminController::class, 'dashboard'])->name('dashboard');
-    Route::get('/departments', [App\Http\Controllers\OrgAdminController::class, 'departments'])->name('departments');
-    Route::post('/departments', [App\Http\Controllers\OrgAdminController::class, 'storeDepartment'])->name('departments.store');
-    Route::get('/staff', [App\Http\Controllers\OrgAdminController::class, 'staff'])->name('staff');
-    Route::post('/staff', [App\Http\Controllers\OrgAdminController::class, 'storeStaff'])->name('staff.store');
+    Route::get('/dashboard', [OrgAdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/departments', [DepartmentController::class, 'index'])->name('departments');
+    Route::post('/departments', [DepartmentController::class, 'store'])->name('departments.store');
+    Route::get('/staff', [OrgAdminStaffController::class, 'index'])->name('staff');
+    Route::post('/staff', [OrgAdminStaffController::class, 'store'])->name('staff.store');
 });

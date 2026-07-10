@@ -20,9 +20,14 @@ class IssueController extends Controller
         $user = Auth::user();
         $isAssigned = $issue->assigned_user_id === $user->id;
         $isAdmin = $user->isSuperAdmin();
+        $isSameOrg = $issue->organization_id === $user->organization_id;
 
-        if (!$isAssigned && !$isAdmin) {
+        if (!$isAssigned && !$isAdmin && !$isSameOrg) {
             return redirect()->route('dashboard')->with('error', 'You are not assigned to this issue.');
+        }
+
+        if (!$isAdmin && !$isSameOrg) {
+            return redirect()->route('dashboard')->with('error', 'You do not have access to this issue.');
         }
 
         return Inertia::render('Staff/Issues/Show', [
@@ -41,6 +46,8 @@ class IssueController extends Controller
                 'bs_created_at' => \App\Services\BsDateService::toBsString($issue->created_at, 'short'),
                 'resolved_at' => $issue->resolved_at?->toISOString(),
                 'photo_path' => $issue->photo_path ? route('issues.photo', $issue->reference_code) : null,
+                'video_path' => $issue->video_path ? route('issues.photo', $issue->reference_code) : null,
+                'has_video' => !is_null($issue->video_path),
                 'events' => $issue->events->map(fn($e) => [
                     'id' => $e->id,
                     'type' => $e->type,

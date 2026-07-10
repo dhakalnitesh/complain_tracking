@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { route } from '../ziggy';
 import { useLanguage } from '../Context/LanguageContext';
-import { StatusBadge, PriorityBadge } from './Badge';
+import { StatusBadge, PriorityBadge } from './UI/Badge';
 
 export default function TrackModal({ open, onClose }) {
   const { t, lang } = useLanguage();

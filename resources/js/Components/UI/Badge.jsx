@@ -1,4 +1,4 @@
-import { useLanguage } from '../Context/LanguageContext';
+import { useLanguage } from '../../Context/LanguageContext';
 
 const statusConfig = {
     received: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-400' },

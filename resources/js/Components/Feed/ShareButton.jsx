@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLanguage } from '../Context/LanguageContext';
+import { useLanguage } from '../../Context/LanguageContext';
 
 export default function ShareButton({ referenceCode, compact = false }) {
   const { t } = useLanguage();

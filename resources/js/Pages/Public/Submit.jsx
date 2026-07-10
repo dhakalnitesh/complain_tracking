@@ -13,6 +13,7 @@ export default function Submit({ locations, organizations, selected_organization
   const user = auth?.user;
   const [step, setStep] = useState(0);
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [videoPreview, setVideoPreview] = useState(null);
   const [dragOver, setDragOver] = useState(false);
 
   const { data, setData, post, processing, errors, reset } = useForm({
@@ -27,6 +28,7 @@ export default function Submit({ locations, organizations, selected_organization
     is_anonymous: !user,
     sms_opt_in: false,
     photo: null,
+    video: null,
     website: '',
   });
 
@@ -35,8 +37,9 @@ export default function Submit({ locations, organizations, selected_organization
     post('/issues', {
       forceFormData: true,
       onSuccess: () => {
-        reset('category_id', 'location_id', 'description', 'photo');
+        reset('category_id', 'location_id', 'description', 'photo', 'video');
         setPhotoPreview(null);
+        setVideoPreview(null);
         setStep(0);
       },
     });
@@ -45,11 +48,23 @@ export default function Submit({ locations, organizations, selected_organization
   function handlePhotoChange(e) {
     const file = e.target.files[0];
     setData('photo', file);
+    setData('video', null);
     if (file) {
       const reader = new FileReader();
       reader.onload = (ev) => setPhotoPreview(ev.target.result);
       reader.readAsDataURL(file);
     } else setPhotoPreview(null);
+    setVideoPreview(null);
+  }
+
+  function handleVideoChange(e) {
+    const file = e.target.files[0];
+    setData('video', file);
+    setData('photo', null);
+    if (file) {
+      setVideoPreview(URL.createObjectURL(file));
+    } else setVideoPreview(null);
+    setPhotoPreview(null);
   }
 
   function handleDrop(e) {
@@ -58,9 +73,14 @@ export default function Submit({ locations, organizations, selected_organization
     const file = e.dataTransfer.files[0];
     if (file && file.type.startsWith('image/')) {
       setData('photo', file);
-      const reader = new FileReader();
-      reader.onload = (ev) => setPhotoPreview(ev.target.result);
-      reader.readAsDataURL(file);
+      setData('video', null);
+      setPhotoPreview(URL.createObjectURL(file));
+      setVideoPreview(null);
+    } else if (file && file.type.startsWith('video/')) {
+      setData('video', file);
+      setData('photo', null);
+      setVideoPreview(URL.createObjectURL(file));
+      setPhotoPreview(null);
     }
   }
 
@@ -168,7 +188,7 @@ export default function Submit({ locations, organizations, selected_organization
           <form onSubmit={handleSubmit} encType="multipart/form-data">
             {/* Honeypot - invisible to humans, bots fill it */}
             <div className="absolute opacity-0 pointer-events-none" tabIndex={-1} aria-hidden="true">
-              <input type="text" name="website" autoComplete="off" />
+              <input type="text" name="website" autoComplete="off" value={data.website} onChange={e => setData('website', e.target.value)} tabIndex={-1} />
             </div>
             {/* Step 1: Issue Details */}
             {step === 0 && (
@@ -321,6 +341,40 @@ export default function Submit({ locations, organizations, selected_organization
                       )}
                     </div>
                     {errors.photo && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>{errors.photo}</p>}
+                  </div>
+
+                  {/* Video Upload */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">{lang === 'np' ? 'भिडियो (वैकल्पिक)' : 'Video (optional)'}</label>
+                    <div
+                      onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                      onDragLeave={() => setDragOver(false)}
+                      onDrop={handleDrop}
+                      className={`relative rounded-xl border-2 border-dashed p-6 text-center transition-all ${
+                        dragOver ? 'border-purple-400 bg-purple-50' : 'border-gray-200 hover:border-gray-300 bg-gray-50/50'
+                      }`}
+                    >
+                      <input type="file" accept="video/*" onChange={handleVideoChange}
+                        className="absolute inset-0 opacity-0 cursor-pointer" />
+                      {videoPreview ? (
+                        <div className="flex items-center justify-center gap-4">
+                          <video src={videoPreview} className="h-20 w-20 rounded-xl object-cover border border-gray-200 shadow-sm" />
+                          <div className="text-left">
+                            <p className="text-sm font-medium text-gray-700">{lang === 'np' ? 'भिडियो तयार छ' : 'Video ready'}</p>
+                            <p className="text-xs text-gray-400">{lang === 'np' ? 'पुन: चयन गर्न क्लिक गर्नुहोस्' : 'Click to change'}</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <svg className="w-8 h-8 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                          <p className="text-sm text-gray-500">{lang === 'np' ? 'भिडियो राख्न यहाँ क्लिक वा ड्र्याग गर्नुहोस्' : 'Click or drag video here'}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">{lang === 'np' ? 'अधिकतम ५० MB' : 'Max 50 MB'}</p>
+                        </div>
+                      )}
+                    </div>
+                    {errors.video && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>{errors.video}</p>}
                   </div>
                 </div>
               </div>

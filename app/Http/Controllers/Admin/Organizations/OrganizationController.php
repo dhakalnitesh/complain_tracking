@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin\Organizations;
 
+use App\Http\Controllers\Controller;
 use App\Models\Issue;
 use App\Models\Location;
 use App\Models\Organization;
@@ -57,7 +58,6 @@ class OrganizationController extends Controller
             'description' => $validated['description'],
         ]);
 
-        // Create default locations for the organization
         $defaultLocations = ['Main Campus', 'Building A', 'Building B', 'Administration'];
         foreach ($defaultLocations as $loc) {
             Location::create(['name' => $loc, 'organization_id' => $org->id]);

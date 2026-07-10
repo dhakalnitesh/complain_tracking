@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Flag;
 use App\Models\Issue;
 
 class AbuseDetectionService
@@ -34,9 +33,8 @@ class AbuseDetectionService
         }
 
         if ($ip) {
-            $ipCount = Issue::where('created_at', '>=', now()->subDay())
-                ->get()
-                ->filter(fn($issue) => request()->ip() === $ip)
+            $ipCount = Issue::where('reporter_ip', $ip)
+                ->where('created_at', '>=', now()->subDay())
                 ->count();
 
             if ($ipCount > 10) {

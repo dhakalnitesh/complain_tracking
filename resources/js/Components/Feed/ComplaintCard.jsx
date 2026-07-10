@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link } from '@inertiajs/react';
-import { route } from '../ziggy';
-import { useLanguage } from '../Context/LanguageContext';
-import { StatusBadge, PriorityBadge } from './Badge';
-import { toBsString } from '../utils/bsDate';
+import { route } from '../../ziggy';
+import { useLanguage } from '../../Context/LanguageContext';
+import { StatusBadge, PriorityBadge } from '../UI/Badge';
+import { toBsString } from '../../utils/bsDate';
 import UpvoteButton from './UpvoteButton';
-import CommentSection from './CommentSection';
+import CommentSection from '../Comments/CommentSection';
 import PhotoLightbox from './PhotoLightbox';
 
 export default function ComplaintCard({ issue }) {
@@ -39,6 +39,19 @@ export default function ComplaintCard({ issue }) {
                 {lang === 'np' ? 'ठूलो हेर्नुहोस्' : 'View full size'}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Video */}
+        {issue.has_video && issue.video_path && (
+          <div className="relative aspect-[16/9] bg-black overflow-hidden">
+            <video
+              src={issue.video_path}
+              className="w-full h-full object-contain"
+              controls
+              preload="metadata"
+              playsInline
+            />
           </div>
         )}
 
@@ -119,7 +132,7 @@ export default function ComplaintCard({ issue }) {
       </div>
 
       {/* Lightbox */}
-      {lightboxOpen && (
+      {lightboxOpen && issue.photo_path && (
         <PhotoLightbox
           src={issue.photo_path}
           alt={issue.description}
