@@ -124,7 +124,8 @@ Transform the current landing page into a modern, Facebook/Reddit-inspired socia
 
 ## Epic 8: Upvoting, Citizen Comments & Social Features
 
-**Status:** 🔴 In Progress
+**Status:** ✅ Completed (Jul 10, 2026)
+**Commits:** `c520d29`
 **Target:** Jul 10 — Jul 16
 
 ### What
@@ -765,7 +766,8 @@ This is deferred until production deployment and user feedback confirms demand.
 | Date | Epic | Status | Notes |
 |------|------|--------|-------|
 | Jul 10, 2026 | Epic 7 | ✅ Completed | BS Date service, Feed page, ComplaintCard, filters, 66 tests |
-| Jul 10, 2026 | Epic 8 | 🔴 In Progress | Upvoting, citizen comments, duplicate detection |
+| Jul 10, 2026 | Epic 8 | ✅ Completed | Upvotes, Comments, Duplicate Detection — 80 tests all passing |
+| Jul 10, 2026 | Epic 9 | 🔴 In Progress | Multi-Tenant, Departments, Auto-Routing |
 
 ---
 

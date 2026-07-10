@@ -35,6 +35,7 @@ class Issue extends Model
         'feedback_comment',
         'feedback_at',
         'duplicate_of_id',
+        'department_id',
     ];
 
     protected function casts(): array
@@ -75,6 +76,11 @@ class Issue extends Model
     public function notificationLogs(): HasMany
     {
         return $this->hasMany(NotificationLog::class);
+    }
+
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
     }
 
     public function upvotes(): HasMany

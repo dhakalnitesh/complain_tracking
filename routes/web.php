@@ -71,3 +71,11 @@ Route::post('/api/issues/{issue}/upvote', [UpvoteController::class, 'toggle'])->
 Route::get('/issues/{issue}/comments', [CommentController::class, 'index'])->name('comments.index');
 Route::post('/issues/{issue}/comments', [CommentController::class, 'store'])->name('comments.store');
 Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+
+Route::prefix('org-admin')->name('org-admin.')->middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\OrgAdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/departments', [App\Http\Controllers\OrgAdminController::class, 'departments'])->name('departments');
+    Route::post('/departments', [App\Http\Controllers\OrgAdminController::class, 'storeDepartment'])->name('departments.store');
+    Route::get('/staff', [App\Http\Controllers\OrgAdminController::class, 'staff'])->name('staff');
+    Route::post('/staff', [App\Http\Controllers\OrgAdminController::class, 'storeStaff'])->name('staff.store');
+});

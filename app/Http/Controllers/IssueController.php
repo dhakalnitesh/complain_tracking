@@ -10,6 +10,7 @@ use App\Models\Location;
 use App\Models\Organization;
 use App\Services\BsDateService;
 use App\Services\DuplicateDetectionService;
+use App\Services\RoutingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -110,6 +111,8 @@ class IssueController extends Controller
         ]);
 
         broadcast(new IssueCreated($issue));
+
+        RoutingService::autoRoute($issue);
 
         $redirect = redirect()->route('issues.show-reference', [
             'reference_code' => $issue->reference_code,
