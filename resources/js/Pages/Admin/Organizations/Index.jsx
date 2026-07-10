@@ -1,5 +1,5 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { route } from '../../ziggy';
+import { route } from '../../../ziggy';
 import { useState } from 'react';
 
 export default function Organizations({ organizations }) {

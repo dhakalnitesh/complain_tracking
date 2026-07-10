@@ -1,6 +1,10 @@
 <?php
 
-use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Admin\AuthController as AdminAuthController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\IssueController as AdminIssueController;
+use App\Http\Controllers\Admin\ModerationController;
+use App\Http\Controllers\Admin\StaffController as AdminStaffController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
@@ -10,7 +14,6 @@ use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\Staff\IssueController as StaffIssueController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\FlagController;
-use App\Http\Controllers\Admin\ModerationController;
 use App\Http\Controllers\UpvoteController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -37,31 +40,31 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/login', [AdminController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AdminController::class, 'login']);
+    Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AdminAuthController::class, 'login']);
 
     Route::middleware(['auth', 'admin'])->group(function () {
-        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-        Route::get('/issues', [App\Http\Controllers\Admin\IssueController::class, 'index'])->name('issues.index');
-        Route::patch('/issues/{issue}/status', [AdminController::class, 'updateStatus'])->name('issues.update-status');
-        Route::post('/issues/{issue}/assign', [AdminController::class, 'assignIssue'])->name('issues.assign');
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/issues', [AdminIssueController::class, 'index'])->name('issues.index');
+        Route::patch('/issues/{issue}/status', [AdminIssueController::class, 'updateStatus'])->name('issues.update-status');
+        Route::post('/issues/{issue}/assign', [AdminIssueController::class, 'assign'])->name('issues.assign');
         Route::get('/organizations', [OrganizationController::class, 'index'])->name('organizations');
         Route::post('/organizations', [OrganizationController::class, 'store'])->name('organizations.store');
         Route::post('/organizations/{organization}/toggle', [OrganizationController::class, 'toggleActive'])->name('organizations.toggle');
 
-        Route::get('/staff', [AdminController::class, 'staff'])->name('staff');
-        Route::get('/staff/create', [AdminController::class, 'createStaff'])->name('staff.create');
-        Route::post('/staff', [AdminController::class, 'storeStaff'])->name('staff.store');
-        Route::get('/staff/{user}/edit', [AdminController::class, 'editStaff'])->name('staff.edit');
-        Route::match(['put', 'post'], '/staff/{user}', [AdminController::class, 'updateStaff'])->name('staff.update');
-        Route::delete('/staff/{user}', [AdminController::class, 'destroyStaff'])->name('staff.destroy');
+        Route::get('/staff', [AdminStaffController::class, 'index'])->name('staff');
+        Route::get('/staff/create', [AdminStaffController::class, 'create'])->name('staff.create');
+        Route::post('/staff', [AdminStaffController::class, 'store'])->name('staff.store');
+        Route::get('/staff/{user}/edit', [AdminStaffController::class, 'edit'])->name('staff.edit');
+        Route::match(['put', 'post'], '/staff/{user}', [AdminStaffController::class, 'update'])->name('staff.update');
+        Route::delete('/staff/{user}', [AdminStaffController::class, 'destroy'])->name('staff.destroy');
 
         Route::get('/staff/{user}/identity-document/{side}', [App\Http\Controllers\Admin\IdentityDocumentController::class, 'show'])->name('staff.identity-document');
 
-        Route::get('/staff/{user}/issues', [AdminController::class, 'staffIssues'])->name('staff.issues');
+        Route::get('/staff/{user}/issues', [AdminStaffController::class, 'issues'])->name('staff.issues');
 
-        Route::get('/issues/{issue}', [AdminController::class, 'showIssue'])->name('issues.show');
-        Route::get('/export/csv', [AdminController::class, 'exportCsv'])->name('issues.export-csv');
+        Route::get('/issues/{issue}', [AdminIssueController::class, 'show'])->name('issues.show');
+        Route::get('/export/csv', [AdminIssueController::class, 'exportCsv'])->name('issues.export-csv');
 
         Route::get('/moderation', [ModerationController::class, 'index'])->name('moderation');
         Route::post('/moderation/{flag}/dismiss', [ModerationController::class, 'dismiss'])->name('moderation.dismiss');

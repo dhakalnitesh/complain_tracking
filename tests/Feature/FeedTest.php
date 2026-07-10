@@ -18,7 +18,7 @@ class FeedTest extends TestCase
         $response = $this->get(route('feed'));
 
         $response->assertStatus(200);
-        $response->assertInertia(fn($page) => $page->component('Feed'));
+        $response->assertInertia(fn($page) => $page->component('Public/Feed'));
     }
 
     public function test_feed_shows_issues(): void
@@ -37,7 +37,7 @@ class FeedTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertInertia(fn($page) => $page
-            ->component('Feed')
+            ->component('Public/Feed')
             ->has('issues.data', 3)
         );
     }
@@ -64,7 +64,7 @@ class FeedTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertInertia(fn($page) => $page
-            ->component('Feed')
+            ->component('Public/Feed')
             ->has('issues.data', 1)
         );
     }
@@ -92,7 +92,7 @@ class FeedTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertInertia(fn($page) => $page
-            ->component('Feed')
+            ->component('Public/Feed')
             ->has('issues.data', 1)
         );
     }

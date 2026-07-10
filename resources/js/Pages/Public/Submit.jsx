@@ -1,8 +1,8 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { route } from '../ziggy';
-import { useLanguage } from '../Context/LanguageContext';
-import VoiceInput from '../Components/VoiceInput';
-import SearchSelect from '../Components/SearchSelect';
+import { route } from '../../ziggy';
+import { useLanguage } from '../../Context/LanguageContext';
+import VoiceInput from '../../Components/UI/VoiceInput';
+import SearchSelect from '../../Components/UI/SearchSelect';
 import { useState } from 'react';
 
 const STEPS = ['issue_details', 'description', 'review'];

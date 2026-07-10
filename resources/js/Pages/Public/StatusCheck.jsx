@@ -1,9 +1,9 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { route } from '../ziggy';
-import { useLanguage } from '../Context/LanguageContext';
-import { StatusBadge, PriorityBadge } from '../Components/Badge';
-import ProgressSteps from '../Components/ProgressSteps';
-import ShareButton from '../Components/ShareButton';
+import { route } from '../../ziggy';
+import { useLanguage } from '../../Context/LanguageContext';
+import { StatusBadge, PriorityBadge } from '../../Components/UI/Badge';
+import ProgressSteps from '../../Components/UI/ProgressSteps';
+import ShareButton from '../../Components/Feed/ShareButton';
 
 export default function StatusCheck({ issue, error }) {
   const { t } = useLanguage();

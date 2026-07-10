@@ -25,7 +25,7 @@ class IssueController extends Controller
             return redirect()->route('dashboard')->with('error', 'You are not assigned to this issue.');
         }
 
-        return Inertia::render('Staff/IssueDetail', [
+        return Inertia::render('Staff/Issues/Show', [
             'issue' => [
                 'id' => $issue->id,
                 'reference_code' => $issue->reference_code,

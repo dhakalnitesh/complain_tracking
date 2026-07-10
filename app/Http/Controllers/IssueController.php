@@ -30,7 +30,7 @@ class IssueController extends Controller
         $organizations = Organization::where('is_active', true)->orderBy('name')->get();
         $categories = Category::active()->sorted()->get(['id', 'name']);
 
-        return Inertia::render('Submit', [
+        return Inertia::render('Public/Submit', [
             'locations' => $locations,
             'organizations' => $organizations,
             'selected_organization' => $organization,
@@ -145,7 +145,7 @@ class IssueController extends Controller
             return redirect()->route('status.check')->with('error', 'No issue found with reference code: ' . $referenceCode);
         }
 
-        return Inertia::render('Reference', [
+        return Inertia::render('Public/Reference', [
             'issue' => [
                 'id' => $issue->id,
                 'reference_code' => $issue->reference_code,
@@ -236,7 +236,7 @@ class IssueController extends Controller
             }
         }
 
-        return Inertia::render('StatusCheck', [
+        return Inertia::render('Public/StatusCheck', [
             'issue' => $issue ? [
                 'id' => $issue->id,
                 'reference_code' => $issue->reference_code,

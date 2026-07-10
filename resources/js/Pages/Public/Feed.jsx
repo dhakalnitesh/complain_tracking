@@ -1,9 +1,9 @@
 import { Head, Link } from '@inertiajs/react';
-import { route } from '../ziggy';
-import { useLanguage } from '../Context/LanguageContext';
-import ComplaintCard from '../Components/ComplaintCard';
-import FeedFilters from '../Components/FeedFilters';
-import TrackModal from '../Components/TrackModal';
+import { route } from '../../ziggy';
+import { useLanguage } from '../../Context/LanguageContext';
+import ComplaintCard from '../../Components/Feed/ComplaintCard';
+import FeedFilters from '../../Components/Feed/FeedFilters';
+import TrackModal from '../../Components/TrackModal';
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 export default function Feed({ issues, filters, categories, locations }) {

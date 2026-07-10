@@ -1,6 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { route } from '../../ziggy';
-import { StatusBadge, PriorityBadge } from '../../Components/Badge';
+import { route } from '../../../ziggy';
+import { StatusBadge, PriorityBadge } from '../../../Components/UI/Badge';
 
 export default function IssueDetail({ issue }) {
   const { data, setData, post, processing, errors } = useForm({

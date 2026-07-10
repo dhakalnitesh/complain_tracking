@@ -1,8 +1,8 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { route } from '../../ziggy';
-import { StatusBadge, PriorityBadge } from '../../Components/Badge';
-import SearchSelect from '../../Components/SearchSelect';
-import NepaliDatePicker from '../../Components/NepaliDatePicker';
+import { route } from '../../../ziggy';
+import { StatusBadge, PriorityBadge } from '../../../Components/UI/Badge';
+import SearchSelect from '../../../Components/UI/SearchSelect';
+import NepaliDatePicker from '../../../Components/UI/NepaliDatePicker';
 import { useState } from 'react';
 
 const statusOptions = ['received', 'in_progress', 'resolved'];

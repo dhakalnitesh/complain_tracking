@@ -18,7 +18,7 @@ class ModerationController extends Controller
             ->latest()
             ->paginate(50);
 
-        return Inertia::render('Admin/Moderation', [
+        return Inertia::render('Admin/Moderation/Index', [
             'flags' => $flags,
         ]);
     }

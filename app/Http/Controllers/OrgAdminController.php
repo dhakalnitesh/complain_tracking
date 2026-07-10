@@ -55,7 +55,7 @@ class OrgAdminController extends Controller
                 'bs_date' => BsDateService::toBsString($i->created_at, 'datetime'),
             ]);
 
-        return Inertia::render('OrgAdmin/Dashboard', [
+        return Inertia::render('OrgAdmin/Dashboard/Index', [
             'organization' => $org,
             'stats' => $stats,
             'recent_issues' => $recentIssues,
@@ -82,7 +82,7 @@ class OrgAdminController extends Controller
                 'children_count' => $d->children->count(),
             ]);
 
-        return Inertia::render('OrgAdmin/Departments', [
+        return Inertia::render('OrgAdmin/Departments/Index', [
             'organization' => $org,
             'departments' => $departments,
         ]);
@@ -130,7 +130,7 @@ class OrgAdminController extends Controller
 
         $departments = Department::where('organization_id', $org->id)->active()->sorted()->get(['id', 'name']);
 
-        return Inertia::render('OrgAdmin/Staff', [
+        return Inertia::render('OrgAdmin/Staff/Index', [
             'organization' => $org,
             'staff' => $staff,
             'departments' => $departments,

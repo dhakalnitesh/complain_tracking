@@ -1,7 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { route } from '../../ziggy';
-import StatsCard from '../../Components/StatsCard';
-import { StatusBadge, PriorityBadge } from '../../Components/Badge';
+import StatsCard from '../../Components/UI/StatsCard';
+import { StatusBadge, PriorityBadge } from '../../Components/UI/Badge';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 
 const COLORS = ['#2563eb', '#dc2626', '#f59e0b', '#10b981', '#8b5cf6'];

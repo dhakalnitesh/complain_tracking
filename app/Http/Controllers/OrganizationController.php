@@ -29,7 +29,7 @@ class OrganizationController extends Controller
                 'created_at' => $o->created_at->toISOString(),
             ]);
 
-        return Inertia::render('Admin/Organizations', [
+        return Inertia::render('Admin/Organizations/Index', [
             'organizations' => $organizations,
         ]);
     }

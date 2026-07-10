@@ -1,7 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
-import { route } from '../../ziggy';
-import { useLanguage } from '../../Context/LanguageContext';
-import { StatusBadge, PriorityBadge } from '../../Components/Badge';
+import { route } from '../../../ziggy';
+import { useLanguage } from '../../../Context/LanguageContext';
+import { StatusBadge, PriorityBadge } from '../../../Components/UI/Badge';
 
 export default function OrgAdminDashboard({ organization, stats, recent_issues }) {
   const { t, lang } = useLanguage();

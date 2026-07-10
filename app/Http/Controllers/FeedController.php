@@ -71,7 +71,7 @@ class FeedController extends Controller
         $categories = Category::active()->sorted()->get(['id', 'name']);
         $locations = Location::whereHas('issues')->orderBy('name')->get(['id', 'name', 'organization_id']);
 
-        return Inertia::render('Feed', [
+        return Inertia::render('Public/Feed', [
             'issues' => $issues,
             'filters' => $request->only(['category_id', 'status', 'location_id', 'organization_id', 'sort']),
             'categories' => $categories,

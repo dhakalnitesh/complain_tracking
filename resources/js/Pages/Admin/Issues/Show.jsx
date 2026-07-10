@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { StatusBadge, PriorityBadge } from '../../Components/Badge';
+import { StatusBadge, PriorityBadge } from '../../../Components/UI/Badge';
 import { useState } from 'react';
 
 const statusOptions = ['received', 'in_progress', 'resolved'];

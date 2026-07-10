@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { usePage, router } from '@inertiajs/react';
-import { useToast } from '../Components/Toast';
+import { useToast } from '../Components/UI/Toast';
 
 export default function useRealtime() {
   const { addToast } = useToast();

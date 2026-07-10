@@ -2,8 +2,8 @@ import { createInertiaApp } from '@inertiajs/react';
 import { createRoot } from 'react-dom/client';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { LanguageProvider } from './Context/LanguageContext';
-import { ToastProvider } from './Components/Toast';
-import Layout from './Components/Layout';
+import { ToastProvider } from './Components/UI/Toast';
+import Layout from './Layouts/Layout';
 import Pusher from 'pusher-js';
 import Echo from 'laravel-echo';
 

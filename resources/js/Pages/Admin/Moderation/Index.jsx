@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { useLanguage } from '../../Context/LanguageContext';
+import { useLanguage } from '../../../Context/LanguageContext';
 
 export default function Moderation({ flags }) {
   const { t, lang } = useLanguage();

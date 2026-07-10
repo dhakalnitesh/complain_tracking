@@ -48,7 +48,7 @@ class DashboardController extends Controller
             ->orderBy('date')
             ->get();
 
-        return Inertia::render('Dashboard', [
+        return Inertia::render('Public/Dashboard', [
             'organizations' => $organizations,
             'stats' => $stats,
             'recent_issues' => $recentIssues,

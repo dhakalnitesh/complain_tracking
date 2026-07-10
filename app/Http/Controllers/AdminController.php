@@ -22,7 +22,7 @@ class AdminController extends Controller
         if (Auth::check() && Auth::user()->isSuperAdmin()) {
             return redirect()->route('admin.dashboard');
         }
-        return Inertia::render('Admin/Login');
+        return Inertia::render('Admin/Auth/Login');
     }
 
     public function login(Request $request)
@@ -90,7 +90,7 @@ class AdminController extends Controller
             ->map(fn($i) => $i->created_at->diffInHours($i->resolved_at))
             ->average();
 
-        return Inertia::render('Admin/Dashboard', [
+        return Inertia::render('Admin/Dashboard/Index', [
             'stats' => $stats,
             'recent_issues' => $recentIssues,
             'category_stats' => $categoryStats,
@@ -335,7 +335,7 @@ class AdminController extends Controller
                     'bs_created_at' => \App\Services\BsDateService::toBsString($issue->created_at, 'short'),
                 ]);
 
-        return Inertia::render('Admin/Staff/StaffIssues', [
+        return Inertia::render('Admin/Staff/Issues', [
             'staff' => ['id' => $user->id, 'name' => $user->name],
             'issues' => $issues,
         ]);
@@ -459,7 +459,7 @@ class AdminController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'organization_id']);
 
-        return Inertia::render('Admin/IssueDetail', [
+        return Inertia::render('Admin/Issues/Show', [
             'issue' => [
                 'id' => $issue->id,
                 'organization_id' => $issue->organization_id,

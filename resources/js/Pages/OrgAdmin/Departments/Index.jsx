@@ -1,6 +1,6 @@
 import { Head, router } from '@inertiajs/react';
-import { route } from '../../ziggy';
-import { useLanguage } from '../../Context/LanguageContext';
+import { route } from '../../../ziggy';
+import { useLanguage } from '../../../Context/LanguageContext';
 import { useState } from 'react';
 
 export default function OrgAdminDepartments({ organization, departments }) {

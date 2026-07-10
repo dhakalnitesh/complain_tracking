@@ -1,10 +1,10 @@
 import { Link, usePage } from '@inertiajs/react';
 import { route } from '../ziggy';
 import { useLanguage } from '../Context/LanguageContext';
-import LanguageToggle from './LanguageToggle';
-import TrackModal from './TrackModal';
-import Footer from './Footer';
-import { useToast } from './Toast';
+import LanguageToggle from '../Components/LanguageToggle';
+import TrackModal from '../Components/TrackModal';
+import Footer from '../Components/Footer';
+import { useToast } from '../Components/UI/Toast';
 import { useState, useEffect } from 'react';
 
 export default function Layout({ children }) {
