@@ -8,12 +8,21 @@ export default function useRealtime() {
   const user = auth?.user;
 
   useEffect(() => {
-    if (!user || !broadcasting?.enabled || !window.Echo) return;
+    // 60s polling fallback — never miss updates even if Reverb goes down
+    const pollTimer = setInterval(() => {
+      router.reload({ only: ['stats', 'recent_issues'], preserveState: true, preserveScroll: true });
+    }, 60000);
+
+    if (!user || !broadcasting?.enabled || !window.Echo) {
+      return () => clearInterval(pollTimer);
+    }
 
     const orgId = user.organization_id;
     const isSuperAdmin = user.is_admin;
 
-    if (!orgId && !isSuperAdmin) return;
+    if (!orgId && !isSuperAdmin) {
+      return () => clearInterval(pollTimer);
+    }
 
     const channels = [];
     if (isSuperAdmin) {
@@ -44,6 +53,7 @@ export default function useRealtime() {
     });
 
     return () => {
+      clearInterval(pollTimer);
       channels.forEach(ch => {
         ch.stopListening('.IssueCreated');
         ch.stopListening('.IssueStatusChanged');
