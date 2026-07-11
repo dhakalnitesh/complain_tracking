@@ -48,6 +48,14 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(60)->by($request->ip());
         });
 
+        RateLimiter::for('auth:register', function (Request $request) {
+            return Limit::perHour(3)->by($request->ip());
+        });
+
+        RateLimiter::for('admin:actions', function (Request $request) {
+            return Limit::perMinute(60)->by($request->user()?->id ?? $request->ip());
+        });
+
         RateLimiter::for('comments:store', function (Request $request) {
             $key = $request->ip() . '|' . ($request->cookie('_auid') ?? session()->getId());
             return Limit::perMinute(10)->by($key);
