@@ -39,6 +39,7 @@ class VideoUploadTest extends TestCase
             'category_id' => $this->category->id,
             'priority' => 'medium',
             'location_id' => $this->location->id,
+            'title' => 'Video test complaint',
             'description' => 'Test complaint with video attachment',
             'video' => $video,
             'website' => '',
@@ -66,6 +67,7 @@ class VideoUploadTest extends TestCase
             'category_id' => $this->category->id,
             'priority' => 'low',
             'location_id' => $this->location->id,
+            'title' => 'Both media test',
             'description' => 'Testing both media',
             'video' => $video,
             'photo' => UploadedFile::fake()->image('photo.jpg', 100, 100),
@@ -121,6 +123,7 @@ class VideoUploadTest extends TestCase
             'category_id' => $this->category->id,
             'priority' => 'low',
             'location_id' => $this->location->id,
+            'title' => 'No media test',
             'description' => 'No media at all',
             'website' => '',
         ]);

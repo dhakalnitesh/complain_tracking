@@ -62,6 +62,13 @@ class DuplicateDetectionService
         'will', 'with', 'from', 'they', 'been', 'into', 'over', 'such',
         'that', 'this', 'these', 'those', 'what', 'which', 'when', 'where',
         'how', 'who', 'whom', 'whose',
+        // Nepali stop words
+        'र', 'पनि', 'वा', 'को', 'मा', 'ले', 'बाट', 'का', 'हो', 'छ',
+        'हुन्', 'थियो', 'छन्', 'यो', 'त्यो', 'ती', 'त्यस', 'यस',
+        'एउटा', 'केही', 'धेरै', 'सबै', 'कुनै', 'अरू',
+        'रहेको', 'गर्न', 'भएको', 'भन्ने', 'गरेको',
+        'लागि', 'सम्म', 'तिर', 'भित्र', 'बाहिर', 'माथि',
+        'तल', 'अगाडि', 'पछाडि', 'छेउ', 'बीच',
     ];
 
     private static function tokenize(string $text): array

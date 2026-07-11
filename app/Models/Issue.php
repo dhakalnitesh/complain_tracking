@@ -117,6 +117,21 @@ class Issue extends Model
         return $this->belongsTo(Department::class);
     }
 
+    public function media(): HasMany
+    {
+        return $this->hasMany(IssueMedia::class);
+    }
+
+    public function getHasPhotoAttribute(): bool
+    {
+        return !is_null($this->photo_path);
+    }
+
+    public function getHasVideoAttribute(): bool
+    {
+        return !is_null($this->video_path);
+    }
+
     public function upvotes(): HasMany
     {
         return $this->hasMany(Upvote::class);
@@ -174,11 +189,6 @@ class Issue extends Model
     {
         $hours = config("sla.priorities.{$this->priority}.hours", 48);
         return $this->created_at->addHours($hours);
-    }
-
-    public function getHasVideoAttribute(): bool
-    {
-        return !is_null($this->video_path);
     }
 
     public function effectivePriority(): string

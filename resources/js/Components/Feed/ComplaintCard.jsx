@@ -103,6 +103,12 @@ export default function ComplaintCard({ issue }) {
             </span>
           </div>
 
+          {issue.merged_count > 0 && (
+            <div className="mt-1 text-[10px] text-gray-400">
+              {issue.merged_count + 1} {(lang === 'np' ? 'जनाले रिपोर्ट गरे' : 'people reported this')}
+            </div>
+          )}
+
           {/* Actions: Like + Comment count + Track */}
           <div className="flex items-center gap-3 mt-2 pt-2 border-t border-gray-100">
             <div className="flex items-center gap-1">

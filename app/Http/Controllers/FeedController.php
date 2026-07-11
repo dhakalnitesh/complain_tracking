@@ -51,6 +51,8 @@ class FeedController extends Controller
             $anonCount = $issue->upvotes->filter(fn($u) => $u->user_id === null)->count();
             $totalUpvotes = $issue->upvotes->count();
 
+            $mergedCount = Issue::where('duplicate_of_id', $issue->id)->count();
+
             $socialProof = null;
             if ($totalUpvotes > 0) {
                 if ($namedUpvoters->count() > 0) {
@@ -87,6 +89,7 @@ class FeedController extends Controller
                 'comments_count' => $issue->comments_count,
                 'has_upvoted' => $issue->isUpvotedBy($userId, $sessionId),
                 'social_proof' => $socialProof,
+                'merged_count' => $mergedCount,
             ];
         });
 

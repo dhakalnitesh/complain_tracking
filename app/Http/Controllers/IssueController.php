@@ -6,10 +6,12 @@ use App\Events\IssueCreated;
 use App\Models\Category;
 use App\Models\Issue;
 use App\Models\IssueEvent;
+use App\Models\IssueMedia;
 use App\Models\Location;
 use App\Models\Organization;
 use App\Services\BsDateService;
 use App\Services\DuplicateDetectionService;
+use App\Services\MergeService;
 use App\Services\NotificationService;
 use App\Services\RoutingService;
 use Illuminate\Http\Request;
@@ -108,6 +110,13 @@ class IssueController extends Controller
             'video_path' => $videoPath,
         ]);
 
+        if ($photoPath) {
+            $issue->media()->create(['path' => $photoPath, 'type' => 'photo']);
+        }
+        if ($videoPath) {
+            $issue->media()->create(['path' => $videoPath, 'type' => 'video']);
+        }
+
         $referenceCode = Issue::generateReferenceCode($validated['organization_id']);
         $issue->update(['reference_code' => $referenceCode]);
 
@@ -122,6 +131,22 @@ class IssueController extends Controller
             ],
             'is_public' => true,
         ]);
+
+        $bestDuplicate = !empty($duplicates) ? $duplicates[0] : null;
+        if ($bestDuplicate && $bestDuplicate['similarity'] > 0.5) {
+            $parentIssue = Issue::find($bestDuplicate['id']);
+            if ($parentIssue && $parentIssue->status !== 'merged') {
+                MergeService::autoMerge($issue, $parentIssue);
+
+                if (config('broadcasting.default') !== 'log') {
+                    broadcast(new IssueCreated($issue));
+                }
+
+                return redirect()->route('issues.show-reference', [
+                    'reference_code' => $parentIssue->reference_code,
+                ])->with('info', 'Your complaint was similar to an existing report. It has been combined for better tracking.');
+            }
+        }
 
         if (config('broadcasting.default') !== 'log') {
             broadcast(new IssueCreated($issue));
@@ -157,6 +182,14 @@ class IssueController extends Controller
 
         if (!$issue) {
             return redirect()->route('status.check')->with('error', 'No issue found with reference code: ' . $referenceCode);
+        }
+
+        if ($issue->status === 'merged' && $issue->duplicate_of_id) {
+            $parent = Issue::find($issue->duplicate_of_id);
+            if ($parent) {
+                return redirect()->route('issues.show-reference', ['reference_code' => $parent->reference_code])
+                    ->with('info', 'This complaint was combined with ' . $parent->reference_code);
+            }
         }
 
         return Inertia::render('Public/Reference', [
