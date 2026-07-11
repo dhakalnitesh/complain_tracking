@@ -17,10 +17,12 @@ class IssueFactory extends Factory
         $location = Location::factory()->create(['organization_id' => $org->id]);
         $prefix = strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $org->name), 0, 3)) ?: 'GRV';
 
+        $refCode = Issue::generateReferenceCode($org->id);
+
         return [
             'organization_id' => $org->id,
             'location_id' => $location->id,
-            'reference_code' => fake()->unique()->regexify('[A-Z]{3}-\d{4}'),
+            'reference_code' => $refCode,
             'category' => fake()->randomElement([
                 'Canteen/Food', 'Toilet/Sanitation', 'Electricity/Water', 'Other',
             ]),

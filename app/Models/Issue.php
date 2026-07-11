@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class Issue extends Model
 {
@@ -182,11 +183,15 @@ class Issue extends Model
         $org = Organization::find($orgId);
         $clean = $org ? preg_replace('/[^A-Za-z0-9]/', '', $org->name) : '';
         $prefix = strtoupper(substr($clean, 0, 3)) ?: 'GRV';
-        $maxSeq = static::withTrashed()->where('organization_id', $orgId)
-            ->where('reference_code', 'LIKE', $prefix . '-%')
-            ->selectRaw('COALESCE(MAX(CAST(SUBSTR(reference_code, LENGTH(?) + 2) AS UNSIGNED)), 0) as max_seq', [$prefix . '-'])
-            ->value('max_seq');
-        return $prefix . '-' . str_pad($maxSeq + 1, 4, '0', STR_PAD_LEFT);
+
+        $seq = DB::transaction(function () {
+            return DB::table('reference_code_sequences')->insertGetId([
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        });
+
+        return $prefix . '-' . str_pad($seq, 6, '0', STR_PAD_LEFT);
     }
 
     public function isEscalated(): bool
