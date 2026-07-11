@@ -54,9 +54,7 @@ export default function StatusCheck({ issue, error }) {
             <div className="mt-6 space-y-5">
               {/* Progress Steps */}
               <div className="bg-gray-50 rounded-xl p-4">
-                <ProgressSteps currentStatus={issue.status} events={[
-                  { id: 1, description: t('statuses.received'), created_at: issue.created_at }
-                ].filter(Boolean)} />
+                <ProgressSteps currentStatus={issue.status} events={issue.events || []} />
               </div>
 
               {/* Issue Details */}
