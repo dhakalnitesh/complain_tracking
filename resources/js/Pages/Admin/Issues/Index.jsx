@@ -3,6 +3,7 @@ import { route } from 'ziggy-js';
 import { StatusBadge, PriorityBadge } from '../../../Components/UI/Badge';
 import SearchSelect from '../../../Components/UI/SearchSelect';
 import NepaliDatePicker from '../../../Components/UI/NepaliDatePicker';
+import AssignPopup from '../../../Components/Issues/AssignPopup';
 import useRealtime from '../../../hooks/useRealtime';
 import { useState } from 'react';
 
@@ -69,17 +70,6 @@ export default function AdminIssues({ issues, staff_users = [], organizations = 
         router.patch(route('admin.issues.update-status', issueId), { status: newStatus }, { preserveScroll: true });
     }
 
-    function handleAssign(issueId, staffId, staffName) {
-        router.post(route('admin.issues.assign', issueId), {
-            assigned_to: staffName,
-            assigned_user_id: staffId || null,
-        }, { preserveScroll: true });
-    }
-
-    function currentOrgStaff(issue) {
-        return staff_users.filter(s => s.organization_id === issue.organization_id || !s.organization_id);
-    }
-
     const [assigning, setAssigning] = useState(null);
 
     return (
@@ -101,6 +91,9 @@ export default function AdminIssues({ issues, staff_users = [], organizations = 
                         </Link>
                         <Link href={route('admin.moderation')} className="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-all">
                             Moderation
+                        </Link>
+                        <Link href={route('admin.extension-requests')} className="px-4 py-2 text-sm font-medium text-amber-600 bg-amber-50 rounded-lg hover:bg-amber-100 transition-all">
+                            Extensions
                         </Link>
                         <Link href={route('dashboard')} className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all">
                             Site
@@ -283,28 +276,11 @@ export default function AdminIssues({ issues, staff_users = [], organizations = 
                                                     {issue.assigned_to || 'Assign'}
                                                 </button>
                                                 {assigning === issue.id && (
-                                                    <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-lg border border-gray-200 shadow-lg z-50 max-h-48 overflow-y-auto">
-                                                        <button
-                                                            onClick={() => handleAssign(issue.id, null, '')}
-                                                            className="w-full text-left px-3 py-2 text-xs text-gray-500 hover:bg-gray-50 border-b border-gray-100"
-                                                        >
-                                                            Unassign
-                                                        </button>
-                                                        {currentOrgStaff(issue).map(s => (
-                                                            <button
-                                                                key={s.id}
-                                                                onClick={() => handleAssign(issue.id, s.id, s.name)}
-                                                                className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 ${
-                                                                    issue.assigned_user_id === s.id ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-700'
-                                                                }`}
-                                                            >
-                                                                {s.name}
-                                                            </button>
-                                                        ))}
-                                                        {currentOrgStaff(issue).length === 0 && (
-                                                            <div className="px-3 py-2 text-xs text-gray-400">No staff available</div>
-                                                        )}
-                                                    </div>
+                                                    <AssignPopup
+                                                        issue={issue}
+                                                        staffUsers={staff_users}
+                                                        onClose={() => setAssigning(null)}
+                                                    />
                                                 )}
                                             </div>
                                         </>

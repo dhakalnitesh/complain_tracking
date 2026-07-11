@@ -67,6 +67,7 @@ class IssueController extends Controller
                 'assigned_user_name' => $issue->assignedUser?->name,
                 'is_escalated' => $issue->status !== 'resolved' && $issue->created_at->lt(now()->subHours(24)),
                 'is_sla_breached' => $issue->isSlaBreached(),
+                'deadline_at' => $issue->deadline_at?->toISOString(),
                 'created_at' => $issue->created_at->toISOString(),
                 'bs_created_at' => \App\Services\BsDateService::toBsString($issue->created_at, 'short'),
                 'resolved_at' => $issue->resolved_at?->toISOString(),
@@ -126,6 +127,8 @@ class IssueController extends Controller
                 'sms_opt_in' => $issue->sms_opt_in,
                 'is_escalated' => $issue->isEscalated(),
                 'is_sla_breached' => $issue->isSlaBreached(),
+                'deadline_at' => $issue->deadline_at?->toISOString(),
+                'extension_deadline_at' => $issue->extension_deadline_at?->toISOString(),
                 'created_at' => $issue->created_at->toISOString(),
                 'bs_created_at' => \App\Services\BsDateService::toBsString($issue->created_at, 'short'),
                 'resolved_at' => $issue->resolved_at?->toISOString(),
@@ -244,21 +247,35 @@ class IssueController extends Controller
                     $q->where('is_staff', true);
                 }),
             ],
+            'days' => 'nullable|integer|min:1|max:365',
         ]);
+
+        $deadlineAt = null;
+        if (($validated['days'] ?? false)) {
+            $deadlineAt = now()->addDays((int) $validated['days']);
+        }
 
         $issue->update([
             'assigned_to' => $validated['assigned_to'],
             'assigned_user_id' => $validated['assigned_user_id'] ?? null,
+            'deadline_at' => $deadlineAt,
         ]);
+
+        $description = "Issue assigned to {$validated['assigned_to']}.";
+        if ($deadlineAt) {
+            $description .= " Deadline: {$deadlineAt->toDateTimeString()} (".($validated['days'] ?? '')." days).";
+        }
 
         IssueEvent::create([
             'issue_id' => $issue->id,
             'user_id' => Auth::id(),
             'type' => 'assigned',
-            'description' => "Issue assigned to {$validated['assigned_to']}.",
+            'description' => $description,
             'metadata' => [
                 'assigned_to' => $validated['assigned_to'],
                 'assigned_user_id' => $validated['assigned_user_id'],
+                'days' => $validated['days'] ?? null,
+                'deadline_at' => $deadlineAt?->toISOString(),
             ],
             'is_public' => true,
         ]);

@@ -216,7 +216,7 @@ export default function StaffIndex({ staff, organizations, filters = {} }) {
                 </div>
 
                 {/* Pagination */}
-                {staff.links && staff.links.length > 3 && (
+                {staff.links && staff.links.length > 0 && staff.total > staff.per_page && (
                     <div className="flex items-center justify-between mt-6">
                         <p className="text-sm text-gray-500">
                             Showing {staff.from ?? 0}–{staff.to ?? 0} of {staff.total ?? 0}

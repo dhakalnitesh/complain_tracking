@@ -1,5 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { StatusBadge, PriorityBadge } from '../../../Components/UI/Badge';
+import AssignPopup from '../../../Components/Issues/AssignPopup';
 import { useState } from 'react';
 
 const statusOptions = ['received', 'in_progress', 'resolved'];
@@ -32,18 +33,6 @@ export default function IssueDetail({ issue, staff_users = [] }) {
     router.post(route('admin.issues.update-priority', issue.id), {
       admin_priority: selectedPriority,
     }, { preserveScroll: true });
-  }
-
-  function handleAssign(staffId, staffName) {
-    router.post(route('admin.issues.assign', issue.id), {
-      assigned_to: staffName,
-      assigned_user_id: staffId || null,
-    }, { preserveScroll: true });
-    setAssigning(false);
-  }
-
-  function orgStaff() {
-    return staff_users.filter(s => s.organization_id === issue.organization_id || !s.organization_id);
   }
 
   return (
@@ -90,6 +79,20 @@ export default function IssueDetail({ issue, staff_users = [] }) {
               <p className="text-xs font-medium text-gray-400 uppercase">Assigned To</p>
               <p className="font-medium text-gray-900">{issue.assigned_user_name || issue.assigned_to || 'Unassigned'}</p>
             </div>
+            {(issue.deadline_at || issue.extension_deadline_at) && (
+              <div>
+                <p className="text-xs font-medium text-gray-400 uppercase">Deadline</p>
+                <p className={`font-medium ${issue.extension_deadline_at ? 'text-amber-600' : 'text-gray-900'}`}>
+                  {issue.extension_deadline_at
+                    ? new Date(issue.extension_deadline_at).toLocaleDateString('en-GB')
+                    : new Date(issue.deadline_at).toLocaleDateString('en-GB')}
+                  {issue.extension_deadline_at && <span className="text-xs text-gray-400 ml-1">(extended)</span>}
+                  {new Date(issue.extension_deadline_at || issue.deadline_at) < new Date() && issue.status !== 'resolved' && (
+                    <span className="text-red-500 text-xs ml-1">Overdue</span>
+                  )}
+                </p>
+              </div>
+            )}
             <div>
               <p className="text-xs font-medium text-gray-400 uppercase">Title</p>
               <p className="font-medium text-gray-900">{issue.title}</p>
@@ -169,28 +172,11 @@ export default function IssueDetail({ issue, staff_users = [] }) {
                     {issue.assigned_user_name || issue.assigned_to || 'Assign'}
                   </button>
                   {assigning && (
-                    <div className="absolute left-0 top-full mt-1 w-56 bg-white rounded-lg border border-gray-200 shadow-lg z-50 max-h-48 overflow-y-auto">
-                      <button
-                        onClick={() => handleAssign(null, '')}
-                        className="w-full text-left px-3 py-2 text-xs text-gray-500 hover:bg-gray-50 border-b border-gray-100"
-                      >
-                        Unassign
-                      </button>
-                      {orgStaff().map(s => (
-                        <button
-                          key={s.id}
-                          onClick={() => handleAssign(s.id, s.name)}
-                          className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 ${
-                            issue.assigned_user_id === s.id ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-700'
-                          }`}
-                        >
-                          {s.name}
-                        </button>
-                      ))}
-                      {orgStaff().length === 0 && (
-                        <div className="px-3 py-2 text-xs text-gray-400">No staff available</div>
-                      )}
-                    </div>
+                    <AssignPopup
+                      issue={issue}
+                      staffUsers={staff_users}
+                      onClose={() => setAssigning(false)}
+                    />
                   )}
                 </div>
               </>

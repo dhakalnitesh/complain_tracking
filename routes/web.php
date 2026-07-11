@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\Export\ExportController as AdminExportController;
 use App\Http\Controllers\Admin\Issues\IssueController as AdminIssueController;
 use App\Http\Controllers\Admin\Moderation\ModerationController;
 use App\Http\Controllers\Admin\Organizations\OrganizationController;
+use App\Http\Controllers\Admin\ExtensionRequests\ExtensionRequestController;
 use App\Http\Controllers\Admin\Staff\IdentityDocumentController;
 use App\Http\Controllers\Admin\Staff\StaffController as AdminStaffController;
 use App\Http\Controllers\AuthController;
@@ -85,12 +86,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/moderation/comments/{comment}/hide', [ModerationController::class, 'hideComment'])->name('moderation.comments.hide');
 
         Route::get('/spam-logs', [ModerationController::class, 'spamLogs'])->name('spam-logs');
+
+        Route::get('/extension-requests', [ExtensionRequestController::class, 'index'])->name('extension-requests');
+        Route::post('/extension-requests/{extensionRequest}/review', [ExtensionRequestController::class, 'review'])->name('extension-requests.review');
     });
 });
 
 Route::middleware(['auth', 'staff'])->prefix('staff')->name('staff.')->group(function () {
     Route::get('/issues/{issue}', [StaffIssueController::class, 'show'])->name('issues.show');
     Route::post('/issues/{issue}/comment', [StaffIssueController::class, 'comment'])->name('issues.comment');
+    Route::post('/issues/{issue}/progress', [StaffIssueController::class, 'storeProgress'])->name('issues.progress');
+    Route::post('/issues/{issue}/extension', [StaffIssueController::class, 'requestExtension'])->name('issues.extension');
 });
 
 Route::get('/api/stats/overview', [StatsController::class, 'overview']);

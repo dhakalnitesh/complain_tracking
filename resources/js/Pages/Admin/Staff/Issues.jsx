@@ -45,11 +45,11 @@ export default function StaffIssues({ staff, issues }) {
                     )}
                 </div>
 
-                {issues.links?.length > 3 && (
-                    <div className="flex items-center justify-between mt-6">
-                        <p className="text-sm text-gray-500">
-                            Showing {issues.from ?? 0}–{issues.to ?? 0} of {issues.total ?? 0}
-                        </p>
+                <div className="flex items-center justify-between mt-6">
+                    <p className="text-sm text-gray-500">
+                        Showing {issues.from ?? 0}–{issues.to ?? 0} of {issues.total ?? 0}
+                    </p>
+                    {issues.links?.length > 0 && issues.total > issues.per_page && (
                         <div className="flex items-center gap-2">
                             {issues.links.map((link, i) => (
                                 <button key={i} onClick={() => link.url && router.get(link.url, {}, { preserveState: true, replace: true, preserveScroll: true })}
@@ -59,8 +59,8 @@ export default function StaffIssues({ staff, issues }) {
                                     }`}>{link.label.replace(/&laquo;/g, '\u00AB').replace(/&raquo;/g, '\u00BB')}</button>
                             ))}
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
         </>
     );

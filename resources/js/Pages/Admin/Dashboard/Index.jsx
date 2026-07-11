@@ -33,6 +33,9 @@ export default function AdminDashboard({ stats, recent_issues, category_stats, i
                         <Link href={route('admin.moderation')} className="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-all">
                             Moderation
                         </Link>
+                        <Link href={route('admin.extension-requests')} className="px-4 py-2 text-sm font-medium text-amber-600 bg-amber-50 rounded-lg hover:bg-amber-100 transition-all">
+                            Extensions
+                        </Link>
                         <Link href={route('dashboard')} className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all">
                             Site
                         </Link>

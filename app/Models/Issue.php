@@ -46,6 +46,8 @@ class Issue extends Model
         'duplicate_of_id',
         'department_id',
         'hidden_at',
+        'deadline_at',
+        'extension_deadline_at',
         'anonymous_uuid',
         'reporter_ip_hash',
         'spam_score',
@@ -68,6 +70,9 @@ class Issue extends Model
             'is_anonymous' => 'boolean',
             'sms_opt_in' => 'boolean',
             'spam_score' => 'float',
+            'deadline_at' => 'datetime',
+            'extension_deadline_at' => 'datetime',
+
         ];
     }
 
@@ -141,6 +146,16 @@ class Issue extends Model
     public function getHasVideoAttribute(): bool
     {
         return !is_null($this->video_path);
+    }
+
+    public function dailyProgress(): HasMany
+    {
+        return $this->hasMany(DailyProgress::class);
+    }
+
+    public function extensionRequests(): HasMany
+    {
+        return $this->hasMany(ExtensionRequest::class);
     }
 
     public function upvotes(): HasMany
