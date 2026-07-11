@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import SearchSelect from '../../../Components/UI/SearchSelect';
+import useRealtime from '../../../hooks/useRealtime';
 import { useState } from 'react';
 import CreateModal from './CreateModal';
 import EditModal from './EditModal';
@@ -12,6 +13,7 @@ const identityLabels = {
 };
 
 export default function StaffIndex({ staff, organizations, filters = {} }) {
+    useRealtime(['staff', 'organizations']);
     const [search, setSearch] = useState(filters.search || '');
     const [orgFilter, setOrgFilter] = useState(filters.organization_id || 'all');
     const [perPage, setPerPage] = useState(filters.per_page || '25');

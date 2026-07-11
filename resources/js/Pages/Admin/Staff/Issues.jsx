@@ -1,8 +1,10 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { route } from 'ziggy-js';
+import useRealtime from '../../../hooks/useRealtime';
 import { StatusBadge, PriorityBadge } from '../../../Components/UI/Badge';
 
 export default function StaffIssues({ staff, issues }) {
+    useRealtime(['issues']);
     return (
         <>
             <Head title={`${staff.name} - Issues`} />
