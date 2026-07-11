@@ -43,10 +43,10 @@ export default function OrgDashboard({ organization, locations, stats, recent_is
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-10 mb-8">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <StatsCard label="Total Issues" value={stats.total_issues} icon="M9 12l2 2 4-4" color="indigo" />
-                    <StatsCard label="Open" value={stats.open_issues} icon="M12 8v4l3 3" color="amber" />
-                    <StatsCard label="Resolved Today" value={stats.resolved_today} icon="M5 13l4 4L19 7" color="green" />
-                    <StatsCard label="Escalated" value={stats.escalated} icon="M12 9v2m0 4h.01" color="red" />
+                    <StatsCard label="Total Issues" value={stats.total_issues} icon="M9 12l2 2 4-4" color="indigo" href={route('feed')} />
+                    <StatsCard label="Open" value={stats.open_issues} icon="M12 8v4l3 3" color="amber" href={route('feed')} />
+                    <StatsCard label="Resolved Today" value={stats.resolved_today} icon="M5 13l4 4L19 7" color="green" href={route('feed')} />
+                    <StatsCard label="Escalated" value={stats.escalated} icon="M12 9v2m0 4h.01" color="red" href={route('feed')} />
                 </div>
             </div>
 
