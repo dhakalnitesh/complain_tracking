@@ -165,8 +165,11 @@ export function toBsString(isoDate, format = 'full') {
       return `${bs.year} ${ENGLISH_MONTHS[npMonth] || ''} ${bs.day}`;
     case 'datetime':
       return `${npYear} साल ${NEPALI_MONTHS[npMonth] || ''} ${npDay} गते, ${npHour}:${npMin} बजे`;
-    case 'datetime_en':
-      return `${bs.year} ${ENGLISH_MONTHS[npMonth] || ''} ${bs.day}, ${String(bs.hour).padStart(2, '0')}:${String(bs.minute).padStart(2, '0')}`;
+    case 'datetime_en': {
+      const hour12 = bs.hour % 12 || 12;
+      const ampm = bs.hour >= 12 ? 'PM' : 'AM';
+      return `${bs.year} ${ENGLISH_MONTHS[npMonth] || ''} ${bs.day}, ${hour12}:${String(bs.minute).padStart(2, '0')} ${ampm}`;
+    }
     default:
       return `${npYear} साल ${NEPALI_MONTHS[npMonth] || ''} ${npDay} गते, ${npHour}:${npMin} बजे`;
   }

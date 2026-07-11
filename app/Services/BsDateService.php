@@ -170,7 +170,7 @@ class BsDateService
             'date' => "{$npYear} साल " . (self::NEPALI_MONTHS[$npMonth] ?? '') . " {$npDay} गते",
             'date_en' => ($bs['year']) . ' ' . (self::ENGLISH_MONTHS[$npMonth] ?? '') . ' ' . $bs['day'],
             'datetime' => "{$npYear} साल " . (self::NEPALI_MONTHS[$npMonth] ?? '') . " {$npDay} गते, {$npHour}:{$npMin} बजे",
-            'datetime_en' => ($bs['year']) . ' ' . (self::ENGLISH_MONTHS[$npMonth] ?? '') . ' ' . $bs['day'] . ', ' . str_pad($bs['hour'], 2, '0', STR_PAD_LEFT) . ':' . str_pad($bs['minute'], 2, '0', STR_PAD_LEFT),
+            'datetime_en' => ($bs['year']) . ' ' . (self::ENGLISH_MONTHS[$npMonth] ?? '') . ' ' . $bs['day'] . ', ' . ($bs['hour'] % 12 ?: 12) . ':' . str_pad($bs['minute'], 2, '0', STR_PAD_LEFT) . ' ' . ($bs['hour'] < 12 ? 'AM' : 'PM'),
             default => "{$npYear} साल " . (self::NEPALI_MONTHS[$npMonth] ?? '') . " {$npDay} गते, {$npHour}:{$npMin} बजे",
         };
     }
