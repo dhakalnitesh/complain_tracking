@@ -14,7 +14,6 @@ class CommentController extends Controller
         $comments = Comment::with(['user', 'replies.user'])
             ->where('issue_id', $issue->id)
             ->visible()
-            ->approved()
             ->public()
             ->root()
             ->latest()

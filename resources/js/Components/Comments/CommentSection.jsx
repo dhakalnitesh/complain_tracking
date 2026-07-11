@@ -91,21 +91,21 @@ export default function CommentSection({ issueId }) {
         {lang === 'np' ? 'टिप्पणीहरू' : 'Comments'} ({comments.length})
       </h4>
 
-      <div className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-        <CommentForm issueId={issueId} onSuccess={handleCommentAdded} />
-      </div>
-
       {comments.length === 0 ? (
         <p className="text-xs text-gray-400 py-2">
           {lang === 'np' ? 'कुनै टिप्पणी छैन। पहिलो टिप्पणी थप्नुहोस्।' : 'No comments yet. Be the first to comment.'}
         </p>
       ) : (
-        <div className="divide-y divide-gray-50">
+        <div className="divide-y divide-gray-50 mb-3">
           {comments.map(comment => (
             <CommentItem key={comment.id} comment={comment} issueId={issueId} />
           ))}
         </div>
       )}
+
+      <div className="p-3 bg-gray-50 rounded-lg border border-gray-100">
+        <CommentForm issueId={issueId} onSuccess={handleCommentAdded} />
+      </div>
     </div>
   );
 }
