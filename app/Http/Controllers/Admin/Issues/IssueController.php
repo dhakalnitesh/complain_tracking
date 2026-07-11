@@ -132,8 +132,8 @@ class IssueController extends Controller
                 'bs_resolved_at' => $issue->resolved_at ? \App\Services\BsDateService::toBsString($issue->resolved_at, 'short') : null,
                 'rating' => $issue->rating,
                 'feedback_comment' => $issue->feedback_comment,
-                'photo_path' => $issue->photo_path ? route('issues.photo', $issue->reference_code) : null,
-                'video_path' => $issue->video_path ? route('issues.photo', $issue->reference_code) : null,
+                'photo_path' => $issue->photo_path && $issue->reference_code ? route('issues.photo', $issue->reference_code) : null,
+                'video_path' => $issue->video_path && $issue->reference_code ? route('issues.photo', $issue->reference_code) : null,
                 'has_video' => !is_null($issue->video_path),
                 'events' => $issue->events->map(fn($e) => [
                     'id' => $e->id,
