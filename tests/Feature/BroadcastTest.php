@@ -54,7 +54,8 @@ class BroadcastTest extends TestCase
             'category_id' => $category->id,
             'priority' => 'low',
             'location_id' => $location->id,
-            'description' => 'Test issue for broadcast',
+            'title' => 'Test issue for broadcast',
+            'description' => 'This is a test issue description for broadcast event testing purposes.',
         ]);
 
         Event::assertDispatched(IssueCreated::class);

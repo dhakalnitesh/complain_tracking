@@ -15,6 +15,7 @@ class Upvote extends Model
         'user_id',
         'session_id',
         'issue_id',
+        'anonymous_uuid',
     ];
 
     public function issue(): BelongsTo
@@ -38,9 +39,9 @@ class Upvote extends Model
         return false;
     }
 
-    public static function toggle(int $issueId, ?int $userId, ?string $sessionId): array
+    public static function toggle(int $issueId, ?int $userId, ?string $sessionId, ?string $uuid = null): array
     {
-        return DB::transaction(function () use ($issueId, $userId, $sessionId) {
+        return DB::transaction(function () use ($issueId, $userId, $sessionId, $uuid) {
             $query = static::where('issue_id', $issueId);
 
             if ($userId) {
@@ -61,6 +62,7 @@ class Upvote extends Model
                     'issue_id' => $issueId,
                     'user_id' => $userId,
                     'session_id' => $sessionId,
+                    'anonymous_uuid' => $uuid,
                 ]);
                 $upvoted = true;
             }

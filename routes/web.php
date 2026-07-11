@@ -29,17 +29,17 @@ Route::get('/feed', [App\Http\Controllers\FeedController::class, 'index'])->name
 Route::get('/org/{organization:slug}', [DashboardController::class, 'organizationDashboard'])->name('org.dashboard');
 
 Route::get('/submit', [IssueController::class, 'create'])->name('issues.create');
-Route::post('/issues', [IssueController::class, 'store'])->name('issues.store')->middleware('throttle:3,1');
+Route::post('/issues', [IssueController::class, 'store'])->name('issues.store')->middleware('throttle:issues:submit');
 Route::get('/issues/reference/{reference_code}', [IssueController::class, 'showReference'])->name('issues.show-reference');
-Route::get('/status', [IssueController::class, 'trackStatus'])->name('status.check')->middleware('throttle:10,1');
-Route::post('/issues/{issue}/feedback', [IssueController::class, 'submitFeedback'])->name('issues.feedback')->middleware('throttle:5,1');
-Route::get('/issues/photo/{reference_code}', [PhotoController::class, 'show'])->name('issues.photo')->middleware('throttle:30,1');
+Route::get('/status', [IssueController::class, 'trackStatus'])->name('status.check')->middleware('throttle:status:check');
+Route::post('/issues/{issue}/feedback', [IssueController::class, 'submitFeedback'])->name('issues.feedback')->middleware('throttle:issues:feedback');
+Route::get('/issues/photo/{reference_code}', [PhotoController::class, 'show'])->name('issues.photo')->middleware('throttle:feed:view');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:admin:login');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:3,1');
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:issues:submit');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -89,13 +89,13 @@ Route::get('/api/stats/categories', [StatsController::class, 'categoryBreakdown'
 Route::get('/api/stats/trends', [StatsController::class, 'issuesOverTime']);
 Route::get('/api/track/{reference_code}', [App\Http\Controllers\Api\TrackController::class, 'show'])->name('api.track');
 
-Route::post('/api/issues/{issue}/upvote', [UpvoteController::class, 'toggle'])->name('upvote.toggle')->middleware('throttle:30,1');
-Route::get('/issues/{issue}/comments', [CommentController::class, 'index'])->name('comments.index')->middleware('throttle:30,1');
-Route::post('/issues/{issue}/comments', [CommentController::class, 'store'])->name('comments.store')->middleware('throttle:10,1');
-Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy')->middleware('throttle:10,1');
+Route::post('/api/issues/{issue}/upvote', [UpvoteController::class, 'toggle'])->name('upvote.toggle')->middleware('throttle:feed:view');
+Route::get('/issues/{issue}/comments', [CommentController::class, 'index'])->name('comments.index')->middleware('throttle:feed:view');
+Route::post('/issues/{issue}/comments', [CommentController::class, 'store'])->name('comments.store')->middleware('throttle:comments:store');
+Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy')->middleware('throttle:comments:store');
 
-Route::post('/issues/{issue}/flag', [FlagController::class, 'flagIssue'])->name('issues.flag')->middleware('throttle:5,1');
-Route::post('/comments/{comment}/flag', [FlagController::class, 'flagComment'])->name('comments.flag')->middleware('throttle:5,1');
+Route::post('/issues/{issue}/flag', [FlagController::class, 'flagIssue'])->name('issues.flag')->middleware('throttle:issues:feedback');
+Route::post('/comments/{comment}/flag', [FlagController::class, 'flagComment'])->name('comments.flag')->middleware('throttle:issues:feedback');
 
 Route::prefix('org-admin')->name('org-admin.')->middleware(['auth', 'org-admin'])->group(function () {
     Route::get('/dashboard', [OrgAdminDashboardController::class, 'index'])->name('dashboard');

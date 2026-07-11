@@ -104,6 +104,8 @@ class IssueController extends Controller
             'reporter_phone' => $validated['reporter_phone'] ?? null,
             'reporter_email' => $validated['reporter_email'] ?? null,
             'reporter_ip' => $request->ip(),
+            'reporter_ip_hash' => \App\Services\IpAnonymizer::hash($request->ip()),
+            'anonymous_uuid' => $request->cookie('_auid'),
             'is_anonymous' => $request->boolean('is_anonymous', true),
             'sms_opt_in' => $request->boolean('sms_opt_in', false),
             'photo_path' => $photoPath,

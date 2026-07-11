@@ -13,8 +13,9 @@ class UpvoteController extends Controller
     {
         $userId = auth()->id();
         $sessionId = $userId ? null : session()->getId();
+        $uuid = $request->cookie('_auid');
 
-        $result = Upvote::toggle($issue->id, $userId, $sessionId);
+        $result = Upvote::toggle($issue->id, $userId, $sessionId, $uuid);
 
         Cache::forget("upvote_count_{$issue->id}");
 

@@ -45,6 +45,10 @@ class Issue extends Model
         'duplicate_of_id',
         'department_id',
         'hidden_at',
+        'anonymous_uuid',
+        'reporter_ip_hash',
+        'spam_score',
+        'moderation_status',
     ];
 
     protected $appends = [
@@ -62,7 +66,13 @@ class Issue extends Model
             'hidden_at' => 'datetime',
             'is_anonymous' => 'boolean',
             'sms_opt_in' => 'boolean',
+            'spam_score' => 'float',
         ];
+    }
+
+    public function scopeVisible($query)
+    {
+        return $query->whereNull('hidden_at');
     }
 
     public function getBsCreatedAtAttribute(): ?string

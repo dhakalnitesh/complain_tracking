@@ -1394,5 +1394,5 @@ Follow this exact order. Each layer builds on the previous.
 ## Commit
 
 ```bash
-git add -A && git commit -m "feat(epic16): add adaptive rate limiting, anonymous UUID, IP hashing, CAPTCHA, spam detection, trust scoring, moderation fixes, audit logging, and priority escalation"
+git add -A && git commit -m "add adaptive rate limiting, anonymous UUID, IP hashing, CAPTCHA, spam detection, trust scoring, moderation fixes, audit logging, and priority escalation"
 ```
