@@ -93,10 +93,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 });
 
 Route::middleware(['auth', 'staff'])->prefix('staff')->name('staff.')->group(function () {
+    Route::get('/issues', [StaffIssueController::class, 'index'])->name('issues.index');
     Route::get('/issues/{issue}', [StaffIssueController::class, 'show'])->name('issues.show');
     Route::post('/issues/{issue}/comment', [StaffIssueController::class, 'comment'])->name('issues.comment');
     Route::post('/issues/{issue}/progress', [StaffIssueController::class, 'storeProgress'])->name('issues.progress');
     Route::post('/issues/{issue}/extension', [StaffIssueController::class, 'requestExtension'])->name('issues.extension');
+    Route::post('/issues/{issue}/resolve', [StaffIssueController::class, 'resolve'])->name('issues.resolve');
 });
 
 Route::get('/api/stats/overview', [StatsController::class, 'overview']);

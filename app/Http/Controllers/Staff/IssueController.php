@@ -16,6 +16,54 @@ use Inertia\Inertia;
 
 class IssueController extends Controller
 {
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+
+        $query = Issue::with(['location', 'organization', 'category'])
+            ->where('assigned_user_id', $user->id);
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('priority')) {
+            $query->where('priority', $request->priority);
+        }
+
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(function ($q) use ($s) {
+                $q->where('reference_code', 'like', "%{$s}%")
+                  ->orWhere('description', 'like', "%{$s}%");
+            });
+        }
+
+        $perPage = min((int) $request->get('per_page', 25), 100);
+        $issues = $query->orderBy('created_at', 'desc')
+            ->paginate($perPage)
+            ->through(fn($issue) => [
+                'id' => $issue->id,
+                'reference_code' => $issue->reference_code,
+                'title' => $issue->title,
+                'category' => $issue->category,
+                'priority' => $issue->priority,
+                'location' => $issue->location?->name,
+                'organization' => $issue->organization?->name,
+                'description' => $issue->description,
+                'status' => $issue->status,
+                'deadline_at' => $issue->deadline_at?->toISOString(),
+                'extension_deadline_at' => $issue->extension_deadline_at?->toISOString(),
+                'created_at' => $issue->created_at->toISOString(),
+                'bs_created_at' => BsDateService::toBsString($issue->created_at, 'short'),
+            ]);
+
+        return Inertia::render('Staff/Issues/Index', [
+            'issues' => $issues,
+            'filters' => $request->only(['status', 'priority', 'search', 'per_page']),
+        ]);
+    }
+
     public function show(Issue $issue)
     {
         $issue->load([
@@ -38,11 +86,7 @@ class IssueController extends Controller
         $isSameOrg = $issue->organization_id === $user->organization_id;
 
         if (!$isAssigned && !$isAdmin && !$isSameOrg) {
-            return redirect()->route('dashboard')->with('error', 'You are not assigned to this issue.');
-        }
-
-        if (!$isAdmin && !$isSameOrg) {
-            return redirect()->route('dashboard')->with('error', 'You do not have access to this issue.');
+            return redirect()->route('staff.issues.index')->with('error', 'You are not assigned to this issue.');
         }
 
         $deadline = $issue->deadline_at ?? $issue->extension_deadline_at;
@@ -65,6 +109,7 @@ class IssueController extends Controller
                 'resolved_at' => $issue->resolved_at?->toISOString(),
                 'deadline_at' => $issue->deadline_at?->toISOString(),
                 'extension_deadline_at' => $issue->extension_deadline_at?->toISOString(),
+                'resolution_summary' => $issue->resolution_summary,
                 'photo_path' => $issue->photo_path && $issue->reference_code ? route('issues.photo', $issue->reference_code) : null,
                 'video_path' => $issue->video_path && $issue->reference_code ? route('issues.photo', $issue->reference_code) : null,
                 'has_video' => !is_null($issue->video_path),
@@ -81,6 +126,7 @@ class IssueController extends Controller
                     'notes' => $p->notes,
                     'photos' => $p->photos,
                     'user_name' => $p->user?->name,
+                    'user_id' => $p->user_id,
                     'created_at' => $p->created_at->toISOString(),
                     'bs_created_at' => BsDateService::toBsString($p->created_at, 'short'),
                 ]),
@@ -181,5 +227,61 @@ class IssueController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Extension request submitted. Awaiting admin approval.');
+    }
+
+    public function resolve(Request $request, Issue $issue)
+    {
+        $user = Auth::user();
+        $isAssigned = $issue->assigned_user_id === $user->id;
+        if (!$isAssigned && !$user->isSuperAdmin()) {
+            return redirect()->back()->with('error', 'You are not assigned to this issue.');
+        }
+
+        $validated = $request->validate([
+            'resolution_summary' => 'required|string|max:5000',
+            'proof_photos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+        ]);
+
+        $proofPaths = [];
+        if ($request->hasFile('proof_photos')) {
+            foreach ($request->file('proof_photos') as $photo) {
+                $path = $photo->store('resolution-proof/' . $issue->reference_code, 'public');
+                $proofPaths[] = $path;
+            }
+        }
+
+        $issue->update([
+            'status' => 'resolved',
+            'resolved_at' => now(),
+            'resolution_summary' => $validated['resolution_summary'],
+            'resolved_by' => $user->id,
+        ]);
+
+        if (count($proofPaths) > 0) {
+            DailyProgress::create([
+                'issue_id' => $issue->id,
+                'user_id' => $user->id,
+                'notes' => "Resolution proof:\n\n{$validated['resolution_summary']}",
+                'photos' => $proofPaths,
+            ]);
+        }
+
+        $event = IssueEvent::create([
+            'issue_id' => $issue->id,
+            'user_id' => $user->id,
+            'type' => 'resolved',
+            'description' => "Issue resolved by {$user->name}. Summary: {$validated['resolution_summary']}",
+            'metadata' => [
+                'resolved_by' => $user->id,
+                'resolved_by_name' => $user->name,
+                'resolution_summary' => $validated['resolution_summary'],
+            ],
+            'is_public' => true,
+        ]);
+
+        $notificationService = app(\App\Services\NotificationService::class);
+        $notificationService->sendStatusChange($issue, $event);
+
+        return redirect()->back()->with('success', 'Issue marked as resolved with summary.');
     }
 }

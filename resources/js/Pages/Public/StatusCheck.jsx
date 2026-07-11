@@ -103,6 +103,35 @@ export default function StatusCheck({ issue, error }) {
                 )}
               </div>
 
+              {/* Resolution Summary */}
+              {issue.status === 'resolved' && issue.resolution_summary && (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                  <h3 className="text-xs font-semibold text-green-800 mb-2">Resolution</h3>
+                  <div className="bg-white rounded-lg p-3 border border-green-100">
+                    <p className="text-xs text-gray-700 whitespace-pre-wrap">{issue.resolution_summary}</p>
+                  </div>
+                  <p className="text-[10px] text-gray-500 mt-1">Resolved by: {issue.resolved_by_name || 'Staff'}</p>
+                </div>
+              )}
+
+              {/* Daily Progress */}
+              {issue.daily_progress && issue.daily_progress.length > 0 && (
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <h3 className="text-xs font-semibold text-gray-700 mb-2">Work Progress</h3>
+                  <div className="space-y-2">
+                    {issue.daily_progress.map(p => (
+                      <div key={p.id} className="text-xs text-gray-600 border-b border-gray-200 pb-2 last:border-0 last:pb-0">
+                        <div className="flex justify-between">
+                          <span className="font-medium text-indigo-600">{p.user_name}</span>
+                          <span className="text-gray-400">{p.bs_created_at}</span>
+                        </div>
+                        <p className="mt-0.5">{p.notes.substring(0, 150)}{p.notes.length > 150 ? '...' : ''}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Share */}
               <div className="bg-indigo-50/50 border border-indigo-100 rounded-xl p-4">
                 <p className="text-xs sm:text-sm font-medium text-indigo-900 mb-3">{t('status.share')}</p>

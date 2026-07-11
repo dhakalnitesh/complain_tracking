@@ -78,7 +78,9 @@ class IssueController extends Controller
             ->visible()
             ->with([
                 'location', 'organization', 'category',
-                'events' => fn($q) => $q->public()->latest()->limit(10),
+                'dailyProgress' => fn($q) => $q->with('user')->latest(),
+                'assignedUser',
+                'events' => fn($q) => $q->public()->latest()->limit(20),
                 'comments' => fn($q) => $q->visible()->approved()->public()->root()->latest()->with(['user', 'replies.user']),
             ])
             ->first();
@@ -115,6 +117,16 @@ class IssueController extends Controller
                 'photo_path' => $issue->photo_path && $issue->reference_code ? route('issues.photo', $issue->reference_code) : null,
                 'video_path' => $issue->video_path && $issue->reference_code ? route('issues.photo', $issue->reference_code) : null,
                 'has_video' => !is_null($issue->video_path),
+                'resolution_summary' => $issue->resolution_summary,
+                'resolved_by_name' => $issue->resolvedBy?->name,
+                'daily_progress' => $issue->dailyProgress->map(fn($p) => [
+                    'id' => $p->id,
+                    'notes' => $p->notes,
+                    'photos' => $p->photos,
+                    'user_name' => $p->user?->name,
+                    'created_at' => $p->created_at->toISOString(),
+                    'bs_created_at' => BsDateService::toBsString($p->created_at, 'short'),
+                ]),
                 'events' => $issue->events->map(fn($e) => [
                     'id' => $e->id,
                     'type' => $e->type,
@@ -178,9 +190,13 @@ class IssueController extends Controller
         $error = null;
 
         if ($request->filled('code')) {
-            $issue = Issue::with(['location', 'organization', 'events' => function ($q) {
-                    $q->public()->latest()->limit(20);
-                }])
+            $issue = Issue::with([
+                    'location', 'organization', 'assignedUser',
+                    'dailyProgress' => fn($q) => $q->with('user')->latest(),
+                    'events' => function ($q) {
+                        $q->public()->latest()->limit(20);
+                    },
+                ])
                 ->visible()
                 ->where('reference_code', strtoupper($request->code))
                 ->first();
@@ -210,6 +226,16 @@ class IssueController extends Controller
                 'photo_path' => $issue->photo_path && $issue->reference_code ? route('issues.photo', $issue->reference_code) : null,
                 'video_path' => $issue->video_path && $issue->reference_code ? route('issues.photo', $issue->reference_code) : null,
                 'has_video' => !is_null($issue->video_path),
+                'resolution_summary' => $issue->resolution_summary,
+                'resolved_by_name' => $issue->assignedUser?->name,
+                'daily_progress' => $issue->dailyProgress->map(fn($p) => [
+                    'id' => $p->id,
+                    'notes' => $p->notes,
+                    'photos' => $p->photos,
+                    'user_name' => $p->user?->name,
+                    'created_at' => $p->created_at->toISOString(),
+                    'bs_created_at' => \App\Services\BsDateService::toBsString($p->created_at, 'short'),
+                ]),
                 'events' => $issue->events->map(fn($e) => [
                     'id' => $e->id,
                     'type' => $e->type,

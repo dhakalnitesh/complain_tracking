@@ -33,6 +33,9 @@ class AuthController extends Controller
             if ($user->isSuperAdmin()) {
                 return redirect()->intended(route('admin.dashboard'));
             }
+            if ($user->is_staff && $user->organization_id) {
+                return redirect()->intended(route('staff.issues.index'));
+            }
             if ($user->organization_id) {
                 return redirect()->intended(route('org.dashboard', $user->organization));
             }

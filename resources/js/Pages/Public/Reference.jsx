@@ -92,6 +92,55 @@ export default function Reference({ issue }) {
               </div>
             </div>
 
+            {/* Resolution Summary */}
+            {issue.status === 'resolved' && issue.resolution_summary && (
+              <div className="bg-green-50 border border-green-200 rounded-2xl p-5 sm:p-7">
+                <div className="flex items-center gap-2 mb-3">
+                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <h2 className="text-sm font-bold text-green-800">{isNp ? 'समाधान विवरण' : 'Resolution'}</h2>
+                </div>
+                <div className="bg-white rounded-xl p-4 border border-green-100">
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{issue.resolution_summary}</p>
+                </div>
+                <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
+                  <span>{isNp ? 'समाधानकर्ता' : 'Resolved by'}: {issue.resolved_by_name || 'Staff'}</span>
+                  {issue.resolved_at && (
+                    <span>{new Date(issue.resolved_at).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Daily Progress */}
+            {issue.daily_progress && issue.daily_progress.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200/60 p-5 sm:p-7">
+                <h2 className="text-sm font-bold text-gray-900 mb-4">{isNp ? 'कार्य प्रगति' : 'Work Progress'}</h2>
+                <div className="space-y-4">
+                  {issue.daily_progress.map(p => (
+                    <div key={p.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <p className="text-xs font-medium text-indigo-600">{p.user_name}</p>
+                        <p className="text-[10px] text-gray-400">{p.bs_created_at}</p>
+                      </div>
+                      <p className="text-sm text-gray-700 whitespace-pre-wrap">{p.notes}</p>
+                      {p.photos && p.photos.length > 0 && (
+                        <div className="flex gap-2 mt-2 flex-wrap">
+                          {p.photos.map((photo, i) => (
+                            <img key={i} src={`/storage/${photo}`} alt="Progress photo"
+                              className="w-20 h-20 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-80"
+                              onClick={() => window.open(`/storage/${photo}`, '_blank')}
+                              onError={e => { e.target.style.display = 'none'; }} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Progress Timeline */}
             {issue.events && issue.events.length > 0 && (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200/60 p-5 sm:p-7">

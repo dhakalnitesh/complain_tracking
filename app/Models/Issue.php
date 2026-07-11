@@ -48,6 +48,8 @@ class Issue extends Model
         'hidden_at',
         'deadline_at',
         'extension_deadline_at',
+        'resolution_summary',
+        'resolved_by',
         'anonymous_uuid',
         'reporter_ip_hash',
         'spam_score',
@@ -116,6 +118,11 @@ class Issue extends Model
     public function assignedUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_user_id');
+    }
+
+    public function resolvedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'resolved_by');
     }
 
     public function events(): HasMany
