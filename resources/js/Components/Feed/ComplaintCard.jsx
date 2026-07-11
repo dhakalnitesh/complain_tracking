@@ -76,12 +76,15 @@ export default function ComplaintCard({ issue }) {
             </span>
           )}
 
-          {/* Description */}
+          {/* Title */}
           <Link
             href={route('issues.show-reference', issue.reference_code)}
             className="block"
           >
-            <p className="text-xs sm:text-sm text-gray-700 line-clamp-3 leading-relaxed hover:text-gray-900 transition-colors">
+            <p className="text-sm font-semibold text-gray-900 mb-1 leading-snug">
+              {issue.title || issue.description?.substring(0, 50)}
+            </p>
+            <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 leading-relaxed">
               {issue.description}
             </p>
           </Link>

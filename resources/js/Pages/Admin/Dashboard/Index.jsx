@@ -144,7 +144,7 @@ export default function AdminDashboard({ stats, recent_issues, category_stats, i
                                         <StatusBadge status={issue.status} />
                                         <PriorityBadge priority={issue.priority} />
                                     </div>
-                                    <p className="text-sm text-gray-700 line-clamp-1">{issue.description}</p>
+                                    <p className="text-sm font-semibold text-gray-900 line-clamp-1">{issue.title || issue.description}</p>
                                     <p className="text-xs text-gray-400 mt-0.5">
                                         {issue.organization || issue.location} &middot; {issue.bs_created_at}
                                     </p>

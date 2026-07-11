@@ -53,6 +53,7 @@ class IssueController extends Controller
             ->through(fn($issue) => [
                 'id' => $issue->id,
                 'reference_code' => $issue->reference_code,
+                'title' => $issue->title,
                 'category' => $issue->category,
                 'category_id' => $issue->category_id,
                 'priority' => $issue->priority,
@@ -106,6 +107,7 @@ class IssueController extends Controller
                 'id' => $issue->id,
                 'organization_id' => $issue->organization_id,
                 'reference_code' => $issue->reference_code,
+                'title' => $issue->title,
                 'category' => $issue->category,
                 'priority' => $issue->priority,
                 'location' => $issue->location?->name,

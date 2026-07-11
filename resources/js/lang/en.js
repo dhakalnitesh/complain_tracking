@@ -40,6 +40,8 @@ export default {
     category_label: 'Category',
     priority_label: 'Priority',
     location_label: 'Location',
+    title_label: 'Title',
+    title_placeholder: 'Enter a short title (e.g., "Broken water pipe at New Road")',
     desc_label: 'Description',
     desc_placeholder: 'Please describe your issue in detail...',
     photo_label: 'Photo (optional)',

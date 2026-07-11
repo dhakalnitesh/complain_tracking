@@ -21,6 +21,7 @@ export default function Submit({ locations, organizations, selected_organization
     category_id: '',
     priority: 'medium',
     location_id: '',
+    title: '',
     description: '',
     reporter_name: user?.name || '',
     reporter_phone: '',
@@ -114,7 +115,7 @@ export default function Submit({ locations, organizations, selected_organization
   }
 
   function canProceed() {
-    if (step === 0) return data.organization_id && data.category_id && data.priority && data.location_id;
+    if (step === 0) return data.organization_id && data.category_id && data.priority && data.location_id && data.title;
     if (step === 1) return data.description && data.description.length >= 10;
     return true;
   }
@@ -273,6 +274,14 @@ export default function Submit({ locations, organizations, selected_organization
                       disabled={!data.organization_id}
                       error={errors.location_id}
                     />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">{t('submit.title_label')} *</label>
+                    <input type="text" value={data.title} onChange={e => setData('title', e.target.value)}
+                      className="w-full rounded-xl border-gray-200 border px-3.5 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow hover:shadow-sm"
+                      placeholder={t('submit.title_placeholder')} maxLength={200} />
+                    {errors.title && <p className="text-red-500 text-xs mt-1.5">{errors.title}</p>}
                   </div>
                 </div>
               </div>
@@ -451,6 +460,7 @@ export default function Submit({ locations, organizations, selected_organization
                       { label: t('submit.category_label'), value: data.category_id ? categories.find(c => String(c.id) === String(data.category_id))?.name || '' : '' },
                       { label: t('submit.priority_label'), value: data.priority ? t(`priorities.${data.priority}`) : '' },
                       { label: t('submit.location_label'), value: groupedLocations.flatMap(g => g.children.length ? g.children : [g]).find(l => l.id === data.location_id)?.name },
+                      { label: t('submit.title_label'), value: data.title },
                     ].filter(i => i.value).map((item, i) => (
                       <div key={i} className="bg-white/80 rounded-xl px-3.5 py-2.5 border border-gray-100">
                         <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">{item.label}</p>

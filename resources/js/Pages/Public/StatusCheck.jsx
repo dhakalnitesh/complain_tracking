@@ -66,6 +66,7 @@ export default function StatusCheck({ issue, error }) {
                   <div><span className="text-gray-500 block text-[10px] sm:text-xs">{t('status.reference')}</span><span className="font-mono font-bold text-gray-900 text-xs sm:text-sm">{issue.reference_code}</span></div>
                   <div><span className="text-gray-500 block text-[10px] sm:text-xs">{t('status.organization')}</span><span className="font-medium text-gray-900 text-xs sm:text-sm">{issue.organization}</span></div>
                   <div><span className="text-gray-500 block text-[10px] sm:text-xs">{t('status.category')}</span><span className="font-medium text-gray-900 text-xs sm:text-sm">{issue.category}</span></div>
+                  <div><span className="text-gray-500 block text-[10px] sm:text-xs">{t('submit.title_label')}</span><span className="font-medium text-gray-900 text-xs sm:text-sm">{issue.title}</span></div>
                   <div><span className="text-gray-500 block text-[10px] sm:text-xs">{t('status.location')}</span><span className="font-medium text-gray-900 text-xs sm:text-sm">{issue.location}</span></div>
                   <div><span className="text-gray-500 block text-[10px] sm:text-xs">{t('status.priority')}</span><PriorityBadge priority={issue.priority} /></div>
                   <div><span className="text-gray-500 block text-[10px] sm:text-xs">{t('status.status')}</span><StatusBadge status={issue.status} /></div>

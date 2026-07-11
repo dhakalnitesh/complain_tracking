@@ -40,6 +40,8 @@ export default {
     category_label: 'श्रेणी',
     priority_label: 'प्राथमिकता',
     location_label: 'स्थान',
+    title_label: 'शीर्षक',
+    title_placeholder: 'छोटो शीर्षक लेख्नुहोस् (जस्तै: "न्यू रोडमा फुटेको पाइप")',
     desc_label: 'विवरण',
     desc_placeholder: 'कृपया आफ्नो समस्या विस्तृत रूपमा लेख्नुहोस्...',
     photo_label: 'फोटो (आवश्यक भए मात्र)',

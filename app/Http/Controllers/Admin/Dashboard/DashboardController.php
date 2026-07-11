@@ -29,6 +29,7 @@ class DashboardController extends Controller
             ->map(fn($i) => [
                 'id' => $i->id,
                 'reference_code' => $i->reference_code,
+                'title' => $i->title,
                 'category' => $i->category,
                 'priority' => $i->priority,
                 'location' => $i->location?->name,

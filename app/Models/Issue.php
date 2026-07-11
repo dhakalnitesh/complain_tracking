@@ -16,6 +16,7 @@ class Issue extends Model
 
     protected $fillable = [
         'reference_code',
+        'title',
         'category',
         'category_id',
         'priority',

@@ -64,7 +64,8 @@ export default function IssueDetail({ issue, staff_users = [] }) {
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200/60 p-5 sm:p-7 mb-5 space-y-4">
-          <h2 className="text-sm font-semibold text-gray-900">Issue Details</h2>
+          <h2 className="text-sm font-semibold text-gray-900">{issue.title || 'Issue Details'}</h2>
+          <p className="text-sm text-gray-600 mt-1 mb-3">{issue.description}</p>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-xs font-medium text-gray-400 uppercase">Organization</p>
@@ -81,6 +82,10 @@ export default function IssueDetail({ issue, staff_users = [] }) {
             <div>
               <p className="text-xs font-medium text-gray-400 uppercase">Assigned To</p>
               <p className="font-medium text-gray-900">{issue.assigned_user_name || issue.assigned_to || 'Unassigned'}</p>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-gray-400 uppercase">Title</p>
+              <p className="font-medium text-gray-900">{issue.title}</p>
             </div>
             <div>
               <p className="text-xs font-medium text-gray-400 uppercase">Reporter</p>

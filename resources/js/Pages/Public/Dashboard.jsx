@@ -259,7 +259,7 @@ export default function Dashboard({ organizations, stats, recent_issues, categor
                           )}
                           <StatusBadge status={issue.status} />
                         </div>
-                        <p className="text-[10px] text-gray-600 line-clamp-1 mt-0.5">{issue.description}</p>
+                        <p className="text-[10px] font-semibold text-gray-800 line-clamp-1 mt-0.5">{issue.title || issue.description?.substring(0, 40)}</p>
                         <div className="flex items-center gap-2 mt-0.5 text-[9px] text-gray-400">
                           <span>{issue.organization || issue.location}</span>
                           <span>{issue.bs_date_short}</span>

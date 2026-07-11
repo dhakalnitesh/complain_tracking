@@ -43,7 +43,7 @@ export default function Reference({ issue }) {
           <div className="lg:col-span-2 space-y-5">
             {/* Issue Card */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200/60 p-5 sm:p-7">
-              <h1 className="text-base sm:text-lg font-bold text-gray-900 mb-1">{isNp ? 'उजुरी विवरण' : 'Complaint Details'}</h1>
+              <h1 className="text-base sm:text-lg font-bold text-gray-900 mb-1">{issue.title || issue.description?.substring(0, 50)}</h1>
 
               {/* Photo */}
               {issue.photo_path && (

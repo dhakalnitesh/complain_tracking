@@ -54,6 +54,7 @@ class IssueController extends Controller
             'organization_id' => 'required|exists:organizations,id',
             'category_id' => 'required|exists:categories,id',
             'priority' => 'required|in:low,medium,high,critical',
+            'title' => 'required|string|max:200',
             'location_id' => [
                 'required',
                 Rule::exists('locations', 'id')->where(function ($q) use ($request) {
@@ -93,6 +94,7 @@ class IssueController extends Controller
             'category_id' => $category->id,
             'priority' => $validated['priority'],
             'location_id' => $validated['location_id'],
+            'title' => $validated['title'],
             'description' => $validated['description'],
             'reporter_name' => $validated['reporter_name'] ?? null,
             'reporter_phone' => $validated['reporter_phone'] ?? null,
@@ -159,6 +161,7 @@ class IssueController extends Controller
             'issue' => [
                 'id' => $issue->id,
                 'reference_code' => $issue->reference_code,
+                'title' => $issue->title,
                 'category' => $issue->category,
                 'category_name' => $issue->category?->name ?? $issue->category,
                 'priority' => $issue->priority,
@@ -252,6 +255,7 @@ class IssueController extends Controller
             'issue' => $issue ? [
                 'id' => $issue->id,
                 'reference_code' => $issue->reference_code,
+                'title' => $issue->title,
                 'category' => $issue->category,
                 'priority' => $issue->priority,
                 'location' => $issue->location?->name,

@@ -245,6 +245,7 @@ export default function AdminIssues({ issues, staff_users = [], organizations = 
                                         <StatusBadge status={issue.status} />
                                         <PriorityBadge priority={issue.priority} />
                                     </div>
+                                    <p className="text-sm font-semibold text-gray-900 mb-1">{issue.title}</p>
                                     <div className="flex items-center gap-2 text-xs text-gray-500 mb-2 flex-wrap">
                                         <span>{issue.category}</span>
                                         <span>&middot;</span>
@@ -258,7 +259,7 @@ export default function AdminIssues({ issues, staff_users = [], organizations = 
                                             </>
                                         )}
                                     </div>
-                                    <p className="text-sm text-gray-700 line-clamp-2">{issue.description}</p>
+                                    <p className="text-sm text-gray-600 line-clamp-2">{issue.description}</p>
                                 </div>
                                 <div className="flex flex-col gap-2 shrink-0">
                                     {issue.status !== 'resolved' && (

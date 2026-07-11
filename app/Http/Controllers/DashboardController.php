@@ -118,6 +118,7 @@ class DashboardController extends Controller
         return [
             'id' => $issue->id,
             'reference_code' => $issue->reference_code,
+            'title' => $issue->title,
             'category' => $issue->category,
             'category_name' => $issue->category?->name ?? $issue->category,
             'category_id' => $issue->category_id,
