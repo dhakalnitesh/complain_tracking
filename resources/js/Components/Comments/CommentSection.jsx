@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../../Context/LanguageContext';
 import CommentForm from './CommentForm';
-import { toBsString } from '../../utils/bsDate';
 
 function CommentItem({ comment, issueId, depth = 0 }) {
-  const { t, lang } = useLanguage();
+  const { lang } = useLanguage();
   const [showReply, setShowReply] = useState(false);
   const [replies, setReplies] = useState(comment.replies || []);
 
-  function handleReplyAdded(newReply) {
-    setReplies(prev => [...prev, newReply]);
+  function handleReplyAdded(data) {
+    if (data && data.id) {
+      setReplies(prev => [...prev, data]);
+    }
     setShowReply(false);
   }
 
@@ -21,29 +22,24 @@ function CommentItem({ comment, issueId, depth = 0 }) {
             {comment.author?.charAt(0) || 'A'}
           </div>
           <span className="text-xs font-medium text-gray-700">{comment.author}</span>
-          <span className="text-[10px] text-gray-400">
-            {comment.bs_created_at || (lang === 'np' ? comment.bs_date : new Date(comment.created_at).toLocaleDateString())}
-          </span>
+          <span className="text-[10px] text-gray-400">{comment.bs_created_at || comment.bs_date}</span>
         </div>
         <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">{comment.body}</p>
 
-        <div className="flex items-center gap-2 mt-1">
-          <button
-            onClick={() => setShowReply(!showReply)}
-            className="text-[10px] text-gray-400 hover:text-indigo-600 transition-colors"
-          >
-            {lang === 'np' ? 'जवाफ दिनुहोस्' : 'Reply'}
-          </button>
-        </div>
+        <button
+          onClick={() => setShowReply(!showReply)}
+          className="text-[10px] text-gray-400 hover:text-indigo-600 transition-colors mt-1"
+        >
+          {lang === 'np' ? 'जवाफ दिनुहोस्' : 'Reply'}
+        </button>
 
         {showReply && (
           <div className="mt-2">
             <CommentForm
               issueId={issueId}
               parentId={comment.id}
-              onSuccess={() => setShowReply(false)}
+              onSuccess={handleReplyAdded}
               onCancel={() => setShowReply(false)}
-              placeholder={lang === 'np' ? 'जवाफ लेख्नुहोस्...' : 'Write a reply...'}
             />
           </div>
         )}
@@ -60,58 +56,44 @@ function CommentItem({ comment, issueId, depth = 0 }) {
   );
 }
 
-export default function CommentSection({ issueId, comments: initialComments = [] }) {
+export default function CommentSection({ issueId }) {
   const { t, lang } = useLanguage();
-  const [comments, setComments] = useState(initialComments);
-  const [showForm, setShowForm] = useState(false);
+  const [comments, setComments] = useState([]);
+  const pollRef = useRef(null);
 
-  useEffect(() => {
-    if (initialComments.length === 0) {
-      fetch(`/issues/${issueId}/comments`)
-        .then(res => res.json())
-        .then(data => {
-          const list = data.data || data;
-          if (Array.isArray(list) && list.length > 0) setComments(list);
-        })
-        .catch(() => {});
-    }
-  }, [issueId]);
-
-  function handleCommentAdded() {
-    setShowForm(false);
-    fetch(`/issues/${issueId}/comments`)
+  function fetchComments() {
+    fetch(`/issues/${issueId}/comments`, { headers: { Accept: 'application/json' } })
       .then(res => res.json())
       .then(data => {
-        if (data.data) setComments(data.data);
+        const list = data.data || data;
+        if (Array.isArray(list)) setComments(list);
       })
       .catch(() => {});
   }
 
+  useEffect(() => {
+    fetchComments();
+    pollRef.current = setInterval(fetchComments, 15000);
+    return () => clearInterval(pollRef.current);
+  }, [issueId]);
+
+  function handleCommentAdded(data) {
+    if (data && data.id) {
+      setComments(prev => [data, ...prev]);
+    } else {
+      fetchComments();
+    }
+  }
+
   return (
     <div className="space-y-1">
-      <div className="flex items-center justify-between mb-2">
-        <h4 className="text-xs font-semibold text-gray-700">
-          {lang === 'np' ? 'टिप्पणीहरू' : 'Comments'} ({comments.length})
-        </h4>
-        {!showForm && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="text-xs text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
-          >
-            {lang === 'np' ? 'टिप्पणी थप्नुहोस्' : 'Add Comment'}
-          </button>
-        )}
-      </div>
+      <h4 className="text-xs font-semibold text-gray-700 mb-2">
+        {lang === 'np' ? 'टिप्पणीहरू' : 'Comments'} ({comments.length})
+      </h4>
 
-      {showForm && (
-        <div className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-          <CommentForm
-            issueId={issueId}
-            onSuccess={handleCommentAdded}
-            onCancel={() => setShowForm(false)}
-          />
-        </div>
-      )}
+      <div className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+        <CommentForm issueId={issueId} onSuccess={handleCommentAdded} />
+      </div>
 
       {comments.length === 0 ? (
         <p className="text-xs text-gray-400 py-2">

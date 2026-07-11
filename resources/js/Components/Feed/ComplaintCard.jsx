@@ -139,7 +139,7 @@ export default function ComplaintCard({ issue }) {
           {/* Inline Comment Section */}
           {showComments && (
             <div className="mt-2 pt-2 border-t border-gray-100">
-              <CommentSection issueId={issue.id} comments={[]} />
+              <CommentSection issueId={issue.id} />
             </div>
           )}
         </div>

@@ -17,17 +17,18 @@ export default function CommentForm({ issueId, parentId = null, onSuccess, onCan
     try {
       const res = await fetch(`/issues/${issueId}/comments`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content },
         body: JSON.stringify({ body: body.trim(), parent_id: parentId }),
       });
 
+      const result = await res.json();
+
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message || 'Failed to submit');
+        throw new Error(result.message || 'Failed to submit');
       }
 
       setBody('');
-      if (onSuccess) onSuccess();
+      if (onSuccess) onSuccess(result);
     } catch (err) {
       setError(err.message);
     } finally {
