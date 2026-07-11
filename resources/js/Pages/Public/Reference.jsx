@@ -1,4 +1,4 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import { useLanguage } from '../../Context/LanguageContext';
 import { StatusBadge, PriorityBadge } from '../../Components/UI/Badge';
@@ -9,6 +9,8 @@ import CommentSection from '../../Components/Comments/CommentSection';
 export default function Reference({ issue }) {
   const { t, lang } = useLanguage();
   const isNp = lang === 'np';
+  const user = usePage().props.auth.user;
+  const backHref = user?.organization?.slug ? route('org.dashboard', user.organization.slug) : route('dashboard');
   const { data, setData, post, processing, errors } = useForm({
     rating: 0,
     feedback_comment: '',
@@ -26,7 +28,7 @@ export default function Reference({ issue }) {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         {/* Header bar */}
         <div className="flex items-center gap-3 mb-5">
-          <Link href={route('dashboard')} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-indigo-600 transition-colors">
+          <Link href={backHref} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
