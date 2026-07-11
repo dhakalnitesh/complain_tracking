@@ -3,6 +3,7 @@ import { route } from 'ziggy-js';
 import { StatusBadge, PriorityBadge } from '../../../Components/UI/Badge';
 import SearchSelect from '../../../Components/UI/SearchSelect';
 import NepaliDatePicker from '../../../Components/UI/NepaliDatePicker';
+import useRealtime from '../../../hooks/useRealtime';
 import { useState } from 'react';
 
 const statusOptions = ['received', 'in_progress', 'resolved'];
@@ -13,6 +14,7 @@ function getNextStatus(current) {
 }
 
 export default function AdminIssues({ issues, staff_users = [], organizations = [], categories = [], filters = {} }) {
+    useRealtime(['issues']);
     const [statusFilter, setStatusFilter] = useState(filters.status || 'all');
     const [priorityFilter, setPriorityFilter] = useState(filters.priority || 'all');
     const [orgFilter, setOrgFilter] = useState(filters.organization_id || 'all');

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { usePage, router } from '@inertiajs/react';
 import { useToast } from '../Components/UI/Toast';
 
-export default function useRealtime() {
+export default function useRealtime(only = ['stats', 'recent_issues']) {
   const { addToast } = useToast();
   const { auth, broadcasting } = usePage().props;
   const user = auth?.user;
@@ -10,7 +10,7 @@ export default function useRealtime() {
   useEffect(() => {
     // 60s polling fallback — never miss updates even if Reverb goes down
     const pollTimer = setInterval(() => {
-      router.reload({ only: ['stats', 'recent_issues'], preserveState: true, preserveScroll: true });
+      router.reload({ only, preserveState: true, preserveScroll: true });
     }, 60000);
 
     if (!user || !broadcasting?.enabled || !window.Echo) {
@@ -34,12 +34,12 @@ export default function useRealtime() {
 
     function onIssueCreated(e) {
       addToast(`New issue: ${e.reference_code}`, e.priority === 'critical' ? 'error' : 'success');
-      router.reload({ only: ['stats', 'recent_issues'] });
+      router.reload({ only });
     }
 
     function onStatusChanged(e) {
       addToast(`${e.reference_code} status changed to ${e.status}`);
-      router.reload({ only: ['stats', 'recent_issues'] });
+      router.reload({ only });
     }
 
     function onCommentAdded(e) {
