@@ -111,6 +111,7 @@ class IssueController extends Controller
                 'status' => $issue->status,
                 'is_anonymous' => $issue->is_anonymous,
                 'created_at' => $issue->created_at->toISOString(),
+                'bs_created_at' => BsDateService::toBsString($issue->created_at, 'datetime_en'),
                 'resolved_at' => $issue->resolved_at?->toISOString(),
                 'rating' => $issue->rating,
                 'feedback_comment' => $issue->feedback_comment,
