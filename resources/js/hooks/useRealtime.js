@@ -15,25 +15,40 @@ export default function useRealtime() {
 
     if (!orgId && !isSuperAdmin) return;
 
-    const channelName = isSuperAdmin ? 'admin.0' : `admin.${orgId}`;
-    const channel = window.Echo.private(channelName);
+    const channels = [];
+    if (isSuperAdmin) {
+      channels.push(window.Echo.private('admin.global'));
+    }
+    if (orgId) {
+      channels.push(window.Echo.private(`admin.${orgId}`));
+    }
 
-    channel.listen('.IssueCreated', (e) => {
+    function onIssueCreated(e) {
       addToast(`New issue: ${e.reference_code}`, e.priority === 'critical' ? 'error' : 'success');
-    });
+      router.reload({ only: ['stats', 'recent_issues'] });
+    }
 
-    channel.listen('.IssueStatusChanged', (e) => {
+    function onStatusChanged(e) {
       addToast(`${e.reference_code} status changed to ${e.status}`);
-    });
+      router.reload({ only: ['stats', 'recent_issues'] });
+    }
 
-    channel.listen('.IssueCommentAdded', (e) => {
+    function onCommentAdded(e) {
       addToast(`New update on issue #${e.issue_id}: ${e.description}`, 'info');
+    }
+
+    channels.forEach(ch => {
+      ch.listen('.IssueCreated', onIssueCreated);
+      ch.listen('.IssueStatusChanged', onStatusChanged);
+      ch.listen('.IssueCommentAdded', onCommentAdded);
     });
 
     return () => {
-      channel.stopListening('.IssueCreated');
-      channel.stopListening('.IssueStatusChanged');
-      channel.stopListening('.IssueCommentAdded');
+      channels.forEach(ch => {
+        ch.stopListening('.IssueCreated');
+        ch.stopListening('.IssueStatusChanged');
+        ch.stopListening('.IssueCommentAdded');
+      });
     };
   }, [user, broadcasting?.enabled]);
 }

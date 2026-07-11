@@ -25,6 +25,7 @@ class IssueStatusChanged implements ShouldBroadcast
     {
         return [
             new PrivateChannel('admin.' . $this->issue->organization_id),
+            new PrivateChannel('admin.global'),
         ];
     }
 

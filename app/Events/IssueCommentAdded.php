@@ -25,6 +25,7 @@ class IssueCommentAdded implements ShouldBroadcast
     {
         return [
             new PrivateChannel('admin.' . $this->organizationId),
+            new PrivateChannel('admin.global'),
         ];
     }
 
