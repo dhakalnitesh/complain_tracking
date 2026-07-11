@@ -42,9 +42,25 @@ class FeedController extends Controller
         $userId = auth()->id();
         $sessionId = $userId ? null : session()->getId();
 
-        $query->withCount(['upvotes', 'comments']);
+        $query->withCount(['comments']);
+        $query->with(['upvotes' => fn($q) => $q->with('user:id,name')->latest()->limit(10)]);
 
         $issues = $query->paginate($perPage)->through(function ($issue) use ($userId, $sessionId) {
+            $namedUpvoters = $issue->upvotes->filter(fn($u) => $u->user_id !== null)
+                ->pluck('user.name')->unique()->take(2)->values();
+            $anonCount = $issue->upvotes->filter(fn($u) => $u->user_id === null)->count();
+            $totalUpvotes = $issue->upvotes->count();
+
+            $socialProof = null;
+            if ($totalUpvotes > 0) {
+                if ($namedUpvoters->count() > 0) {
+                    $others = $totalUpvotes - $namedUpvoters->count();
+                    $socialProof = $namedUpvoters->implode(', ') . ($others > 0 ? " + {$others} others" : '');
+                } else {
+                    $socialProof = $totalUpvotes . ' people';
+                }
+            }
+
             return [
                 'id' => $issue->id,
                 'reference_code' => $issue->reference_code,
@@ -67,9 +83,10 @@ class FeedController extends Controller
                 'resolved_at' => $issue->resolved_at?->toISOString(),
                 'bs_date' => BsDateService::toBsString($issue->created_at, 'datetime'),
                 'bs_date_short' => BsDateService::toBsString($issue->created_at, 'short'),
-                'upvotes_count' => $issue->upvotes_count,
+                'upvotes_count' => $totalUpvotes,
                 'comments_count' => $issue->comments_count,
                 'has_upvoted' => $issue->isUpvotedBy($userId, $sessionId),
+                'social_proof' => $socialProof,
             ];
         });
 

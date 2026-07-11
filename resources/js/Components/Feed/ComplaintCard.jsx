@@ -105,11 +105,16 @@ export default function ComplaintCard({ issue }) {
 
           {/* Actions: Like + Comment count + Track */}
           <div className="flex items-center gap-3 mt-2 pt-2 border-t border-gray-100">
-            <UpvoteButton
-              issueId={issue.id}
-              initialCount={issue.upvotes_count || 0}
-              initialUpvoted={issue.has_upvoted || false}
-            />
+            <div className="flex items-center gap-1">
+              <UpvoteButton
+                issueId={issue.id}
+                initialCount={issue.upvotes_count || 0}
+                initialUpvoted={issue.has_upvoted || false}
+              />
+              {issue.social_proof && (
+                <span className="text-[10px] text-gray-400 ml-0.5">{issue.social_proof}</span>
+              )}
+            </div>
             <button
               onClick={() => setShowComments(!showComments)}
               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
