@@ -1,9 +1,10 @@
-import { Head, Link, useForm, router } from '@inertiajs/react';
+import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import { StatusBadge, PriorityBadge } from '../../../Components/UI/Badge';
 import { useState } from 'react';
 
 export default function IssueDetail({ issue }) {
+    const user = usePage().props.auth.user;
     const { data, setData, post, processing, errors } = useForm({
         comment: '',
         is_public: true,
@@ -142,6 +143,14 @@ export default function IssueDetail({ issue }) {
                         &larr; My Issues
                     </Link>
                     <span className="text-gray-300">|</span>
+                    {user?.organization && (
+                        <>
+                            <Link href={route('org.dashboard', user.organization.slug)} className="text-sm text-indigo-600 hover:text-indigo-800">
+                                {user.organization.name}
+                            </Link>
+                            <span className="text-gray-300">|</span>
+                        </>
+                    )}
                     <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{issue.reference_code}</h1>
                     <div className="flex gap-2 ml-auto">
                         <StatusBadge status={issue.status} />

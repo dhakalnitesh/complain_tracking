@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import StatsCard from '../../Components/UI/StatsCard';
 import { StatusBadge, PriorityBadge } from '../../Components/UI/Badge';
@@ -7,19 +7,35 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pi
 const COLORS = ['#2563eb', '#dc2626', '#f59e0b', '#10b981', '#8b5cf6'];
 
 export default function OrgDashboard({ organization, locations, stats, recent_issues, category_stats, priority_stats }) {
+    const user = usePage().props.auth.user;
+
     return (
         <>
             <Head title={`${organization.name} - Dashboard`} />
 
             <div className="bg-gradient-to-br from-indigo-900 via-blue-900 to-blue-950">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                    <div className="flex items-center gap-4 mb-2">
-                        <div className="w-14 h-14 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                            <span className="text-2xl font-bold text-white">{organization.name.charAt(0)}</span>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                                <span className="text-2xl font-bold text-white">{organization.name.charAt(0)}</span>
+                            </div>
+                            <div>
+                                <h1 className="text-3xl font-bold text-white">{organization.name}</h1>
+                                <p className="text-blue-200/80 text-sm">{organization.address || organization.type}</p>
+                            </div>
                         </div>
-                        <div>
-                            <h1 className="text-3xl font-bold text-white">{organization.name}</h1>
-                            <p className="text-blue-200/80 text-sm">{organization.address || organization.type}</p>
+                        <div className="flex items-center gap-2">
+                            {user?.is_staff && (
+                                <Link href={route('staff.issues.index')}
+                                    className="px-4 py-2 text-sm font-medium text-indigo-900 bg-white rounded-lg hover:bg-blue-50 transition-all shadow-sm">
+                                    My Issues
+                                </Link>
+                            )}
+                            <Link href={route('issues.create')}
+                                className="px-4 py-2 text-sm font-medium text-white bg-white/20 rounded-lg hover:bg-white/30 transition-all border border-white/20">
+                                Submit Issue
+                            </Link>
                         </div>
                     </div>
                 </div>

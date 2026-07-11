@@ -1,10 +1,11 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import { StatusBadge, PriorityBadge } from '../../../Components/UI/Badge';
 import useRealtime from '../../../hooks/useRealtime';
 import { useState } from 'react';
 
 export default function StaffIssues({ issues, filters = {} }) {
+    const user = usePage().props.auth.user;
     useRealtime(['issues']);
     const [statusFilter, setStatusFilter] = useState(filters.status || 'all');
     const [priorityFilter, setPriorityFilter] = useState(filters.priority || 'all');
@@ -48,9 +49,15 @@ export default function StaffIssues({ issues, filters = {} }) {
                         <p className="text-sm text-gray-500 mt-1">{issues.total} issue{issues.total !== 1 ? 's' : ''} assigned to you</p>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Link href={route('dashboard')} className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all">
-                            Site
-                        </Link>
+                        {user?.organization ? (
+                            <Link href={route('org.dashboard', user.organization.slug)} className="px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-all">
+                                {user.organization.name}
+                            </Link>
+                        ) : (
+                            <Link href={route('dashboard')} className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all">
+                                Site
+                            </Link>
+                        )}
                     </div>
                 </div>
 
