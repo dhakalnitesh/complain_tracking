@@ -96,7 +96,7 @@ Route::get('/api/track/{reference_code}', [App\Http\Controllers\Api\TrackControl
 Route::post('/api/issues/{issue}/upvote', [UpvoteController::class, 'toggle'])->name('upvote.toggle')->middleware('throttle:feed:view');
 Route::get('/issues/{issue}/comments', [CommentController::class, 'index'])->name('comments.index')->middleware('throttle:feed:view');
 Route::post('/issues/{issue}/comments', [CommentController::class, 'store'])->name('comments.store')->middleware('throttle:comments:store');
-Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy')->middleware('throttle:comments:store');
+Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy')->middleware(['auth', 'throttle:comments:store']);
 
 Route::post('/issues/{issue}/flag', [FlagController::class, 'flagIssue'])->name('issues.flag')->middleware('throttle:issues:feedback');
 Route::post('/comments/{comment}/flag', [FlagController::class, 'flagComment'])->name('comments.flag')->middleware('throttle:issues:feedback');

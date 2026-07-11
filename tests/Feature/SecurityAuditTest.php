@@ -49,20 +49,18 @@ class SecurityAuditTest extends TestCase
 
     // ===== Bug 1.4: Guest can delete another guest's comment (no session_id check) =====
 
-    public function test_guest_cannot_delete_another_guests_comment(): void
+    public function test_guest_cannot_delete_comment(): void
     {
         $issue = Issue::factory()->create();
         $comment = Comment::factory()->create([
             'issue_id' => $issue->id,
-            'session_id' => 'session-abc',
             'user_id' => null,
         ]);
 
-        // Guest with different session cannot delete
-        $response = $this->withSession(['session_id' => 'session-xyz'])
-            ->delete('/comments/' . $comment->id);
+        // Guest (unauthenticated) gets redirected to login
+        $response = $this->delete('/comments/' . $comment->id);
 
-        $response->assertStatus(403);
+        $response->assertRedirect(route('login'));
         $this->assertNotNull($comment->fresh(), 'Comment should not be deleted');
     }
 

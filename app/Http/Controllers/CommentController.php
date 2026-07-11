@@ -58,24 +58,15 @@ class CommentController extends Controller
 
     public function destroy(Comment $comment, Request $request)
     {
-        $user = auth()->user();
+        $user = $request->user();
 
-        if ($user && $user->isSuperAdmin()) {
+        if ($user->isSuperAdmin()) {
             $comment->delete();
             return back()->with('success', 'Comment deleted.');
         }
 
-        if ($user) {
-            if ($comment->user_id !== $user->id) {
-                abort(403);
-            }
-        } else {
-            if ($comment->user_id !== null) {
-                abort(403);
-            }
-            if ($comment->session_id !== session()->getId()) {
-                abort(403);
-            }
+        if ($comment->user_id !== $user->id) {
+            abort(403);
         }
 
         $comment->delete();
