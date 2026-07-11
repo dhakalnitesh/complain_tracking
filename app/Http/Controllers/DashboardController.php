@@ -8,6 +8,7 @@ use App\Models\Location;
 use App\Models\Organization;
 use App\Services\BsDateService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
@@ -105,8 +106,13 @@ class DashboardController extends Controller
 
     private function getAvgResolutionTime(): ?string
     {
+        $driver = DB::connection()->getDriverName();
+        $expression = $driver === 'mysql'
+            ? 'AVG(TIMESTAMPDIFF(SECOND, created_at, resolved_at) / 3600.0)'
+            : 'AVG((strftime(\'%s\', resolved_at) - strftime(\'%s\', created_at)) / 3600.0)';
+
         $result = Issue::whereNotNull('resolved_at')
-            ->selectRaw('AVG((strftime(\'%s\', resolved_at) - strftime(\'%s\', created_at)) / 3600.0) AS avg_hours')
+            ->selectRaw("{$expression} AS avg_hours")
             ->value('avg_hours');
 
         return $result ? round($result, 1) . ' hrs' : null;

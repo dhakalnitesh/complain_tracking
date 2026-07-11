@@ -19,21 +19,24 @@ class StatsController extends Controller
             'escalated_issues' => Issue::where('status', '!=', 'resolved')
                 ->where('created_at', '<', now()->subHours(24))->count(),
             'total_organizations' => Organization::count(),
-            'avg_resolution_hours' => Issue::whereNotNull('resolved_at')
-                ->get()
-                ->map(fn($i) => $i->created_at->diffInHours($i->resolved_at))
-                ->average(),
+            'avg_resolution_hours' => round(
+                Issue::whereNotNull('resolved_at')
+                    ->selectRaw(DB::connection()->getDriverName() === 'mysql'
+                        ? 'AVG(TIMESTAMPDIFF(SECOND, created_at, resolved_at) / 3600.0) AS avg_hours'
+                        : 'AVG((strftime(\'%s\', resolved_at) - strftime(\'%s\', created_at)) / 3600.0) AS avg_hours')
+                    ->value('avg_hours') ?? 0, 2),
         ]);
     }
 
     public function categoryBreakdown()
     {
-        return response()->json(
-            Category::withCount('issues')
-                ->having('issues_count', '>', 0)
-                ->orderByDesc('issues_count')
-                ->get(['id', 'name', 'issues_count'])
-        );
+        $categories = Category::withCount('issues')
+            ->orderByDesc('issues_count')
+            ->get(['id', 'name', 'issues_count'])
+            ->filter(fn($c) => $c->issues_count > 0)
+            ->values();
+
+        return response()->json($categories);
     }
 
     public function issuesOverTime()

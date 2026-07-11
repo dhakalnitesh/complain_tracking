@@ -15,7 +15,7 @@ class OrganizationFactory extends Factory
         $name = fake()->company();
         return [
             'name' => $name,
-            'slug' => Str::slug($name),
+            'slug' => Str::slug($name) . '-' . uniqid(),
             'type' => fake()->randomElement(['educational', 'municipality', 'government', 'hospital']),
             'is_active' => true,
         ];
