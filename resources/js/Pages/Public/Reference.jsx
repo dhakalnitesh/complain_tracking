@@ -4,7 +4,7 @@ import { useLanguage } from '../../Context/LanguageContext';
 import { StatusBadge, PriorityBadge } from '../../Components/UI/Badge';
 import ProgressSteps from '../../Components/UI/ProgressSteps';
 import ShareButton from '../../Components/Feed/ShareButton';
-import CommentSection from '../../Components/Comments/CommentSection';
+import CommentsModal from '../../Components/Comments/CommentsModal';
 import UpvotersModal from '../../Components/Comments/UpvotersModal';
 import { useState } from 'react';
 
@@ -17,7 +17,7 @@ export default function Reference({ issue }) {
     rating: 0,
     feedback_comment: '',
   });
-  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [showComments, setShowComments] = useState(false);
   const [showUpvoters, setShowUpvoters] = useState(false);
 
   function handleFeedback(e) {
@@ -88,7 +88,7 @@ export default function Reference({ issue }) {
                   <span className="font-medium">{issue.upvotes_count || 0}</span>
                   <span className="text-gray-400">{isNp ? 'प्रतिक्रिया' : 'reactions'}</span>
                 </button>
-                <button onClick={() => setCommentsOpen(!commentsOpen)} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-indigo-600 transition-colors cursor-pointer">
+                <button onClick={() => setShowComments(true)} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-indigo-600 transition-colors cursor-pointer">
                   <svg className="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
@@ -155,13 +155,12 @@ export default function Reference({ issue }) {
               </div>
             )}
 
-            {/* Comments */}
-            {commentsOpen && issue.comments && (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200/60 p-5 sm:p-7 animate-[fadeIn_200ms_ease-out]">
-                <h2 className="text-sm font-bold text-gray-900 mb-4">{isNp ? 'टिप्पणीहरू' : 'Comments'}</h2>
-                <CommentSection issueId={issue.id} comments={issue.comments} />
-              </div>
-            )}
+            {/* Comments Modal */}
+            <CommentsModal
+              open={showComments}
+              issueId={issue.id}
+              onClose={() => setShowComments(false)}
+            />
           </div>
 
           {/* RIGHT: Sidebar */}
