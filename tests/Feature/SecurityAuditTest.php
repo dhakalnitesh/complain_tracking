@@ -217,6 +217,23 @@ class SecurityAuditTest extends TestCase
         $this->assertFalse($result2);
     }
 
+    public function test_cannot_merge_into_already_merged_issue_as_target(): void
+    {
+        $org = Organization::factory()->create();
+        $issueA = Issue::factory()->create(['organization_id' => $org->id]);
+        $issueB = Issue::factory()->create(['organization_id' => $org->id]);
+        $issueC = Issue::factory()->create(['organization_id' => $org->id]);
+        $issueD = Issue::factory()->create(['organization_id' => $org->id]);
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        \App\Services\MergeService::merge($issueA, $issueB, $admin);
+        \App\Services\MergeService::merge($issueB->fresh(), $issueC, $admin);
+        $this->assertEquals('merged', $issueB->fresh()->status);
+
+        $result = \App\Services\MergeService::merge($issueD, $issueB->fresh(), $admin);
+        $this->assertFalse($result);
+    }
+
     // ===== Bug 2.11: Issue creation not wrapped in transaction =====
     // This is more of an architecture concern — not easily testable without mocking failures
     // Covered implicitly by other tests

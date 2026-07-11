@@ -18,6 +18,10 @@ class MergeService
             return false;
         }
 
+        if ($target->status === 'merged') {
+            return false;
+        }
+
         return DB::transaction(function () use ($source, $target) {
             $source->update([
                 'status' => 'merged',
@@ -63,14 +67,24 @@ class MergeService
             return false;
         }
 
+        if ($target->status === 'merged') {
+            return false;
+        }
+
         DB::transaction(function () use ($source, $target, $mergedBy) {
             $source->update([
                 'status' => 'merged',
                 'duplicate_of_id' => $target->id,
             ]);
 
+            IssueMedia::where('issue_id', $source->id)->update(['issue_id' => $target->id]);
             Comment::where('issue_id', $source->id)->update(['issue_id' => $target->id]);
-            Upvote::where('issue_id', $source->id)->update(['issue_id' => $target->id]);
+
+            foreach (Upvote::where('issue_id', $source->id)->get() as $upvote) {
+                if (!Upvote::hasUpvoted($target->id, $upvote->user_id, $upvote->session_id)) {
+                    $upvote->update(['issue_id' => $target->id]);
+                }
+            }
 
             IssueEvent::create([
                 'issue_id' => $source->id,
