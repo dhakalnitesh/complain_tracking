@@ -230,10 +230,11 @@ class IssueController extends Controller
     public function showReference($referenceCode)
     {
         $issue = Issue::where('reference_code', $referenceCode)
+            ->visible()
             ->with([
                 'location', 'organization', 'category',
                 'events' => fn($q) => $q->public()->latest()->limit(10),
-                'comments' => fn($q) => $q->approved()->public()->root()->latest()->with(['user', 'replies.user']),
+                'comments' => fn($q) => $q->visible()->approved()->public()->root()->latest()->with(['user', 'replies.user']),
             ])
             ->first();
 
@@ -335,6 +336,7 @@ class IssueController extends Controller
             $issue = Issue::with(['location', 'organization', 'events' => function ($q) {
                     $q->public()->latest()->limit(20);
                 }])
+                ->visible()
                 ->where('reference_code', strtoupper($request->code))
                 ->first();
 

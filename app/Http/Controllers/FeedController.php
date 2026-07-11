@@ -15,6 +15,7 @@ class FeedController extends Controller
     public function index(Request $request)
     {
         $query = Issue::with(['location', 'organization', 'category'])
+            ->visible()
             ->whereNull('deleted_at');
 
         if ($request->filled('category_id')) {

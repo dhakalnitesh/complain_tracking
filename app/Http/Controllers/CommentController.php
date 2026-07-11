@@ -13,6 +13,7 @@ class CommentController extends Controller
     {
         $comments = Comment::with(['user', 'replies.user'])
             ->where('issue_id', $issue->id)
+            ->visible()
             ->approved()
             ->public()
             ->root()
@@ -45,7 +46,7 @@ class CommentController extends Controller
             'parent_id' => $validated['parent_id'] ?? null,
             'body' => $validated['body'],
             'is_public' => true,
-            'is_approved' => true,
+            'is_approved' => auth()->check(),
         ]);
 
         if ($request->wantsJson()) {

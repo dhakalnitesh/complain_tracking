@@ -76,6 +76,11 @@ class Comment extends Model
         return $query->whereNull('parent_id');
     }
 
+    public function scopeVisible($query)
+    {
+        return $query->whereNull('hidden_at');
+    }
+
     public function authorName(): string
     {
         if ($this->user) {

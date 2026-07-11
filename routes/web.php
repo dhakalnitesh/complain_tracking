@@ -76,6 +76,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/moderation/{flag}/dismiss', [ModerationController::class, 'dismiss'])->name('moderation.dismiss');
         Route::post('/moderation/{flag}/hide', [ModerationController::class, 'hide'])->name('moderation.hide');
         Route::delete('/moderation/{flag}', [ModerationController::class, 'deleteContent'])->name('moderation.delete');
+
+        Route::get('/moderation/comments', [ModerationController::class, 'pendingComments'])->name('moderation.comments');
+        Route::post('/moderation/comments/{comment}/approve', [ModerationController::class, 'approveComment'])->name('moderation.comments.approve');
+        Route::post('/moderation/comments/{comment}/hide', [ModerationController::class, 'hideComment'])->name('moderation.comments.hide');
+
+        Route::get('/spam-logs', [ModerationController::class, 'spamLogs'])->name('spam-logs');
     });
 });
 
