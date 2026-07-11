@@ -106,7 +106,8 @@ export default function OrgDashboard({ organization, locations, stats, recent_is
                     <h3 className="text-sm font-semibold text-gray-900 mb-4">Recent Issues</h3>
                     <div className="space-y-3">
                         {recent_issues.map(issue => (
-                            <div key={issue.id} className="flex items-start justify-between p-3 bg-gray-50 rounded-lg">
+                            <Link key={issue.id} href={route('issues.show-reference', issue.reference_code)}
+                                className="flex items-start justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                                 <div>
                                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                                         <span className="font-mono text-xs font-bold text-gray-900">{issue.reference_code}</span>
@@ -116,7 +117,10 @@ export default function OrgDashboard({ organization, locations, stats, recent_is
                                     <p className="text-sm text-gray-700 line-clamp-1">{issue.description}</p>
                                     <p className="text-xs text-gray-400 mt-0.5">{issue.category} &middot; {issue.bs_created_at}</p>
                                 </div>
-                            </div>
+                                <svg className="w-4 h-4 text-gray-300 shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </Link>
                         ))}
                         {recent_issues.length === 0 && (
                             <p className="text-center text-gray-400 text-sm py-8">No issues reported yet.</p>
