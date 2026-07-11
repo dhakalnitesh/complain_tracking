@@ -52,6 +52,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/issues', [AdminIssueController::class, 'index'])->name('issues.index');
         Route::patch('/issues/{issue}/status', [AdminIssueController::class, 'updateStatus'])->name('issues.update-status');
+        Route::post('/issues/{issue}/priority', [AdminIssueController::class, 'updatePriority'])->name('issues.update-priority');
         Route::post('/issues/{issue}/assign', [AdminIssueController::class, 'assign'])->name('issues.assign');
         Route::get('/organizations', [OrganizationController::class, 'index'])->name('organizations');
         Route::post('/organizations', [OrganizationController::class, 'store'])->name('organizations.store');

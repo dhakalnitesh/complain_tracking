@@ -88,11 +88,13 @@ class IssueController extends Controller
             $videoPath = $request->file('video')->store('issue-videos', 'public');
         }
 
+        $userPriority = $validated['priority'];
         $issue = Issue::create([
             'organization_id' => $validated['organization_id'],
             'category' => $category->name,
             'category_id' => $category->id,
-            'priority' => $validated['priority'],
+            'priority' => $userPriority,
+            'user_priority' => $userPriority,
             'location_id' => $validated['location_id'],
             'title' => $validated['title'],
             'description' => $validated['description'],

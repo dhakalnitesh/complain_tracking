@@ -109,7 +109,9 @@ class IssueController extends Controller
                 'reference_code' => $issue->reference_code,
                 'title' => $issue->title,
                 'category' => $issue->category,
-                'priority' => $issue->priority,
+                'priority' => $issue->effectivePriority(),
+                'user_priority' => $issue->user_priority,
+                'admin_priority' => $issue->admin_priority,
                 'location' => $issue->location?->name,
                 'organization' => $issue->organization?->name,
                 'description' => $issue->description,
@@ -189,6 +191,36 @@ class IssueController extends Controller
         }
 
         return redirect()->back()->with('success', 'Issue status updated successfully.');
+    }
+
+    public function updatePriority(Request $request, Issue $issue)
+    {
+        $validated = $request->validate([
+            'admin_priority' => 'required|in:low,medium,high,critical',
+        ]);
+
+        $oldPriority = $issue->effectivePriority();
+        $issue->update([
+            'admin_priority' => $validated['admin_priority'],
+            'priority' => $validated['admin_priority'],
+            'priority_reviewed_at' => now(),
+            'priority_reviewed_by' => Auth::id(),
+        ]);
+
+        IssueEvent::create([
+            'issue_id' => $issue->id,
+            'user_id' => Auth::id(),
+            'type' => 'priority_changed',
+            'description' => "Priority changed from {$oldPriority} to {$validated['admin_priority']} by admin.",
+            'metadata' => [
+                'from' => $oldPriority,
+                'to' => $validated['admin_priority'],
+                'user_priority' => $issue->user_priority,
+            ],
+            'is_public' => true,
+        ]);
+
+        return redirect()->back()->with('success', 'Priority updated successfully.');
     }
 
     public function assign(Request $request, Issue $issue)

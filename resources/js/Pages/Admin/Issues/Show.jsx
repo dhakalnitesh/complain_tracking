@@ -13,6 +13,7 @@ export default function IssueDetail({ issue, staff_users = [] }) {
   const [assigning, setAssigning] = useState(false);
   const [reopenModal, setReopenModal] = useState(false);
   const [reopenReason, setReopenReason] = useState('');
+  const [selectedPriority, setSelectedPriority] = useState(issue.admin_priority || issue.user_priority || 'medium');
 
   function handleStatusUpdate(newStatus) {
     router.patch(route('admin.issues.update-status', issue.id), { status: newStatus }, { preserveScroll: true });
@@ -25,6 +26,12 @@ export default function IssueDetail({ issue, staff_users = [] }) {
     }, { preserveScroll: true });
     setReopenModal(false);
     setReopenReason('');
+  }
+
+  function handlePriorityOverride() {
+    router.post(route('admin.issues.update-priority', issue.id), {
+      admin_priority: selectedPriority,
+    }, { preserveScroll: true });
   }
 
   function handleAssign(staffId, staffName) {
@@ -102,6 +109,42 @@ export default function IssueDetail({ issue, staff_users = [] }) {
             <div>
               <p className="text-xs font-medium text-gray-400 uppercase">Anonymous</p>
               <p className="font-medium text-gray-900">{issue.is_anonymous ? 'Yes' : 'No'}</p>
+            </div>
+          </div>
+
+          {/* Priority Override */}
+          <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+            <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-3">Priority Verification</h3>
+            <div className="flex items-center gap-4 mb-3">
+              <div>
+                <span className="text-[10px] text-gray-500">User reported:</span>
+                <div className="mt-0.5"><PriorityBadge priority={issue.user_priority || issue.priority} /></div>
+              </div>
+              {issue.admin_priority && (
+                <div>
+                  <span className="text-[10px] text-gray-500">Admin verified:</span>
+                  <div className="mt-0.5"><PriorityBadge priority={issue.admin_priority} /></div>
+                </div>
+              )}
+              {issue.user_priority && issue.admin_priority && issue.user_priority !== issue.admin_priority && (
+                <span className="text-[10px] text-amber-600 font-medium flex items-center gap-1">&#9888; Mismatch</span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <select
+                defaultValue={issue.admin_priority || issue.user_priority || 'medium'}
+                onChange={e => setSelectedPriority(e.target.value)}
+                className="text-xs rounded-lg border-gray-200 border px-2 py-1.5 focus:ring-2 focus:ring-indigo-500 outline-none"
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="critical">Critical</option>
+              </select>
+              <button onClick={handlePriorityOverride}
+                className="text-xs bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition-colors">
+                Confirm Priority
+              </button>
             </div>
           </div>
 

@@ -20,6 +20,10 @@ class Issue extends Model
         'category',
         'category_id',
         'priority',
+        'user_priority',
+        'admin_priority',
+        'priority_reviewed_at',
+        'priority_reviewed_by',
         'location_id',
         'organization_id',
         'description',
@@ -175,6 +179,11 @@ class Issue extends Model
     public function getHasVideoAttribute(): bool
     {
         return !is_null($this->video_path);
+    }
+
+    public function effectivePriority(): string
+    {
+        return $this->admin_priority ?? $this->priority;
     }
 
     public function isSlaBreached(): bool
