@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Issue;
 use App\Models\IssueEvent;
 use App\Models\Upvote;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -44,5 +45,19 @@ class UpvoteController extends Controller
         }
 
         return back();
+    }
+
+    public function upvoters(Issue $issue)
+    {
+        $upvoters = $issue->upvotes()
+            ->with('user')
+            ->latest()
+            ->get()
+            ->map(fn($upvote) => $upvote->user
+                ? ['id' => $upvote->user->id, 'name' => $upvote->user->name, 'email' => $upvote->user->email]
+                : ['id' => null, 'name' => null, 'email' => 'Anonymous']
+            );
+
+        return response()->json(['data' => $upvoters]);
     }
 }

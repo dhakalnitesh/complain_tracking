@@ -107,6 +107,7 @@ Route::get('/api/stats/trends', [StatsController::class, 'issuesOverTime']);
 Route::get('/api/track/{reference_code}', [App\Http\Controllers\Api\TrackController::class, 'show'])->name('api.track');
 
 Route::post('/api/issues/{issue}/upvote', [UpvoteController::class, 'toggle'])->name('upvote.toggle')->middleware('throttle:feed:view');
+Route::get('/api/issues/{issue}/upvoters', [UpvoteController::class, 'upvoters'])->name('upvote.upvoters')->middleware('throttle:feed:view');
 Route::get('/issues/{issue}/comments', [CommentController::class, 'index'])->name('comments.index')->middleware('throttle:feed:view');
 Route::post('/issues/{issue}/comments', [CommentController::class, 'store'])->name('comments.store')->middleware('throttle:comments:store');
 Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy')->middleware(['auth', 'throttle:comments:store']);
