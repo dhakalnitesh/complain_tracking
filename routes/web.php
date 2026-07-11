@@ -28,8 +28,8 @@ Route::get('/feed', [App\Http\Controllers\FeedController::class, 'index'])->name
 
 Route::get('/org/{organization:slug}', [DashboardController::class, 'organizationDashboard'])->name('org.dashboard');
 
-Route::get('/submit', [IssueController::class, 'create'])->name('issues.create');
-Route::post('/issues', [IssueController::class, 'store'])->name('issues.store')->middleware('throttle:issues:submit');
+Route::get('/submit', [IssueController::class, 'create'])->name('issues.create')->middleware('captcha');
+Route::post('/issues', [IssueController::class, 'store'])->name('issues.store')->middleware(['throttle:issues:submit', 'captcha']);
 Route::get('/issues/reference/{reference_code}', [IssueController::class, 'showReference'])->name('issues.show-reference');
 Route::get('/status', [IssueController::class, 'trackStatus'])->name('status.check')->middleware('throttle:status:check');
 Route::post('/issues/{issue}/feedback', [IssueController::class, 'submitFeedback'])->name('issues.feedback')->middleware('throttle:issues:feedback');

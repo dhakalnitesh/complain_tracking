@@ -3,6 +3,7 @@ import { route } from '../../ziggy';
 import { useLanguage } from '../../Context/LanguageContext';
 import VoiceInput from '../../Components/UI/VoiceInput';
 import SearchSelect from '../../Components/UI/SearchSelect';
+import TurnstileWidget from '../../Components/UI/TurnstileWidget';
 import { useState } from 'react';
 
 const STEPS = ['issue_details', 'description', 'review'];
@@ -475,6 +476,8 @@ export default function Submit({ locations, organizations, selected_organization
                     </div>
                   )}
                 </div>
+
+                <TurnstileWidget />
 
                 {/* Submit Button */}
                 <button type="submit" disabled={processing}

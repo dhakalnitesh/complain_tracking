@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Issue;
+use App\Models\IssueEvent;
 use App\Models\Upvote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -18,6 +19,25 @@ class UpvoteController extends Controller
         $result = Upvote::toggle($issue->id, $userId, $sessionId, $uuid);
 
         Cache::forget("upvote_count_{$issue->id}");
+
+        $upvoteCount = $issue->upvotes()->count();
+        if ($upvoteCount === 20 || $upvoteCount === 50) {
+            $trustService = app(\App\Services\TrustService::class);
+            $newPriority = $trustService->getEffectivePriority($issue);
+
+            if ($newPriority !== $issue->priority) {
+                $oldPriority = $issue->priority;
+                $issue->update(['priority' => $newPriority]);
+
+                IssueEvent::create([
+                    'issue_id' => $issue->id,
+                    'type' => 'priority_changed',
+                    'description' => "Priority auto-escalated from {$oldPriority} to {$newPriority} (community support).",
+                    'metadata' => ['from' => $oldPriority, 'to' => $newPriority, 'reason' => 'upvote_milestone'],
+                    'is_public' => true,
+                ]);
+            }
+        }
 
         if ($request->wantsJson()) {
             return response()->json($result);

@@ -22,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
+            'captcha' => \App\Http\Middleware\AdaptiveCaptcha::class,
             'guest' => \Illuminate\Auth\Middleware\RedirectIfAuthenticated::class,
             'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
             'admin' => function (Request $request, $next) {

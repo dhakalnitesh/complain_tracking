@@ -49,6 +49,15 @@ class IssueController extends Controller
     public function store(Request $request)
     {
         if ($request->filled('website')) {
+            \App\Models\SpamLog::create([
+                'event_type' => 'honeypot_trigger',
+                'uuid' => $request->cookie('_auid'),
+                'ip_hash' => \App\Services\IpAnonymizer::hash($request->ip()),
+                'metadata' => ['user_agent' => $request->userAgent()],
+            ]);
+
+            app(\App\Services\TrustService::class)->adjustScore(null, $request->cookie('_auid'), -0.3);
+
             return redirect()->route('dashboard');
         }
 
@@ -73,7 +82,24 @@ class IssueController extends Controller
             'video' => 'nullable|mimes:mp4,webm,ogg,avi,mov|max:51200',
         ]);
 
+        $turnstileService = app(\App\Services\TurnstileService::class);
+        if ($turnstileService->shouldShowCaptcha($request)) {
+            $request->validate([
+                'cf-turnstile-response' => 'required|string',
+            ]);
+            if (!$turnstileService->verify($request->input('cf-turnstile-response'))) {
+                return back()->withErrors(['captcha' => 'Security check failed. Please try again.']);
+            }
+        }
+
         $category = Category::findOrFail($validated['category_id']);
+
+        $spamResult = \App\Services\AbuseDetectionService::check(
+            description: $validated['description'],
+            phone: $validated['reporter_phone'] ?? null,
+            ipHash: \App\Services\IpAnonymizer::hash($request->ip()),
+            uuid: $request->cookie('_auid'),
+        );
 
         $duplicates = DuplicateDetectionService::findDuplicates(
             $validated['description'],
@@ -108,9 +134,25 @@ class IssueController extends Controller
             'anonymous_uuid' => $request->cookie('_auid'),
             'is_anonymous' => $request->boolean('is_anonymous', true),
             'sms_opt_in' => $request->boolean('sms_opt_in', false),
+            'spam_score' => $spamResult['spam_score'],
+            'hidden_at' => $spamResult['is_spam'] ? now() : null,
+            'moderation_status' => $spamResult['is_spam'] ? 'pending' : 'approved',
             'photo_path' => $photoPath,
             'video_path' => $videoPath,
         ]);
+
+        if ($spamResult['is_spam']) {
+            app(\App\Services\TurnstileService::class)->incrementSuspicion($request, 0.3);
+            \App\Models\SpamLog::create([
+                'event_type' => 'spam_detected',
+                'loggable_type' => Issue::class,
+                'loggable_id' => $issue->id,
+                'uuid' => $request->cookie('_auid'),
+                'ip_hash' => \App\Services\IpAnonymizer::hash($request->ip()),
+                'spam_score' => $spamResult['spam_score'],
+                'metadata' => ['reasons' => $spamResult['reasons']],
+            ]);
+        }
 
         if ($photoPath) {
             $issue->media()->create(['path' => $photoPath, 'type' => 'photo']);
@@ -133,6 +175,19 @@ class IssueController extends Controller
             ],
             'is_public' => true,
         ]);
+
+        $trustService = app(\App\Services\TrustService::class);
+
+        if ($spamResult['is_spam']) {
+            $trustService->adjustScore(auth()->user(), $request->cookie('_auid'), -0.2);
+        } else {
+            $trustService->adjustScore(auth()->user(), $request->cookie('_auid'), 0.05);
+        }
+
+        $effectivePriority = $trustService->getEffectivePriority($issue);
+        if ($effectivePriority !== $issue->priority) {
+            $issue->update(['priority' => $effectivePriority]);
+        }
 
         $bestDuplicate = !empty($duplicates) ? $duplicates[0] : null;
         if ($bestDuplicate && $bestDuplicate['similarity'] > 0.5) {

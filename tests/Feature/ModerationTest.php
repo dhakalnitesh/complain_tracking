@@ -115,10 +115,10 @@ class ModerationTest extends TestCase
             ]);
         }
 
-        $result = AbuseDetectionService::check('9812345678');
+        $result = AbuseDetectionService::check('Some complaint description for testing', '9812345678');
 
-        $this->assertTrue($result['flagged']);
-        $this->assertContains('High volume of complaints from this phone number', $result['reasons']);
+        $this->assertGreaterThan(0, $result['spam_score']);
+        $this->assertContains('High volume from this phone number', $result['reasons']);
     }
 
     public function test_abuse_detection_does_not_flag_normal_user(): void
@@ -132,26 +132,18 @@ class ModerationTest extends TestCase
             'reporter_phone' => '9812345678',
         ]);
 
-        $result = AbuseDetectionService::check('9812345678');
+        $result = AbuseDetectionService::check('Normal complaint description for testing', '9812345678');
 
-        $this->assertFalse($result['flagged']);
+        $this->assertEquals(0, $result['spam_score']);
     }
 
-    public function test_abuse_detection_flags_duplicate_description(): void
+    public function test_abuse_detection_flags_spammy_description(): void
     {
-        $org = Organization::factory()->create();
-        $location = Location::factory()->create(['organization_id' => $org->id]);
+        $spammy = 'BUY NOW!!! 😀😀😀😀😀😀 Check this https://spam.com and https://scam.net and https://evil.org and https://phish.com and https://malware.net and https://tracker.org for cheap cheap cheap deals 9812345678 9800000000 9811111111';
 
-        Issue::factory()->create([
-            'organization_id' => $org->id,
-            'location_id' => $location->id,
-            'description' => 'The road near my house has a big pothole that needs to be fixed immediately',
-            'created_at' => now()->subHours(2),
-        ]);
+        $result = AbuseDetectionService::check($spammy);
 
-        $result = AbuseDetectionService::check('9812345678', 'The road near my house has a big pothole that needs to be fixed immediately');
-
-        $this->assertTrue($result['flagged']);
-        $this->assertContains('Identical description submitted within 24 hours', $result['reasons']);
+        $this->assertGreaterThan(0.7, $result['spam_score']);
+        $this->assertContains('Contains 6 URLs', $result['reasons']);
     }
 }
