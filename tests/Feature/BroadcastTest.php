@@ -26,7 +26,7 @@ class BroadcastTest extends TestCase
 
         $channels = $event->broadcastOn();
         $this->assertInstanceOf(PrivateChannel::class, $channels[0]);
-        $this->assertEquals('private-admin', $channels[0]->name);
+        $this->assertEquals('private-admin.' . $org->id, $channels[0]->name);
     }
 
     public function test_issue_status_changed_uses_private_channel(): void
@@ -70,7 +70,7 @@ class BroadcastTest extends TestCase
             'description' => 'Test comment',
             'is_public' => true,
         ]);
-        $broadcastEvent = new IssueCommentAdded($event);
+        $broadcastEvent = new IssueCommentAdded($event, $org->id);
 
         $channels = $broadcastEvent->broadcastOn();
         $this->assertInstanceOf(PrivateChannel::class, $channels[0]);

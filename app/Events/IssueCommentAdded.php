@@ -13,16 +13,18 @@ class IssueCommentAdded implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets;
 
     public IssueEvent $event;
+    public int $organizationId;
 
-    public function __construct(IssueEvent $event)
+    public function __construct(IssueEvent $event, int $organizationId)
     {
         $this->event = $event;
+        $this->organizationId = $organizationId;
     }
 
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('admin'),
+            new PrivateChannel('admin.' . $this->organizationId),
         ];
     }
 

@@ -22,7 +22,7 @@ class CommentService
         $notificationService->sendCommentAdded($issue, $event);
 
         if (config('broadcasting.default') !== 'log') {
-            broadcast(new IssueCommentAdded($event));
+            broadcast(new IssueCommentAdded($event, $issue->organization_id));
         }
 
         return $event;

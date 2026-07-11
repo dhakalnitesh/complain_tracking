@@ -10,7 +10,13 @@ export default function useRealtime() {
   useEffect(() => {
     if (!user || !broadcasting?.enabled || !window.Echo) return;
 
-    const channel = window.Echo.private('admin');
+    const orgId = user.organization_id;
+    const isSuperAdmin = user.is_admin;
+
+    if (!orgId && !isSuperAdmin) return;
+
+    const channelName = isSuperAdmin ? 'admin.0' : `admin.${orgId}`;
+    const channel = window.Echo.private(channelName);
 
     channel.listen('.IssueCreated', (e) => {
       addToast(`New issue: ${e.reference_code}`, e.priority === 'critical' ? 'error' : 'success');

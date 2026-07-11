@@ -24,7 +24,7 @@ class IssueStatusChanged implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('admin'),
+            new PrivateChannel('admin.' . $this->issue->organization_id),
         ];
     }
 

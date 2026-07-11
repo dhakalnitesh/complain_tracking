@@ -19,32 +19,38 @@ class SecurityAuditTest extends TestCase
 
     // ===== Bug 1.1: Broadcast channels use public Channel instead of PrivateChannel =====
 
-    public function test_issue_created_uses_private_channel(): void
+    public function test_issue_created_uses_org_scoped_private_channel(): void
     {
-        $issue = Issue::factory()->create();
+        $org = Organization::factory()->create();
+        $issue = Issue::factory()->create(['organization_id' => $org->id]);
         $event = new IssueCreated($issue);
 
         $channels = $event->broadcastOn();
         $this->assertInstanceOf(PrivateChannel::class, $channels[0]);
+        $this->assertStringContainsString((string) $org->id, $channels[0]->name);
     }
 
-    public function test_issue_status_changed_uses_private_channel(): void
+    public function test_issue_status_changed_uses_org_scoped_private_channel(): void
     {
-        $issue = Issue::factory()->create();
+        $org = Organization::factory()->create();
+        $issue = Issue::factory()->create(['organization_id' => $org->id]);
         $event = new IssueStatusChanged($issue, 'received');
 
         $channels = $event->broadcastOn();
         $this->assertInstanceOf(PrivateChannel::class, $channels[0]);
+        $this->assertStringContainsString((string) $org->id, $channels[0]->name);
     }
 
-    public function test_comment_added_uses_private_channel(): void
+    public function test_comment_added_uses_org_scoped_private_channel(): void
     {
-        $issue = Issue::factory()->create();
+        $org = Organization::factory()->create();
+        $issue = Issue::factory()->create(['organization_id' => $org->id]);
         $eventModel = $issue->events()->create(['type' => 'commented', 'description' => 'Test', 'is_public' => true]);
-        $event = new IssueCommentAdded($eventModel);
+        $event = new IssueCommentAdded($eventModel, $org->id);
 
         $channels = $event->broadcastOn();
         $this->assertInstanceOf(PrivateChannel::class, $channels[0]);
+        $this->assertStringContainsString((string) $org->id, $channels[0]->name);
     }
 
     // ===== Bug 1.4: Guest can delete another guest's comment (no session_id check) =====
