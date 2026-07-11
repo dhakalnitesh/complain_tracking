@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { route } from '../../ziggy';
+import { route } from 'ziggy-js';
 import { useLanguage } from '../../Context/LanguageContext';
 import ComplaintCard from '../../Components/Feed/ComplaintCard';
 import FeedFilters from '../../Components/Feed/FeedFilters';

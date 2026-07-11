@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import { route } from '../../../ziggy';
+import { route } from 'ziggy-js';
 import { useState, useEffect } from 'react';
 
 const identityTypes = [

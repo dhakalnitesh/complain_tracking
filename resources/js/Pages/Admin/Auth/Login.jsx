@@ -1,5 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-// import { route } from '../../../ziggy';
+// import { route } from 'ziggy-js';
 import { route } from 'ziggy-js';
 import { useLanguage } from '../../../Context/LanguageContext';
 import { useState } from 'react';

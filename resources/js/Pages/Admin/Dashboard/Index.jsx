@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { route } from '../../../ziggy';
+import { route } from 'ziggy-js';
 import StatsCard from '../../../Components/UI/StatsCard';
 import { StatusBadge, PriorityBadge } from '../../../Components/UI/Badge';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell, LineChart, Line } from 'recharts';

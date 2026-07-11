@@ -1,5 +1,5 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { route } from '../../ziggy';
+import { route } from 'ziggy-js';
 import { useLanguage } from '../../Context/LanguageContext';
 import VoiceInput from '../../Components/UI/VoiceInput';
 import SearchSelect from '../../Components/UI/SearchSelect';

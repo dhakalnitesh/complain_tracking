@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { route } from '../../../ziggy';
+import { route } from 'ziggy-js';
 import { StatusBadge, PriorityBadge } from '../../../Components/UI/Badge';
 
 export default function StaffIssues({ staff, issues }) {

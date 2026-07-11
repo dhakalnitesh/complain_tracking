@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { route } from '../../../ziggy';
+import { route } from 'ziggy-js';
 import { StatusBadge, PriorityBadge } from '../../../Components/UI/Badge';
 import SearchSelect from '../../../Components/UI/SearchSelect';
 import NepaliDatePicker from '../../../Components/UI/NepaliDatePicker';

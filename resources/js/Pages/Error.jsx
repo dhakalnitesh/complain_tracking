@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { route } from '../ziggy';
+import { route } from 'ziggy-js';
 
 export default function Error({ status }) {
   const title = {

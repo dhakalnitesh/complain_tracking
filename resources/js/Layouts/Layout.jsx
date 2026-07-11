@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { route } from '../ziggy';
+import { route } from 'ziggy-js';
 import { useLanguage } from '../Context/LanguageContext';
 import LanguageToggle from '../Components/LanguageToggle';
 import TrackModal from '../Components/TrackModal';

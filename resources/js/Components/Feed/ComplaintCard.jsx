@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from '@inertiajs/react';
-import { route } from '../../ziggy';
+import { route } from 'ziggy-js';
 import { useLanguage } from '../../Context/LanguageContext';
 import { StatusBadge, PriorityBadge } from '../UI/Badge';
 import { toBsString } from '../../utils/bsDate';

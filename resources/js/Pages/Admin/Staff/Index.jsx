@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { route } from '../../../ziggy';
+import { route } from 'ziggy-js';
 import SearchSelect from '../../../Components/UI/SearchSelect';
 import { useState } from 'react';
 import CreateModal from './CreateModal';

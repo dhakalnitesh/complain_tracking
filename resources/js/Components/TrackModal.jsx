@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { route } from '../ziggy';
+import { route } from 'ziggy-js';
 import { useLanguage } from '../Context/LanguageContext';
 import { StatusBadge, PriorityBadge } from './UI/Badge';
 
