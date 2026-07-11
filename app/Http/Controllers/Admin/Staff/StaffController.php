@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin\Staff;
 
 use App\Http\Controllers\Controller;
-use App\Models\Issue;
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -17,7 +16,7 @@ class StaffController extends Controller
     {
         $organizations = Organization::withCount('issues')->orderBy('name')->get();
 
-        $query = User::staff()->with('organization');
+        $query = User::staff()->with('organization')->withCount('assignedIssues');
 
         if ($request->filled('search')) {
             $s = $request->search;
@@ -48,7 +47,7 @@ class StaffController extends Controller
                 'address' => $user->address,
                 'identity_document_front_url' => $user->identity_document_front_url,
                 'identity_document_back_url' => $user->identity_document_back_url,
-                'issues_count' => Issue::where('assigned_user_id', $user->id)->count(),
+                'issues_count' => $user->assigned_issues_count,
                 'created_at' => $user->created_at->toISOString(),
             ]);
 
@@ -57,11 +56,6 @@ class StaffController extends Controller
             'organizations' => $organizations,
             'filters' => $request->only(['search', 'organization_id', 'per_page']),
         ]);
-    }
-
-    public function create()
-    {
-        return redirect()->route('admin.staff');
     }
 
     public function store(Request $request)
@@ -102,15 +96,6 @@ class StaffController extends Controller
         ]);
 
         return redirect()->route('admin.staff')->with('success', 'Staff member created successfully.');
-    }
-
-    public function edit(User $user)
-    {
-        if (!$user->is_staff) {
-            return redirect()->route('admin.staff')->with('error', 'User is not a staff member.');
-        }
-
-        return redirect()->route('admin.staff');
     }
 
     public function update(Request $request, User $user)
@@ -178,7 +163,7 @@ class StaffController extends Controller
             Storage::disk('public')->delete($user->identity_document_back);
         }
 
-        Issue::where('assigned_user_id', $user->id)->update(['assigned_user_id' => null]);
+        $user->assignedIssues()->update(['assigned_user_id' => null]);
         $user->delete();
 
         return redirect()->route('admin.staff')->with('success', 'Staff member removed.');
@@ -190,8 +175,8 @@ class StaffController extends Controller
             return redirect()->route('admin.staff')->with('error', 'User is not a staff member.');
         }
 
-        $issues = Issue::with(['location', 'organization'])
-            ->where('assigned_user_id', $user->id)
+        $issues = $user->assignedIssues()
+            ->with(['location', 'organization'])
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(fn($issue) => [

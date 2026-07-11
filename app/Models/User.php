@@ -94,6 +94,11 @@ class User extends Authenticatable
         return $this->is_staff;
     }
 
+    public function assignedIssues(): HasMany
+    {
+        return $this->hasMany(Issue::class, 'assigned_user_id');
+    }
+
     public function departments(): BelongsToMany
     {
         return $this->belongsToMany(Department::class, 'department_user')

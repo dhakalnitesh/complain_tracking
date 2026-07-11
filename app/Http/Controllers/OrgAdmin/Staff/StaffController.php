@@ -4,7 +4,6 @@ namespace App\Http\Controllers\OrgAdmin\Staff;
 
 use App\Http\Controllers\Controller;
 use App\Models\Department;
-use App\Models\Issue;
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -33,13 +32,14 @@ class StaffController extends Controller
         $staff = User::where('organization_id', $org->id)
             ->where('is_staff', true)
             ->with('departments')
+            ->withCount('assignedIssues')
             ->get()
             ->map(fn($u) => [
                 'id' => $u->id,
                 'name' => $u->name,
                 'email' => $u->email,
                 'departments' => $u->departments->pluck('name'),
-                'issues_count' => Issue::where('assigned_user_id', $u->id)->count(),
+                'issues_count' => $u->assigned_issues_count,
             ]);
 
         $departments = Department::where('organization_id', $org->id)->active()->sorted()->get(['id', 'name']);

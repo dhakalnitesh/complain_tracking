@@ -59,9 +59,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/organizations/{organization}/toggle', [OrganizationController::class, 'toggleActive'])->name('organizations.toggle');
 
         Route::get('/staff', [AdminStaffController::class, 'index'])->name('staff');
-        Route::get('/staff/create', [AdminStaffController::class, 'create'])->name('staff.create');
         Route::post('/staff', [AdminStaffController::class, 'store'])->name('staff.store');
-        Route::get('/staff/{user}/edit', [AdminStaffController::class, 'edit'])->name('staff.edit');
         Route::match(['put', 'post'], '/staff/{user}', [AdminStaffController::class, 'update'])->name('staff.update');
         Route::delete('/staff/{user}', [AdminStaffController::class, 'destroy'])->name('staff.destroy');
 

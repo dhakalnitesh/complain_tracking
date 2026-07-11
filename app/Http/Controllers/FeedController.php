@@ -7,7 +7,6 @@ use App\Models\Issue;
 use App\Models\Location;
 use App\Services\BsDateService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 
 class FeedController extends Controller
