@@ -64,8 +64,16 @@ export default function SpamLogs() {
         </div>
       )}
 
-      {logs.links && (
-        <div className="mt-6 flex justify-center gap-2" dangerouslySetInnerHTML={{ __html: logs.links }} />
+      {logs.links?.length > 3 && (
+        <div className="mt-6 flex justify-center gap-2 flex-wrap">
+          {logs.links.map((link, i) => (
+            <button key={i} onClick={() => link.url && router.get(link.url, {}, { preserveState: true, replace: true, preserveScroll: true })}
+              disabled={!link.url}
+              className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                link.active ? 'bg-indigo-600 text-white' : link.url ? 'text-gray-600 hover:bg-gray-100' : 'text-gray-300 cursor-not-allowed'
+              }`}>{link.label.replace(/&laquo;/g, '\u00AB').replace(/&raquo;/g, '\u00BB')}</button>
+          ))}
+        </div>
       )}
     </div>
   );

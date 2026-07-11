@@ -62,6 +62,11 @@ export default function AdminLogin() {
                   </button>
                 </div>
               </div>
+              <div className="text-right">
+                <Link href={route('password.request')} className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-800">
+                  Forgot Password?
+                </Link>
+              </div>
               <button type="submit" disabled={processing}
                 className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 text-white py-2.5 sm:py-3 px-4 rounded-lg font-medium hover:from-indigo-700 hover:to-blue-700 disabled:opacity-50 transition-all text-sm">
                 {processing ? t('submit.submitting') : t('auth.login_btn')}

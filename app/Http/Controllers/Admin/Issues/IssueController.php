@@ -158,6 +158,17 @@ class IssueController extends Controller
             return redirect()->back()->with('error', 'Issue is already in this status.');
         }
 
+        $allowedTransitions = [
+            'received' => ['in_progress', 'resolved'],
+            'in_progress' => ['received', 'resolved'],
+            'resolved' => ['in_progress'],
+        ];
+
+        $allowed = $allowedTransitions[$issue->status] ?? [];
+        if (!in_array($validated['status'], $allowed, true)) {
+            return redirect()->back()->with('error', "Cannot change status from {$issue->status} to {$validated['status']}.");
+        }
+
         $oldStatus = $issue->status;
         $issue->status = $validated['status'];
 

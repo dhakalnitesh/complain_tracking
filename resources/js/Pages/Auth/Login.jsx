@@ -62,11 +62,16 @@ export default function Login() {
                   </button>
                 </div>
               </div>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={data.remember} onChange={e => setData('remember', e.target.checked)}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
-                <span className="text-xs sm:text-sm text-gray-600">{t('auth.remember')}</span>
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={data.remember} onChange={e => setData('remember', e.target.checked)}
+                    className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
+                  <span className="text-xs sm:text-sm text-gray-600">{t('auth.remember')}</span>
+                </label>
+                <Link href={route('password.request')} className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-800">
+                  Forgot Password?
+                </Link>
+              </div>
               <button type="submit" disabled={processing}
                 className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 text-white py-2.5 sm:py-3 px-4 rounded-lg font-medium hover:from-indigo-700 hover:to-blue-700 disabled:opacity-50 transition-all text-sm active:scale-[0.99]">
                 {processing ? t('submit.submitting') : t('auth.login_btn')}

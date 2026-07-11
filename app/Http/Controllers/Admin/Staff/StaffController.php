@@ -175,11 +175,12 @@ class StaffController extends Controller
             return redirect()->route('admin.staff')->with('error', 'User is not a staff member.');
         }
 
+        $perPage = min((int) request('per_page', 20), 100);
         $issues = $user->assignedIssues()
             ->with(['location', 'organization'])
             ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(fn($issue) => [
+            ->paginate($perPage)
+            ->through(fn($issue) => [
                 'id' => $issue->id,
                 'reference_code' => $issue->reference_code,
                 'category' => $issue->category,

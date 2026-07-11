@@ -11,7 +11,7 @@ class TrackController extends Controller
 {
     public function show($referenceCode)
     {
-        $issue = Issue::with(['location', 'organization', 'events' => function ($q) {
+        $issue = Issue::visible()->with(['location', 'organization', 'events' => function ($q) {
             $q->public()->latest()->limit(20);
         }])
         ->where('reference_code', strtoupper($referenceCode))

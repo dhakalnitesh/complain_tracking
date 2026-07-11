@@ -9,7 +9,7 @@ class PhotoController extends Controller
 {
     public function show($referenceCode)
     {
-        $issue = Issue::where('reference_code', $referenceCode)->firstOrFail();
+        $issue = Issue::visible()->where('reference_code', $referenceCode)->firstOrFail();
 
         $path = $issue->photo_path ?? $issue->video_path;
 

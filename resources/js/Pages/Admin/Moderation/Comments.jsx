@@ -47,8 +47,16 @@ export default function CommentsModeration() {
         </div>
       )}
 
-      {comments.links && (
-        <div className="mt-6 flex justify-center gap-2" dangerouslySetInnerHTML={{ __html: comments.links }} />
+      {comments.links?.length > 3 && (
+        <div className="mt-6 flex justify-center gap-2 flex-wrap">
+          {comments.links.map((link, i) => (
+            <button key={i} onClick={() => link.url && router.get(link.url, {}, { preserveState: true, replace: true, preserveScroll: true })}
+              disabled={!link.url}
+              className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                link.active ? 'bg-indigo-600 text-white' : link.url ? 'text-gray-600 hover:bg-gray-100' : 'text-gray-300 cursor-not-allowed'
+              }`}>{link.label.replace(/&laquo;/g, '\u00AB').replace(/&raquo;/g, '\u00BB')}</button>
+          ))}
+        </div>
       )}
     </div>
   );

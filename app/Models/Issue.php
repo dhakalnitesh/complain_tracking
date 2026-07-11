@@ -196,8 +196,10 @@ class Issue extends Model
 
     public function isEscalated(): bool
     {
+        $hours = config("sla.priorities.{$this->priority}.hours", 24);
         return $this->status !== 'resolved'
-            && $this->created_at->lt(now()->subHours(24));
+            && $this->status !== 'merged'
+            && $this->created_at->lt(now()->subHours((int) $hours));
     }
 
     public function slaDeadline(): ?\DateTimeInterface
