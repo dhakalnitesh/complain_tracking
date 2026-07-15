@@ -192,7 +192,7 @@ class IssueController extends Controller
 
         if ($request->filled('code')) {
             $issue = Issue::with([
-                    'location', 'organization', 'assignedUser',
+                    'location', 'organization', 'assignedUser', 'resolvedBy',
                     'dailyProgress' => fn($q) => $q->with('user')->latest(),
                     'events' => function ($q) {
                         $q->public()->latest()->limit(20);
@@ -228,7 +228,7 @@ class IssueController extends Controller
                 'video_path' => $issue->video_path && $issue->reference_code ? route('issues.photo', $issue->reference_code) : null,
                 'has_video' => !is_null($issue->video_path),
                 'resolution_summary' => $issue->resolution_summary,
-                'resolved_by_name' => $issue->assignedUser?->name,
+                'resolved_by_name' => $issue->resolvedBy?->name,
                 'daily_progress' => $issue->dailyProgress->map(fn($p) => [
                     'id' => $p->id,
                     'notes' => $p->notes,
