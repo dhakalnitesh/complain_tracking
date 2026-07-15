@@ -138,7 +138,7 @@ class VideoUploadTest extends TestCase
         $this->assertFalse($issue->has_photo);
     }
 
-    public function test_photo_controller_serves_video_by_reference_code(): void
+    public function test_video_controller_serves_video_by_reference_code(): void
     {
         $issue = \App\Models\Issue::factory()->create([
             'video_path' => 'issue-videos/test_video.mp4',
@@ -146,7 +146,7 @@ class VideoUploadTest extends TestCase
 
         Storage::disk('public')->put('issue-videos/test_video.mp4', 'fake-video-content');
 
-        $response = $this->get('/issues/photo/' . $issue->reference_code);
+        $response = $this->get('/issues/video/' . $issue->reference_code);
 
         $response->assertOk();
         $response->assertHeader('Content-Type', 'video/mp4');

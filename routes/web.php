@@ -17,6 +17,7 @@ use App\Http\Controllers\OrgAdmin\Dashboard\DashboardController as OrgAdminDashb
 use App\Http\Controllers\OrgAdmin\Departments\DepartmentController;
 use App\Http\Controllers\OrgAdmin\Staff\StaffController as OrgAdminStaffController;
 use App\Http\Controllers\PhotoController;
+use App\Http\Controllers\VideoController;
 use App\Http\Controllers\Staff\IssueController as StaffIssueController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\FlagController;
@@ -35,6 +36,7 @@ Route::get('/issues/reference/{reference_code}', [IssueController::class, 'showR
 Route::get('/status', [IssueController::class, 'trackStatus'])->name('status.check')->middleware('throttle:status:check');
 Route::post('/issues/{issue}/feedback', [IssueController::class, 'submitFeedback'])->name('issues.feedback')->middleware('throttle:issues:feedback');
 Route::get('/issues/photo/{reference_code}', [PhotoController::class, 'show'])->name('issues.photo')->middleware('throttle:feed:view');
+Route::get('/issues/video/{reference_code}', [VideoController::class, 'show'])->name('issues.video')->middleware('throttle:feed:view');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

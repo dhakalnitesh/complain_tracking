@@ -11,12 +11,10 @@ class PhotoController extends Controller
     {
         $issue = Issue::visible()->where('reference_code', $referenceCode)->firstOrFail();
 
-        $path = $issue->photo_path ?? $issue->video_path;
-
-        if (!$path || !Storage::disk('public')->exists($path)) {
+        if (!$issue->photo_path || !Storage::disk('public')->exists($issue->photo_path)) {
             abort(404);
         }
 
-        return Storage::disk('public')->response($path);
+        return Storage::disk('public')->response($issue->photo_path);
     }
 }

@@ -79,7 +79,7 @@ class FeedController extends Controller
                 'is_anonymous' => $issue->is_anonymous,
                 'photo_path' => $issue->photo_path && $issue->reference_code ? route('issues.photo', $issue->reference_code) : null,
                 'has_photo' => !is_null($issue->photo_path),
-                'video_path' => $issue->video_path && $issue->reference_code ? route('issues.photo', $issue->reference_code) : null,
+                'video_path' => $issue->video_path && $issue->reference_code ? route('issues.video', $issue->reference_code) : null,
                 'has_video' => !is_null($issue->video_path),
                 'created_at' => $issue->created_at->toISOString(),
                 'resolved_at' => $issue->resolved_at?->toISOString(),

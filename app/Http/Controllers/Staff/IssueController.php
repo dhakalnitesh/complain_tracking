@@ -111,7 +111,7 @@ class IssueController extends Controller
                 'extension_deadline_at' => $issue->extension_deadline_at?->toISOString(),
                 'resolution_summary' => $issue->resolution_summary,
                 'photo_path' => $issue->photo_path && $issue->reference_code ? route('issues.photo', $issue->reference_code) : null,
-                'video_path' => $issue->video_path && $issue->reference_code ? route('issues.photo', $issue->reference_code) : null,
+                'video_path' => $issue->video_path && $issue->reference_code ? route('issues.video', $issue->reference_code) : null,
                 'has_video' => !is_null($issue->video_path),
                 'events' => $issue->events->map(fn($e) => [
                     'id' => $e->id,

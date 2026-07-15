@@ -35,7 +35,7 @@ class TrackController extends Controller
             'resolved_at' => $issue->resolved_at?->toISOString(),
             'rating' => $issue->rating,
             'photo_path' => $issue->photo_path && $issue->reference_code ? route('issues.photo', $issue->reference_code) : null,
-            'video_path' => $issue->video_path && $issue->reference_code ? route('issues.photo', $issue->reference_code) : null,
+            'video_path' => $issue->video_path && $issue->reference_code ? route('issues.video', $issue->reference_code) : null,
             'has_video' => !is_null($issue->video_path),
             'bs_date' => BsDateService::toBsString($issue->created_at, 'datetime'),
             'bs_date_short' => BsDateService::toBsString($issue->created_at, 'short'),
