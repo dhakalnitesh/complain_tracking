@@ -218,7 +218,7 @@ class Issue extends Model
 
     public function isEscalated(): bool
     {
-        $hours = config("sla.priorities.{$this->priority}.hours", 24);
+        $hours = config("sla.priorities.{$this->effectivePriority()}.hours", 24);
         return $this->status !== 'resolved'
             && $this->status !== 'merged'
             && $this->created_at->lt(now()->subHours((int) $hours));
@@ -226,7 +226,7 @@ class Issue extends Model
 
     public function slaDeadline(): ?\DateTimeInterface
     {
-        $hours = config("sla.priorities.{$this->priority}.hours", 48);
+        $hours = config("sla.priorities.{$this->effectivePriority()}.hours", 48);
         return $this->created_at->addHours($hours);
     }
 
@@ -240,6 +240,6 @@ class Issue extends Model
         if (in_array($this->status, ['resolved', 'merged'], true)) {
             return false;
         }
-        return now()->greaterThan($this->slaDeadline());
+        return now()->greaterThanOrEqualTo($this->slaDeadline());
     }
 }

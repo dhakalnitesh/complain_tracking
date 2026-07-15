@@ -65,7 +65,7 @@ class IssueController extends Controller
                 'assigned_to' => $issue->assigned_to,
                 'assigned_user_id' => $issue->assigned_user_id,
                 'assigned_user_name' => $issue->assignedUser?->name,
-                'is_escalated' => $issue->status !== 'resolved' && $issue->created_at->lt(now()->subHours(24)),
+                'is_escalated' => $issue->isEscalated(),
                 'is_sla_breached' => $issue->isSlaBreached(),
                 'deadline_at' => $issue->deadline_at?->toISOString(),
                 'created_at' => $issue->created_at->toISOString(),
