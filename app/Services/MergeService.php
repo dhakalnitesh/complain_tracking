@@ -12,6 +12,27 @@ use Illuminate\Support\Facades\DB;
 
 class MergeService
 {
+    private static function wouldCreateCycle(Issue $source, Issue $target): bool
+    {
+        $visited = [$source->id];
+        $current = $target;
+
+        while ($current->duplicate_of_id !== null) {
+            if (in_array($current->duplicate_of_id, $visited, true)) {
+                return true;
+            }
+            $visited[] = $current->duplicate_of_id;
+
+            $next = Issue::find($current->duplicate_of_id);
+            if (!$next) {
+                break;
+            }
+            $current = $next;
+        }
+
+        return false;
+    }
+
     public static function autoMerge(Issue $source, Issue $target): bool
     {
         if ($source->id === $target->id || $source->status === 'merged') {
@@ -19,6 +40,10 @@ class MergeService
         }
 
         if ($target->status === 'merged') {
+            return false;
+        }
+
+        if (self::wouldCreateCycle($source, $target)) {
             return false;
         }
 
@@ -68,6 +93,10 @@ class MergeService
         }
 
         if ($target->status === 'merged') {
+            return false;
+        }
+
+        if (self::wouldCreateCycle($source, $target)) {
             return false;
         }
 
