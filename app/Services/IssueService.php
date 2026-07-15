@@ -16,6 +16,7 @@ use App\Services\RoutingService;
 use App\Services\TrustService;
 use App\Services\TurnstileService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class IssueService
@@ -98,75 +99,80 @@ class IssueService
         }
 
         $userPriority = $validated['priority'];
-        $issue = Issue::create([
-            'organization_id' => $validated['organization_id'],
-            'category' => $category->name,
-            'category_id' => $category->id,
-            'priority' => $userPriority,
-            'user_priority' => $userPriority,
-            'location_id' => $validated['location_id'],
-            'title' => $validated['title'],
-            'description' => $validated['description'],
-            'reporter_name' => $validated['reporter_name'] ?? null,
-            'reporter_phone' => $validated['reporter_phone'] ?? null,
-            'reporter_email' => $validated['reporter_email'] ?? null,
-            'reporter_ip' => $request->ip(),
-            'reporter_ip_hash' => IpAnonymizer::hash($request->ip()),
-            'anonymous_uuid' => $request->cookie('_auid'),
-            'is_anonymous' => $request->boolean('is_anonymous', true),
-            'sms_opt_in' => $request->boolean('sms_opt_in', false),
-            'spam_score' => $spamResult['spam_score'],
-            'hidden_at' => $spamResult['is_spam'] ? now() : null,
-            'moderation_status' => $spamResult['is_spam'] ? 'pending' : 'approved',
-            'photo_path' => $photoPath,
-            'video_path' => $videoPath,
-        ]);
 
-        if ($spamResult['is_spam']) {
-            $this->turnstileService->incrementSuspicion($request, 0.3);
-            SpamLog::create([
-                'event_type' => 'spam_detected',
-                'loggable_type' => Issue::class,
-                'loggable_id' => $issue->id,
-                'uuid' => $request->cookie('_auid'),
-                'ip_hash' => IpAnonymizer::hash($request->ip()),
-                'spam_score' => $spamResult['spam_score'],
-                'metadata' => ['reasons' => $spamResult['reasons']],
-            ]);
-        }
-
-        if ($photoPath) {
-            $issue->media()->create(['path' => $photoPath, 'type' => 'photo']);
-        }
-        if ($videoPath) {
-            $issue->media()->create(['path' => $videoPath, 'type' => 'video']);
-        }
-
-        $referenceCode = Issue::generateReferenceCode($validated['organization_id']);
-        $issue->update(['reference_code' => $referenceCode]);
-
-        IssueEvent::create([
-            'issue_id' => $issue->id,
-            'type' => 'created',
-            'description' => 'Issue submitted successfully.',
-            'metadata' => [
-                'priority' => $validated['priority'],
+        $issue = DB::transaction(function () use ($validated, $category, $photoPath, $videoPath, $request, $spamResult, $userPriority) {
+            $issue = Issue::create([
+                'organization_id' => $validated['organization_id'],
                 'category' => $category->name,
-                'is_anonymous' => $issue->is_anonymous,
-            ],
-            'is_public' => true,
-        ]);
+                'category_id' => $category->id,
+                'priority' => $userPriority,
+                'user_priority' => $userPriority,
+                'location_id' => $validated['location_id'],
+                'title' => $validated['title'],
+                'description' => $validated['description'],
+                'reporter_name' => $validated['reporter_name'] ?? null,
+                'reporter_phone' => $validated['reporter_phone'] ?? null,
+                'reporter_email' => $validated['reporter_email'] ?? null,
+                'reporter_ip' => $request->ip(),
+                'reporter_ip_hash' => IpAnonymizer::hash($request->ip()),
+                'anonymous_uuid' => $request->cookie('_auid'),
+                'is_anonymous' => $request->boolean('is_anonymous', true),
+                'sms_opt_in' => $request->boolean('sms_opt_in', false),
+                'spam_score' => $spamResult['spam_score'],
+                'hidden_at' => $spamResult['is_spam'] ? now() : null,
+                'moderation_status' => $spamResult['is_spam'] ? 'pending' : 'approved',
+                'photo_path' => $photoPath,
+                'video_path' => $videoPath,
+            ]);
 
-        if ($spamResult['is_spam']) {
-            $this->trustService->adjustScore(auth()->user(), $request->cookie('_auid'), -0.2);
-        } else {
-            $this->trustService->adjustScore(auth()->user(), $request->cookie('_auid'), 0.05);
-        }
+            if ($spamResult['is_spam']) {
+                $this->turnstileService->incrementSuspicion($request, 0.3);
+                SpamLog::create([
+                    'event_type' => 'spam_detected',
+                    'loggable_type' => Issue::class,
+                    'loggable_id' => $issue->id,
+                    'uuid' => $request->cookie('_auid'),
+                    'ip_hash' => IpAnonymizer::hash($request->ip()),
+                    'spam_score' => $spamResult['spam_score'],
+                    'metadata' => ['reasons' => $spamResult['reasons']],
+                ]);
+            }
 
-        $effectivePriority = $this->trustService->getEffectivePriority($issue);
-        if ($effectivePriority !== $issue->priority) {
-            $issue->update(['priority' => $effectivePriority]);
-        }
+            if ($photoPath) {
+                $issue->media()->create(['path' => $photoPath, 'type' => 'photo']);
+            }
+            if ($videoPath) {
+                $issue->media()->create(['path' => $videoPath, 'type' => 'video']);
+            }
+
+            $referenceCode = Issue::generateReferenceCode($validated['organization_id']);
+            $issue->update(['reference_code' => $referenceCode]);
+
+            IssueEvent::create([
+                'issue_id' => $issue->id,
+                'type' => 'created',
+                'description' => 'Issue submitted successfully.',
+                'metadata' => [
+                    'priority' => $validated['priority'],
+                    'category' => $category->name,
+                    'is_anonymous' => $issue->is_anonymous,
+                ],
+                'is_public' => true,
+            ]);
+
+            if ($spamResult['is_spam']) {
+                $this->trustService->adjustScore(auth()->user(), $request->cookie('_auid'), -0.2);
+            } else {
+                $this->trustService->adjustScore(auth()->user(), $request->cookie('_auid'), 0.05);
+            }
+
+            $effectivePriority = $this->trustService->getEffectivePriority($issue);
+            if ($effectivePriority !== $issue->priority) {
+                $issue->update(['priority' => $effectivePriority]);
+            }
+
+            return $issue;
+        });
 
         $bestDuplicate = !empty($duplicates) ? $duplicates[0] : null;
         if ($bestDuplicate && $bestDuplicate['similarity'] > 0.5) {

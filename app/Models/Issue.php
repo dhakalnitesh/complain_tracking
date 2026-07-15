@@ -206,14 +206,31 @@ class Issue extends Model
         $clean = $org ? preg_replace('/[^A-Za-z0-9]/', '', $org->name) : '';
         $prefix = strtoupper(substr($clean, 0, 3)) ?: 'GRV';
 
-        $seq = DB::transaction(function () {
-            return DB::table('reference_code_sequences')->insertGetId([
+        return DB::transaction(function () use ($prefix) {
+            $maxAttempts = 5;
+            for ($i = 0; $i < $maxAttempts; $i++) {
+                $seq = DB::table('reference_code_sequences')->insertGetId([
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                $code = $prefix . '-' . str_pad($seq, 6, '0', STR_PAD_LEFT);
+
+                $exists = static::where('reference_code', $code)->exists();
+                if (!$exists) {
+                    return $code;
+                }
+            }
+
+            $seq = DB::table('reference_code_sequences')->insertGetId([
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-        });
+            $code = $prefix . '-' . str_pad($seq, 6, '0', STR_PAD_LEFT);
+            $code .= chr(rand(65, 90));
 
-        return $prefix . '-' . str_pad($seq, 6, '0', STR_PAD_LEFT);
+            return $code;
+        });
     }
 
     public function isEscalated(): bool
