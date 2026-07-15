@@ -196,7 +196,7 @@ class IssueService
             broadcast(new IssueCreated($issue));
         }
 
-        if ($issue->reporter_email) {
+        if ($issue->reporter_email || ($issue->sms_opt_in && $issue->reporter_phone)) {
             $this->notificationService->sendIssueCreated($issue, $issue->events()->latest()->first());
         }
 

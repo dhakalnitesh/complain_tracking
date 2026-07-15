@@ -14,6 +14,9 @@ class SendNotificationJob implements ShouldQueue
 {
     use Queueable;
 
+    public $tries = 3;
+    public $backoff = [60, 300];
+
     public function __construct(
         public int $issueId,
         public int $eventId,

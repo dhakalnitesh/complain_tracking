@@ -9,12 +9,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('issue_events', function (Blueprint $table) {
-            $table->boolean('is_public')->default(false)->after('metadata');
+            $table->boolean('is_public')->default(false);
             $table->index('is_public');
         });
 
         Schema::table('issues', function (Blueprint $table) {
-            $table->boolean('sms_opt_in')->default(false)->after('is_anonymous');
+            $table->boolean('sms_opt_in')->default(false);
             $table->index('sms_opt_in');
         });
     }

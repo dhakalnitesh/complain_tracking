@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('upvotes', function (Blueprint $table) {
-            $table->string('anonymous_uuid', 36)->nullable()->after('session_id');
+            $table->string('anonymous_uuid', 36)->nullable();
         });
     }
 

@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('issues', function (Blueprint $table) {
-            $table->string('reporter_ip', 45)->nullable()->after('reporter_email');
+            $table->string('reporter_ip', 45)->nullable();
         });
     }
 

@@ -10,10 +10,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('issues', function (Blueprint $table) {
-            $table->string('user_priority', 20)->nullable()->after('priority');
-            $table->string('admin_priority', 20)->nullable()->after('user_priority');
-            $table->timestamp('priority_reviewed_at')->nullable()->after('admin_priority');
-            $table->foreignId('priority_reviewed_by')->nullable()->constrained('users')->after('priority_reviewed_at');
+            $table->string('user_priority', 20)->nullable();
+            $table->string('admin_priority', 20)->nullable();
+            $table->timestamp('priority_reviewed_at')->nullable();
+            $table->foreignId('priority_reviewed_by')->nullable()->constrained('users');
         });
 
         DB::table('issues')->whereNull('user_priority')->update(['user_priority' => DB::raw('priority')]);

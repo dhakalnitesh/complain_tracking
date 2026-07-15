@@ -13,18 +13,17 @@ class EscalateIssues extends Command
 
     public function handle(): int
     {
-        $breached = Issue::whereNotIn('status', ['resolved', 'merged'])
-            ->get()
-            ->filter(fn($issue) => $issue->isSlaBreached());
-
         $count = 0;
-        foreach ($breached as $issue) {
-            $result = EscalationService::escalate($issue);
-            if ($result) {
-                $count++;
-                $this->info("Escalated {$issue->reference_code}");
-            }
-        }
+        Issue::whereNotIn('status', ['resolved', 'merged'])
+            ->lazy()
+            ->filter(fn($issue) => $issue->isSlaBreached())
+            ->each(function ($issue) use (&$count) {
+                $result = EscalationService::escalate($issue);
+                if ($result) {
+                    $count++;
+                    $this->info("Escalated {$issue->reference_code}");
+                }
+            });
 
         $this->info("Escalated {$count} issue(s).");
         return Command::SUCCESS;

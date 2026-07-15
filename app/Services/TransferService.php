@@ -18,7 +18,10 @@ class TransferService
             throw new \InvalidArgumentException('Department must belong to the same organization as the issue.');
         }
 
-        $issue->update(['department_id' => $dept->id]);
+        $issue->update([
+            'department_id' => $dept->id,
+            'assigned_user_id' => null,
+        ]);
 
         IssueEvent::create([
             'issue_id' => $issue->id,

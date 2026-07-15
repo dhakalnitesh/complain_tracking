@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignId('location_id')->constrained();
             $table->text('description');
             $table->string('photo_path')->nullable();
-            $table->enum('status', ['received', 'in_progress', 'resolved'])->default('received');
+            $table->string('status', 20)->default('received');
             $table->timestamp('resolved_at')->nullable();
             $table->timestamps();
             $table->index(['category', 'location_id', 'status']);

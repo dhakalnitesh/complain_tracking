@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('comments', function (Blueprint $table) {
-            $table->timestamp('hidden_at')->nullable()->after('is_approved');
+            $table->timestamp('hidden_at')->nullable();
         });
     }
 

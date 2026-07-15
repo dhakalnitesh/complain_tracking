@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('issues', function (Blueprint $table) {
-            $table->string('moderation_status', 20)->default('approved')->after('hidden_at');
+            $table->string('moderation_status', 20)->default('approved');
         });
     }
 

@@ -9,8 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('issues', function (Blueprint $table) {
-            $table->text('resolution_summary')->nullable()->after('deadline_at');
-            $table->foreignId('resolved_by')->nullable()->after('resolution_summary')->constrained('users')->nullOnDelete();
+            $table->text('resolution_summary')->nullable();
+            $table->foreignId('resolved_by')->nullable()->constrained('users')->nullOnDelete();
         });
     }
 

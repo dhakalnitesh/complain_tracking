@@ -45,13 +45,13 @@ class EscalationService
             'issue_id' => $issue->id,
             'user_id' => $orgAdmin?->id,
             'type' => 'escalated',
-            'description' => "Issue auto-escalated due to SLA breach. Priority: {$issue->priority}, breached after " . config("sla.priorities.{$issue->priority}.hours") . ' hours.',
+            'description' => "Issue auto-escalated due to SLA breach. Priority: {$issue->effectivePriority()}, breached after " . config("sla.priorities.{$issue->effectivePriority()}.hours") . ' hours.',
             'metadata' => [
                 'escalation_level' => $orgAdmin ? 1 : 0,
                 'previous_assignee_id' => $previousAssigneeId,
                 'new_assignee_id' => $orgAdmin?->id,
-                'priority' => $issue->priority,
-                'sla_hours' => config("sla.priorities.{$issue->priority}.hours"),
+                'priority' => $issue->effectivePriority(),
+                'sla_hours' => config("sla.priorities.{$issue->effectivePriority()}.hours"),
             ],
             'is_public' => true,
         ]);

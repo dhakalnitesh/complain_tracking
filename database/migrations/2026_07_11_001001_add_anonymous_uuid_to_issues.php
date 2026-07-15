@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('issues', function (Blueprint $table) {
-            $table->string('anonymous_uuid', 36)->nullable()->after('reporter_ip');
+            $table->string('anonymous_uuid', 36)->nullable();
             $table->index('anonymous_uuid');
         });
     }

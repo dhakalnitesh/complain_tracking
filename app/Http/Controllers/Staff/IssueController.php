@@ -146,6 +146,13 @@ class IssueController extends Controller
 
     public function comment(Request $request, Issue $issue, CommentService $commentService)
     {
+        $user = Auth::user();
+        $isAssigned = $issue->assigned_user_id === $user->id;
+        $isSameOrg = $issue->organization_id === $user->organization_id;
+        if (!$isAssigned && !$user->isSuperAdmin() && !$isSameOrg) {
+            return redirect()->back()->with('error', 'You are not assigned to this issue.');
+        }
+
         $validated = $request->validate([
             'comment' => 'required|string|max:2000',
             'is_public' => 'boolean',

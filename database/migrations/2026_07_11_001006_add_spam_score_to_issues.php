@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('issues', function (Blueprint $table) {
-            $table->float('spam_score')->nullable()->default(0)->after('sms_opt_in');
+            $table->float('spam_score')->nullable()->default(0);
         });
     }
 

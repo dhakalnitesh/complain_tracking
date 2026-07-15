@@ -10,7 +10,7 @@ class ExportController extends Controller
 {
     public function csv(Request $request)
     {
-        $query = Issue::with(['location', 'organization', 'assignedUser']);
+        $query = Issue::visible()->with(['location', 'organization', 'assignedUser']);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);

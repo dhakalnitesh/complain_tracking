@@ -13,6 +13,12 @@ class UpvoteController extends Controller
 {
     public function toggle(Issue $issue, Request $request)
     {
+        if ($issue->hidden_at) {
+            return $request->wantsJson()
+                ? response()->json(['error' => 'Issue not found.'], 404)
+                : redirect()->back()->with('error', 'Issue not found.');
+        }
+
         $userId = auth()->id();
         $sessionId = $userId ? null : session()->getId();
         $uuid = $request->cookie('_auid');
@@ -49,6 +55,8 @@ class UpvoteController extends Controller
 
     public function upvoters(Issue $issue)
     {
+        abort_if($issue->hidden_at, 404);
+
         $upvoters = $issue->upvotes()
             ->with('user')
             ->latest()

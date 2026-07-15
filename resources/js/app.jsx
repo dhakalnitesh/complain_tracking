@@ -11,17 +11,21 @@ window.Pusher = Pusher;
 
 const broadcastEl = document.getElementById('broadcast-data');
 if (broadcastEl) {
-  const config = JSON.parse(broadcastEl.textContent);
-  if (config.enabled) {
-    window.Echo = new Echo({
-      broadcaster: 'reverb',
-      key: config.key,
-      wsHost: config.host,
-      wsPort: config.port,
-      wssPort: config.port,
-      forceTLS: config.scheme === 'https',
-      enabledTransports: ['ws', 'wss'],
-    });
+  try {
+    const config = JSON.parse(broadcastEl.textContent);
+    if (config.enabled) {
+      window.Echo = new Echo({
+        broadcaster: 'reverb',
+        key: config.key,
+        wsHost: config.host,
+        wsPort: config.port,
+        wssPort: config.port,
+        forceTLS: config.scheme === 'https',
+        enabledTransports: ['ws', 'wss'],
+      });
+    }
+  } catch (e) {
+    console.warn('Failed to parse broadcast config:', e);
   }
 }
 

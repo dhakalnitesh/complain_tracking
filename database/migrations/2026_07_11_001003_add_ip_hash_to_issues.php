@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('issues', function (Blueprint $table) {
-            $table->string('reporter_ip_hash', 64)->nullable()->after('reporter_ip');
+            $table->string('reporter_ip_hash', 64)->nullable();
             $table->index('reporter_ip_hash');
         });
     }

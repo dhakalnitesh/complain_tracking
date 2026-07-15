@@ -11,6 +11,8 @@ class FlagController extends Controller
 {
     public function flagIssue(Request $request, Issue $issue)
     {
+        abort_if($issue->hidden_at, 404);
+
         $validated = $request->validate([
             'reason' => 'required|string|max:100',
             'description' => 'nullable|string|max:1000',

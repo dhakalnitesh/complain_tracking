@@ -40,8 +40,9 @@ class TurnstileService
         $uuid = $request->cookie('_auid');
         if (!$uuid) return;
 
-        $current = Cache::get("suspicion:{$uuid}", 0);
-        Cache::put("suspicion:{$uuid}", min($current + $amount, 1.0), now()->addDay());
+        Cache::add("suspicion:{$uuid}", 0, now()->addDay());
+        $newScore = min(Cache::increment("suspicion:{$uuid}", $amount), 1.0);
+        Cache::put("suspicion:{$uuid}", $newScore, now()->addDay());
     }
 
     public function resetSuspicion(Request $request): void

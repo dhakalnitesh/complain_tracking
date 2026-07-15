@@ -9,16 +9,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('issues', function (Blueprint $table) {
-            $table->foreignId('organization_id')->nullable()->after('location_id')->constrained()->nullOnDelete();
-            $table->string('priority')->default('medium')->after('category'); // low, medium, high, critical
-            $table->string('reporter_name')->nullable()->after('description');
-            $table->string('reporter_phone')->nullable()->after('reporter_name');
-            $table->string('reporter_email')->nullable()->after('reporter_phone');
-            $table->boolean('is_anonymous')->default(true)->after('photo_path');
-            $table->integer('rating')->nullable()->after('resolved_at'); // 1-5 feedback rating
-            $table->text('feedback_comment')->nullable()->after('rating');
-            $table->timestamp('feedback_at')->nullable()->after('feedback_comment');
-            $table->string('assigned_to')->nullable()->after('status');
+            $table->foreignId('organization_id')->nullable()->constrained()->nullOnDelete();
+            $table->string('priority')->default('medium'); // low, medium, high, critical
+            $table->string('reporter_name')->nullable();
+            $table->string('reporter_phone')->nullable();
+            $table->string('reporter_email')->nullable();
+            $table->boolean('is_anonymous')->default(true);
+            $table->integer('rating')->nullable(); // 1-5 feedback rating
+            $table->text('feedback_comment')->nullable();
+            $table->timestamp('feedback_at')->nullable();
+            $table->string('assigned_to')->nullable();
             $table->index('organization_id');
             $table->index('priority');
         });

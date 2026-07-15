@@ -9,8 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('issues', function (Blueprint $table) {
-            $table->foreignId('category_id')->nullable()->after('category')->constrained('categories')->nullOnDelete();
-            $table->string('reporter_phone')->nullable()->change();
+            $table->foreignId('category_id')->nullable()->constrained('categories')->nullOnDelete();
             $table->index('reporter_phone');
         });
     }

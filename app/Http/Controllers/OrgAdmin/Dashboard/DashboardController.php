@@ -23,14 +23,14 @@ class DashboardController extends Controller
         if (!$org) abort(403);
 
         $stats = [
-            'total_issues' => Issue::where('organization_id', $org->id)->count(),
-            'open_issues' => Issue::where('organization_id', $org->id)->where('status', '!=', 'resolved')->count(),
-            'resolved_today' => Issue::where('organization_id', $org->id)->whereDate('resolved_at', today())->count(),
+            'total_issues' => Issue::visible()->where('organization_id', $org->id)->count(),
+            'open_issues' => Issue::visible()->where('organization_id', $org->id)->where('status', '!=', 'resolved')->count(),
+            'resolved_today' => Issue::visible()->where('organization_id', $org->id)->whereDate('resolved_at', today())->count(),
             'staff_count' => User::where('organization_id', $org->id)->where('is_staff', true)->count(),
             'department_count' => Department::where('organization_id', $org->id)->count(),
         ];
 
-        $recentIssues = Issue::with(['location', 'department'])
+        $recentIssues = Issue::visible()->with(['location', 'department'])
             ->where('organization_id', $org->id)
             ->latest()
             ->take(10)

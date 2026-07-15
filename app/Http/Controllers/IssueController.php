@@ -75,7 +75,6 @@ class IssueController extends Controller
     public function showReference($referenceCode)
     {
         $issue = Issue::where('reference_code', $referenceCode)
-            ->visible()
             ->with([
                 'location', 'organization', 'category',
                 'dailyProgress' => fn($q) => $q->with('user')->latest(),
@@ -198,7 +197,6 @@ class IssueController extends Controller
                         $q->public()->latest()->limit(20);
                     },
                 ])
-                ->visible()
                 ->where('reference_code', strtoupper($request->code))
                 ->first();
 

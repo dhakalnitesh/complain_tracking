@@ -11,9 +11,12 @@ class CommentController extends Controller
 {
     public function index(Issue $issue, Request $request)
     {
+        abort_if($issue->hidden_at, 404);
+
         $comments = Comment::with(['user', 'replies.user'])
             ->where('issue_id', $issue->id)
             ->visible()
+            ->approved()
             ->public()
             ->root()
             ->latest()
@@ -25,6 +28,8 @@ class CommentController extends Controller
 
     public function store(Issue $issue, Request $request)
     {
+        abort_if($issue->hidden_at, 404);
+
         $validated = $request->validate([
             'body' => 'required|string|min:1|max:2000',
             'parent_id' => [
