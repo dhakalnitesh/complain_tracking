@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Issue;
+use Illuminate\Support\Facades\Cache;
 
 class AbuseDetectionService
 {
@@ -23,9 +24,12 @@ class AbuseDetectionService
         }
 
         if ($phone) {
+            $phoneKey = 'abuse_phone:' . $phone . ':' . now()->format('Ymd');
             $recentCount = Issue::where('reporter_phone', $phone)
                 ->where('created_at', '>=', now()->subDay())
                 ->count();
+            Cache::add($phoneKey, $recentCount, 86400);
+            $recentCount = Cache::increment($phoneKey);
             if ($recentCount > 10) {
                 $score += 0.3;
                 $reasons[] = 'High volume from this phone number';
@@ -36,9 +40,12 @@ class AbuseDetectionService
         }
 
         if ($ipHash) {
+            $ipKey = 'abuse_ip:' . $ipHash . ':' . now()->format('Ymd');
             $ipCount = Issue::where('reporter_ip_hash', $ipHash)
                 ->where('created_at', '>=', now()->subDay())
                 ->count();
+            Cache::add($ipKey, $ipCount, 86400);
+            $ipCount = Cache::increment($ipKey);
             if ($ipCount > 10) {
                 $score += 0.3;
                 $reasons[] = 'High volume from this location';
