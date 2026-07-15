@@ -17,19 +17,19 @@ class DashboardController extends Controller
     {
         $organizations = Organization::where('is_active', true)
             ->withCount(['issues' => function ($q) {
-                $q->where('status', '!=', 'resolved');
+                $q->visible()->where('status', '!=', 'resolved');
             }])
             ->orderBy('name')
             ->get();
 
         $stats = [
-            'total_issues' => Issue::count(),
-            'open_issues' => Issue::where('status', '!=', 'resolved')->count(),
-            'resolved_today' => Issue::whereDate('resolved_at', today())->count(),
+            'total_issues' => Issue::visible()->count(),
+            'open_issues' => Issue::visible()->where('status', '!=', 'resolved')->count(),
+            'resolved_today' => Issue::visible()->whereDate('resolved_at', today())->count(),
             'avg_resolution_time' => $this->getAvgResolutionTime(),
         ];
 
-        $recentIssues = Issue::with(['location', 'organization', 'category'])
+        $recentIssues = Issue::visible()->with(['location', 'organization', 'category'])
             ->latest()
             ->take(5)
             ->get()
@@ -43,7 +43,7 @@ class DashboardController extends Controller
                 'total' => $c->issues_count,
             ]);
 
-        $issuesOverTime = Issue::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+        $issuesOverTime = Issue::visible()->selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->where('created_at', '>=', now()->subDays(7))
             ->groupBy('date')
             ->orderBy('date')
@@ -68,14 +68,14 @@ class DashboardController extends Controller
             ->get();
 
         $stats = [
-            'total_issues' => Issue::where('organization_id', $organization->id)->count(),
-            'open_issues' => Issue::where('organization_id', $organization->id)->where('status', '!=', 'resolved')->count(),
-            'resolved_today' => Issue::where('organization_id', $organization->id)->whereDate('resolved_at', today())->count(),
-            'escalated' => Issue::where('organization_id', $organization->id)->where('status', '!=', 'resolved')
+            'total_issues' => Issue::visible()->where('organization_id', $organization->id)->count(),
+            'open_issues' => Issue::visible()->where('organization_id', $organization->id)->where('status', '!=', 'resolved')->count(),
+            'resolved_today' => Issue::visible()->where('organization_id', $organization->id)->whereDate('resolved_at', today())->count(),
+            'escalated' => Issue::visible()->where('organization_id', $organization->id)->where('status', '!=', 'resolved')
                 ->where('created_at', '<', now()->subHours(24))->count(),
         ];
 
-        $recentIssues = Issue::with('location')
+        $recentIssues = Issue::visible()->with('location')
             ->where('organization_id', $organization->id)
             ->latest()
             ->take(5)
@@ -111,7 +111,7 @@ class DashboardController extends Controller
             ? 'AVG(TIMESTAMPDIFF(SECOND, created_at, resolved_at) / 3600.0)'
             : 'AVG((strftime(\'%s\', resolved_at) - strftime(\'%s\', created_at)) / 3600.0)';
 
-        $result = Issue::whereNotNull('resolved_at')
+        $result = Issue::visible()->whereNotNull('resolved_at')
             ->selectRaw("{$expression} AS avg_hours")
             ->value('avg_hours');
 

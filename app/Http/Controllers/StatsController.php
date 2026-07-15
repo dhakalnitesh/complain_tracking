@@ -14,14 +14,14 @@ class StatsController extends Controller
     {
         try {
             return response()->json([
-                'total_issues' => Issue::count(),
-                'open_issues' => Issue::where('status', '!=', 'resolved')->count(),
-                'resolved_issues' => Issue::where('status', 'resolved')->count(),
-                'escalated_issues' => Issue::where('status', '!=', 'resolved')
+                'total_issues' => Issue::visible()->count(),
+                'open_issues' => Issue::visible()->where('status', '!=', 'resolved')->count(),
+                'resolved_issues' => Issue::visible()->where('status', 'resolved')->count(),
+                'escalated_issues' => Issue::visible()->where('status', '!=', 'resolved')
                     ->where('created_at', '<', now()->subHours(24))->count(),
                 'total_organizations' => Organization::count(),
                 'avg_resolution_hours' => round(
-                    Issue::whereNotNull('resolved_at')
+                    Issue::visible()->whereNotNull('resolved_at')
                         ->selectRaw(DB::connection()->getDriverName() === 'mysql'
                             ? 'AVG(TIMESTAMPDIFF(SECOND, created_at, resolved_at) / 3600.0) AS avg_hours'
                             : 'AVG((strftime(\'%s\', resolved_at) - strftime(\'%s\', created_at)) / 3600.0) AS avg_hours')
@@ -51,7 +51,7 @@ class StatsController extends Controller
     {
         try {
             return response()->json(
-                Issue::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+                Issue::visible()->selectRaw('DATE(created_at) as date, COUNT(*) as count')
                     ->where('created_at', '>=', now()->subDays(30))
                     ->groupBy('date')
                     ->orderBy('date')

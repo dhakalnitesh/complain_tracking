@@ -13,16 +13,16 @@ class DashboardController extends Controller
     public function index()
     {
         $stats = [
-            'total_issues' => Issue::count(),
-            'open_issues' => Issue::where('status', '!=', 'resolved')->count(),
-            'resolved_issues' => Issue::where('status', 'resolved')->count(),
-            'escalated_issues' => Issue::where('status', '!=', 'resolved')
+            'total_issues' => Issue::visible()->count(),
+            'open_issues' => Issue::visible()->where('status', '!=', 'resolved')->count(),
+            'resolved_issues' => Issue::visible()->where('status', 'resolved')->count(),
+            'escalated_issues' => Issue::visible()->where('status', '!=', 'resolved')
                 ->where('created_at', '<', now()->subHours(24))->count(),
             'total_organizations' => Organization::count(),
             'total_users' => User::count(),
         ];
 
-        $recentIssues = Issue::with(['location', 'organization'])
+        $recentIssues = Issue::visible()->with(['location', 'organization'])
             ->latest()
             ->take(5)
             ->get()
@@ -40,21 +40,20 @@ class DashboardController extends Controller
                 'bs_created_at' => \App\Services\BsDateService::toBsString($i->created_at, 'short'),
             ]);
 
-        $categoryStats = Issue::selectRaw('category, COUNT(*) as total')
+        $categoryStats = Issue::visible()->selectRaw('category, COUNT(*) as total')
             ->groupBy('category')
             ->orderByDesc('total')
             ->get();
 
-        $issuesOverTime = Issue::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+        $issuesOverTime = Issue::visible()->selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->where('created_at', '>=', now()->subDays(14))
             ->groupBy('date')
             ->orderBy('date')
             ->get();
 
-        $avgResolution = Issue::whereNotNull('resolved_at')
-            ->get()
-            ->map(fn($i) => $i->created_at->diffInHours($i->resolved_at))
-            ->average();
+        $avgResolution = Issue::visible()->whereNotNull('resolved_at')
+            ->selectRaw('AVG((julianday(resolved_at) - julianday(created_at)) * 24) as avg_hours')
+            ->value('avg_hours');
 
         return Inertia::render('Admin/Dashboard/Index', [
             'stats' => $stats,

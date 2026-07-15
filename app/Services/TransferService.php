@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Department;
 use App\Models\Issue;
 use App\Models\IssueEvent;
+use App\Models\Location;
 use App\Models\User;
 
 class TransferService
@@ -37,6 +38,11 @@ class TransferService
 
     public static function transferToOrganization(Issue $issue, int $organizationId, int $locationId, User $transferredBy, string $note = ''): bool
     {
+        $location = Location::findOrFail($locationId);
+        if ($location->organization_id !== $organizationId) {
+            throw new \InvalidArgumentException('Location must belong to the target organization.');
+        }
+
         $issue->update([
             'organization_id' => $organizationId,
             'location_id' => $locationId,
